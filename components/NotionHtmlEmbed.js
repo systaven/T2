@@ -5,6 +5,7 @@ const NotionHtmlEmbed = ({ block }) => {
   const html = getNotionTextContent(block?.properties?.title)
   if (!html) return null
 
+  // Sanitizer.sanitizeXss strips scripts, iframes, event handlers, and unsafe URLs.
   const sanitizedHtml = Sanitizer.sanitizeXss(html)
   if (!sanitizedHtml) return null
 
