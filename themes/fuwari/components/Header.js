@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import MenuList from './MenuList'
 import MobileNav from './MobileNav'
 import ThemeColorSwitch from './ThemeColorSwitch'
+import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 
 const Header = ({ locale, customNav, customMenu, searchModal }) => {
   const { isDarkMode, toggleDarkMode } = useGlobal()
@@ -41,6 +42,22 @@ const Header = ({ locale, customNav, customMenu, searchModal }) => {
         </SmartLink>
         <MenuList locale={locale} customNav={customNav} customMenu={customMenu} />
         <div className='hidden md:flex items-center justify-end gap-2 relative'>
+          {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && (
+            <div className='flex items-center'>
+              <SignedOut>
+                <SignInButton mode='modal'>
+                   <button className='fuwari-tool-btn' title='Login'>
+                     <i className='fas fa-user' />
+                   </button>
+                </SignInButton>
+              </SignedOut>
+              <SignedIn>
+                <div className='w-8 h-8 flex items-center justify-center'>
+                   <UserButton afterSignOutUrl='/' />
+                </div>
+              </SignedIn>
+            </div>
+          )}
           <button type='button' onClick={handleSearch} className='fuwari-tool-btn'>
             <i className='fas fa-search' />
           </button>
@@ -58,6 +75,22 @@ const Header = ({ locale, customNav, customMenu, searchModal }) => {
           </button>
         </div>
         <div className='md:hidden flex items-center justify-end gap-2 relative'>
+          {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && (
+            <div className='flex items-center'>
+              <SignedOut>
+                <SignInButton mode='modal'>
+                   <button className='fuwari-tool-btn' title='Login'>
+                     <i className='fas fa-user' />
+                   </button>
+                </SignInButton>
+              </SignedOut>
+              <SignedIn>
+                <div className='w-8 h-8 flex items-center justify-center'>
+                   <UserButton afterSignOutUrl='/' />
+                </div>
+              </SignedIn>
+            </div>
+          )}
           <button type='button' onClick={handleSearch} className='fuwari-tool-btn'>
             <i className='fas fa-search' />
           </button>
