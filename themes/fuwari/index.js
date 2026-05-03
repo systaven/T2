@@ -25,6 +25,7 @@ import Pagination from './components/Pagination'
 import PostList from './components/PostList'
 import RightFloatArea from './components/RightFloatArea'
 import SidePanel from './components/SidePanel'
+import SearchInput from './components/SearchInput'
 import CONFIG from './config'
 import { Style } from './style'
 import { isCommentServiceConfigured } from './utils/commentEnabled'
@@ -158,8 +159,16 @@ const LayoutSlug = props => {
 }
 
 const LayoutSearch = props => {
-  const { keyword } = props
+  const { keyword, categoryOptions, tagOptions } = props
   const router = useRouter()
+  const locale = getLocale()
+  const searchInputRef = useRef(null)
+
+  useEffect(() => {
+    if (isBrowser) {
+      searchInputRef.current?.focus()
+    }
+  }, [])
 
   useEffect(() => {
     if (isBrowser && keyword) {
@@ -174,8 +183,61 @@ const LayoutSearch = props => {
     }
   }, [router, keyword])
 
-  return <LayoutPostList {...props} />
+  return (
+    <>
+      <div className='fuwari-card p-6 mb-4'>
+        <p className='text-sm uppercase tracking-widest text-[var(--fuwari-muted)] mb-2'>
+          {locale?.NAV?.SEARCH || '搜索'}
+        </p>
+        <h1 className='text-3xl font-bold mb-6'>
+          {keyword ? `${locale?.NAV?.SEARCH}: ${keyword}` : (locale?.NAV?.SEARCH || '搜索')}
+        </h1>
+        <SearchInput cRef={searchInputRef} currentSearch={keyword} />
+
+        {!keyword && (
+          <div className='mt-8 space-y-6'>
+            {categoryOptions?.length > 0 && (
+              <div>
+                <h2 className='text-sm font-semibold mb-3 tracking-wide uppercase text-[var(--fuwari-muted)]'>
+                  {locale?.COMMON?.CATEGORY || '分类'}
+                </h2>
+                <div className='flex flex-wrap gap-2'>
+                  {categoryOptions.map(c => (
+                    <SmartLink
+                      key={c.name}
+                      href={`/category/${encodeURIComponent(c.name)}`}
+                      className='fuwari-chip'>
+                      {c.name} ({c.count})
+                    </SmartLink>
+                  ))}
+                </div>
+              </div>
+            )}
+            {tagOptions?.length > 0 && (
+              <div>
+                <h2 className='text-sm font-semibold mb-3 tracking-wide uppercase text-[var(--fuwari-muted)]'>
+                  {locale?.COMMON?.TAGS || '标签'}
+                </h2>
+                <div className='flex flex-wrap gap-2'>
+                  {tagOptions.map(t => (
+                    <SmartLink
+                      key={t.name}
+                      href={`/tag/${encodeURIComponent(t.name)}`}
+                      className='fuwari-chip'>
+                      #{t.name}
+                    </SmartLink>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      <LayoutPostList {...props} />
+    </>
+  )
 }
+
 
 const LayoutArchive = props => {
   const locale = getLocale()

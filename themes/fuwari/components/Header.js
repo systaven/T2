@@ -1,6 +1,7 @@
 import SmartLink from '@/components/SmartLink'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
+import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
 import MenuList from './MenuList'
 import MobileNav from './MobileNav'
@@ -8,6 +9,7 @@ import ThemeColorSwitch from './ThemeColorSwitch'
 import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 
 const Header = ({ locale, customNav, customMenu, searchModal }) => {
+  const router = useRouter()
   const { isDarkMode, toggleDarkMode } = useGlobal()
   const [showPalette, setShowPalette] = useState(false)
   const panelRef = useRef(null)
@@ -19,7 +21,7 @@ const Header = ({ locale, customNav, customMenu, searchModal }) => {
       searchModal?.current?.openSearch()
       return
     }
-    window.location.href = '/search'
+    router.push('/search')
   }
 
   useEffect(() => {
@@ -58,9 +60,15 @@ const Header = ({ locale, customNav, customMenu, searchModal }) => {
               </SignedIn>
             </div>
           )}
-          <button type='button' onClick={handleSearch} className='fuwari-tool-btn'>
-            <i className='fas fa-search' />
-          </button>
+          {algoliaEnabled ? (
+            <button type='button' onClick={handleSearch} className='fuwari-tool-btn'>
+              <i className='fas fa-search' />
+            </button>
+          ) : (
+            <SmartLink href='/search' className='fuwari-tool-btn' title={locale?.NAV?.SEARCH}>
+              <i className='fas fa-search' />
+            </SmartLink>
+          )}
           {!paletteFixed && (
             <button
               type='button'
@@ -91,9 +99,15 @@ const Header = ({ locale, customNav, customMenu, searchModal }) => {
               </SignedIn>
             </div>
           )}
-          <button type='button' onClick={handleSearch} className='fuwari-tool-btn'>
-            <i className='fas fa-search' />
-          </button>
+          {algoliaEnabled ? (
+            <button type='button' onClick={handleSearch} className='fuwari-tool-btn'>
+              <i className='fas fa-search' />
+            </button>
+          ) : (
+            <SmartLink href='/search' className='fuwari-tool-btn' title={locale?.NAV?.SEARCH}>
+              <i className='fas fa-search' />
+            </SmartLink>
+          )}
           {!paletteFixed && (
             <button
               type='button'
