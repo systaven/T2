@@ -10,7 +10,12 @@ import ContactCard from './ContactCard'
 import CONFIG from '../config'
 import PluginCard from './PluginCard'
 import SocialButton from './SocialButton'
+import DailyQuote from './DailyQuote'
 import Toc from './Toc'
+
+import dynamic from 'next/dynamic'
+
+const NotionPage = dynamic(() => import('@/components/NotionPage'))
 
 const SidePanel = props => {
   const {
@@ -38,8 +43,6 @@ const SidePanel = props => {
     setGreetingIndex((greetingIndex + 1) % greetings.length)
   }
 
-  const groupIcons = siteConfig('HEO_GROUP_ICONS', [], CONFIG)
-
   return (
     <aside className='space-y-4'>
       <section className='fuwari-card fuwari-profile-card p-4'>
@@ -64,18 +67,10 @@ const SidePanel = props => {
           </p>
         </div>
 
-        {groupIcons.length > 0 && (
-          <div className='flex flex-wrap gap-3 mt-4 justify-center'>
-            {groupIcons.map((group, index) => (
-              <div key={index} className='flex gap-2'>
-                <div className='w-8 h-8 rounded-lg p-1.5 flex items-center justify-center transition-transform hover:scale-110' style={{ backgroundColor: group.color_1 }}>
-                   <LazyImage src={group.img_1} title={group.title_1} className='w-full h-full' />
-                </div>
-                <div className='w-8 h-8 rounded-lg p-1.5 flex items-center justify-center transition-transform hover:scale-110' style={{ backgroundColor: group.color_2 }}>
-                   <LazyImage src={group.img_2} title={group.title_2} className='w-full h-full' />
-                </div>
-              </div>
-            ))}
+        {/* 合并公告内容 */}
+        {siteConfig('FUWARI_WIDGET_NOTICE', true, CONFIG) && notice?.blockMap && (
+          <div id='announcement-content' className='mt-3 pt-3 border-t border-[var(--fuwari-border)] text-sm'>
+            <NotionPage post={notice} />
           </div>
         )}
 
@@ -83,6 +78,9 @@ const SidePanel = props => {
           <SocialButton />
         </div>
       </section>
+
+      {/* 一言挂件 */}
+      <DailyQuote />
 
       {showToc && (
         <section className='fuwari-card p-4'>
@@ -93,11 +91,7 @@ const SidePanel = props => {
         </section>
       )}
 
-      {siteConfig('FUWARI_WIDGET_NOTICE', true, CONFIG) &&
-        notice &&
-        Object.keys(notice).length > 0 && (
-          <Announcement post={notice} title={locale?.COMMON?.ANNOUNCEMENT || '公告'} className='p-5' />
-      )}
+      {/* 移除独立公告挂件 */}
 
       {siteConfig('FUWARI_WIDGET_LATEST_POSTS', true, CONFIG) && latestPosts.length > 0 && (
         <section className='fuwari-card p-5'>

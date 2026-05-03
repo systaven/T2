@@ -100,6 +100,9 @@ const CONFIG = {
   /** 文章页目录：桌面在侧栏；小屏为浮动按钮抽屉（RightFloatArea） */
   FUWARI_ARTICLE_TOC: true,
 
+  /** 音乐播放器 */
+  MUSIC_PLAYER: true,
+
   // ---------------------------------------------------------------------------
   // 个人资料卡（适配 HEO 风格欢迎语）
   // ---------------------------------------------------------------------------
@@ -110,42 +113,6 @@ const CONFIG = {
     '还在点？（疑惑）',
     '不要再点了！生气了～',
     '呜呜呜～'
-  ],
-
-  // 用户技能图标 (适配 HEO 风格)
-  HEO_GROUP_ICONS: [
-    {
-      title_1: 'face-smile-solid-full',
-      img_1: '/images/heo/icon/face-smile-solid-full.svg',
-      color_1: '#FFD9EF',
-      title_2: 'bilibili-brands-solid-full',
-      img_2: '/images/heo/icon/bilibili-brands-solid-full.svg',
-      color_2: '#FFF0F8'
-    },
-    {
-      title_1: 'envelope-solid-full',
-      img_1: '/images/heo/icon/envelope-solid-full.svg',
-      color_1: '#FFB8E3',
-      title_2: 'shield-cat-solid-full',
-      img_2: '/images/heo/icon/shield-cat-solid-full.svg',
-      color_2: '#F76FC2'
-    },
-    {
-      title_1: 'trophy-solid-full',
-      img_1: '/images/heo/icon/trophy-solid-full.svg',
-      color_1: '#FFF0F8',
-      title_2: 'gamepad-solid-full',
-      img_2: '/images/heo/icon/gamepad-solid-full.svg',
-      color_2: '#FFF0F8'
-    },
-    {
-      title_1: 'heart-solid-full',
-      img_1: '/images/heo/icon/heart-solid-full.svg',
-      color_1: '#FFB8E3',
-      title_2: 'heart-regular-full',
-      img_2: '/images/heo/icon/heart-regular-full.svg',
-      color_2: '#2E031B'
-    }
   ],
 
   // ---------------------------------------------------------------------------

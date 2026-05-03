@@ -514,6 +514,10 @@ const AosAnimation = dynamic(() => import('@/components/AOSAnimation'), {
   ssr: false
 })
 
+const Live2D = dynamic(() => import('@/components/Live2D'), {
+  ssr: false
+})
+
 const Coze = dynamic(() => import('@/components/Coze'), {
   ssr: false
 })
