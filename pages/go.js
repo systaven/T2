@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import Head from "next/head";
 
 export default function GoPage() {
   const [target, setTarget] = useState(null);
@@ -56,7 +57,11 @@ export default function GoPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-start pt-24 md:pt-32 min-h-screen text-center p-6 bg-white">
+    <>
+      <Head>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
+      <div className="flex flex-col items-center justify-start pt-24 md:pt-32 min-h-screen text-center p-6 bg-white">
       <h1 className="text-3xl font-semibold mb-4 text-red-500">⚠️ 您即将离开本站</h1>
       <p className="mb-4 text-gray-600 max-w-full">
         即将跳转到外部网站：
@@ -89,6 +94,6 @@ export default function GoPage() {
           返回上一页
         </button>
       </div>
-    </div>
+    </>
   );
 }

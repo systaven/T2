@@ -210,6 +210,15 @@ const nextConfig = {
     : () => {
       return [
         {
+          source: '/go',
+          headers: [
+            {
+              key: 'X-Robots-Tag',
+              value: 'noindex, nofollow'
+            }
+          ]
+        },
+        {
           source: '/:path*{/}?',
           headers: [
             // 为了博客兼容性，不做过多安全限制
