@@ -3,8 +3,12 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Head from "next/head";
+import { fetchGlobalAllData } from "@/lib/db/SiteDataApi";
+import BLOG from "@/blog.config";
+import { siteConfig } from "@/lib/config";
 
-export default function GoPage() {
+export default function GoPage(props) {
+  const { siteInfo } = props;
   const [target, setTarget] = useState(null);
   const [countdown, setCountdown] = useState(5);
   const router = useRouter();
@@ -56,9 +60,12 @@ export default function GoPage() {
     return null;
   }
 
+  const title = siteConfig('TITLE', '跳转中...', props.NOTION_CONFIG);
+
   return (
     <>
       <Head>
+        <title>{`正在离开 - ${title}`}</title>
         <meta name="robots" content="noindex, nofollow" />
       </Head>
       <div className="flex flex-col items-center justify-start pt-24 md:pt-32 min-h-screen text-center p-6 bg-white">
@@ -97,4 +104,18 @@ export default function GoPage() {
     </div>
     </>
   );
+}
+
+export async function getStaticProps({ locale }) {
+  const props = await fetchGlobalAllData({ from: 'go-page', locale })
+  return {
+    props,
+    revalidate: process.env.EXPORT
+      ? undefined
+      : siteConfig(
+          'NEXT_REVALIDATE_SECOND',
+          BLOG.NEXT_REVALIDATE_SECOND,
+          props.NOTION_CONFIG
+        )
+  }
 }
