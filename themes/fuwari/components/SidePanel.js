@@ -2,6 +2,7 @@ import SmartLink from '@/components/SmartLink'
 import LazyImage from '@/components/LazyImage'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
+import { useState } from 'react'
 import AdCard from './AdCard'
 import AnalyticsCard from './AnalyticsCard'
 import Announcement from './Announcement'
@@ -25,10 +26,19 @@ const SidePanel = props => {
   const { locale } = useGlobal()
   const title = siteConfig('TITLE')
   const description = siteConfig('DESCRIPTION')
+  const greetings = siteConfig('FUWARI_PROFILE_GREETINGS', [], CONFIG)
+  const [greetingIndex, setGreetingIndex] = useState(0)
+
   const showToc =
     siteConfig('FUWARI_ARTICLE_TOC', true, CONFIG) &&
     post?.toc &&
     post.toc.length > 1
+
+  const nextGreeting = () => {
+    setGreetingIndex((greetingIndex + 1) % greetings.length)
+  }
+
+  const groupIcons = siteConfig('HEO_GROUP_ICONS', [], CONFIG)
 
   return (
     <aside className='space-y-4'>
@@ -45,12 +55,30 @@ const SidePanel = props => {
             </span>
           </div>
         </SmartLink>
-        <h2 className='text-xl font-semibold mb-1'>{siteConfig('AUTHOR') || title}</h2>
-        {description && (
+        <div className='cursor-pointer select-none' onClick={nextGreeting}>
+          <h2 className='text-xl font-semibold mb-1'>
+            {greetings.length > 0 ? greetings[greetingIndex] : (siteConfig('AUTHOR') || title)}
+          </h2>
           <p className='text-sm leading-6 text-[var(--fuwari-muted)]'>
-            {description}
+            {greetings.length > 0 ? (siteConfig('AUTHOR') || title) : description}
           </p>
+        </div>
+
+        {groupIcons.length > 0 && (
+          <div className='flex flex-wrap gap-3 mt-4 justify-center'>
+            {groupIcons.map((group, index) => (
+              <div key={index} className='flex gap-2'>
+                <div className='w-8 h-8 rounded-lg p-1.5 flex items-center justify-center transition-transform hover:scale-110' style={{ backgroundColor: group.color_1 }}>
+                   <LazyImage src={group.img_1} title={group.title_1} className='w-full h-full' />
+                </div>
+                <div className='w-8 h-8 rounded-lg p-1.5 flex items-center justify-center transition-transform hover:scale-110' style={{ backgroundColor: group.color_2 }}>
+                   <LazyImage src={group.img_2} title={group.title_2} className='w-full h-full' />
+                </div>
+              </div>
+            ))}
+          </div>
         )}
+
         <div className='pt-3 mt-3 border-t border-[var(--fuwari-border)]'>
           <SocialButton />
         </div>

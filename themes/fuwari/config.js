@@ -43,7 +43,7 @@ const CONFIG = {
   FUWARI_MOBILE_MENU: true,
 
   // ---------------------------------------------------------------------------
-  // 首页 Hero 大图区（封面来自站点信息或下方图片配置）
+  // 首页 Hero 大图区（适配 HEO 风格标题）
   // ---------------------------------------------------------------------------
   /** 是否渲染 Hero 区块（无图时仍占位，可按需关） */
   FUWARI_HERO_ENABLE: true,
@@ -53,6 +53,14 @@ const CONFIG = {
   FUWARI_HERO_CREDIT_TEXT: '',
   /** 署名链接 */
   FUWARI_HERO_CREDIT_LINK: '',
+
+  // HEO 风格标题适配
+  HEO_HERO_TITLE_1: '分享事情',
+  HEO_HERO_TITLE_2: 'To look up future',
+  HEO_HERO_TITLE_3: 'Stavmb',
+  HEO_HERO_TITLE_4: '点击进入',
+  HEO_HERO_TITLE_5: '神奇的小房间',
+  HEO_HERO_TITLE_LINK: 'https://blog.vachiika.me/',
 
   // ---------------------------------------------------------------------------
   // 侧栏（SidePanel）小部件
@@ -81,8 +89,8 @@ const CONFIG = {
   FUWARI_WIDGET_ANALYTICS: true,
   /** 顶栏调色板内的色相滑块等；false 时展开调色板无控件 */
   FUWARI_WIDGET_THEME_COLOR_SWITCHER: true,
-  /** 默认品牌色相 0–360 */
-  FUWARI_THEME_COLOR_HUE: 52,
+  /** 默认品牌色相 0–360 (HEO 风格推荐 350 左右) */
+  FUWARI_THEME_COLOR_HUE: 350,
   /** true：隐藏顶栏调色盘按钮，无法在站内改色相 */
   FUWARI_THEME_COLOR_FIXED: false,
   /** 文章页右侧浮动区：跳转评论区按钮 */
@@ -93,26 +101,75 @@ const CONFIG = {
   FUWARI_ARTICLE_TOC: true,
 
   // ---------------------------------------------------------------------------
+  // 个人资料卡（适配 HEO 风格欢迎语）
+  // ---------------------------------------------------------------------------
+  FUWARI_PROFILE_GREETINGS: [
+    '你好！我是',
+    '喵喵喵？～',
+    '啊哈哈。。。',
+    '还在点？（疑惑）',
+    '不要再点了！生气了～',
+    '呜呜呜～'
+  ],
+
+  // 用户技能图标 (适配 HEO 风格)
+  HEO_GROUP_ICONS: [
+    {
+      title_1: 'face-smile-solid-full',
+      img_1: '/images/heo/icon/face-smile-solid-full.svg',
+      color_1: '#FFD9EF',
+      title_2: 'bilibili-brands-solid-full',
+      img_2: '/images/heo/icon/bilibili-brands-solid-full.svg',
+      color_2: '#FFF0F8'
+    },
+    {
+      title_1: 'envelope-solid-full',
+      img_1: '/images/heo/icon/envelope-solid-full.svg',
+      color_1: '#FFB8E3',
+      title_2: 'shield-cat-solid-full',
+      img_2: '/images/heo/icon/shield-cat-solid-full.svg',
+      color_2: '#F76FC2'
+    },
+    {
+      title_1: 'trophy-solid-full',
+      img_1: '/images/heo/icon/trophy-solid-full.svg',
+      color_1: '#FFF0F8',
+      title_2: 'gamepad-solid-full',
+      img_2: '/images/heo/icon/gamepad-solid-full.svg',
+      color_2: '#FFF0F8'
+    },
+    {
+      title_1: 'heart-solid-full',
+      img_1: '/images/heo/icon/heart-solid-full.svg',
+      color_1: '#FFB8E3',
+      title_2: 'heart-regular-full',
+      img_2: '/images/heo/icon/heart-regular-full.svg',
+      color_2: '#2E031B'
+    }
+  ],
+
+  // ---------------------------------------------------------------------------
   // 联系卡片（侧栏，可翻转）
   // ---------------------------------------------------------------------------
   /** 正面标题 */
-  FUWARI_CONTACT_TITLE: '社区',
+  FUWARI_CONTACT_TITLE: '交流频道',
   /** 正面说明文案 */
-  FUWARI_CONTACT_DESCRIPTION: '欢迎交流与反馈',
+  FUWARI_CONTACT_DESCRIPTION: '加入我们的社群讨论分享',
   /** 正面右上角徽标 */
   FUWARI_CONTACT_FRONT_BADGE: 'Community',
   /** 跳转 URL（外链或站内路径） */
-  FUWARI_CONTACT_URL: 'https://docs.tangly1024.com/article/chat-community',
+  FUWARI_CONTACT_URL: 'https://blog.vachiika.me/article/how-to-question',
   /** 正面行动文案（如「联系我们 →」） */
-  FUWARI_CONTACT_TEXT: '查看',
+  FUWARI_CONTACT_TEXT: '点击加入',
   /** 是否使用正反面翻转卡片 */
   FUWARI_CONTACT_FLIP_CARD: true,
   /** 背面标题 */
-  FUWARI_CONTACT_BACK_TITLE: '支持内容',
+  FUWARI_CONTACT_BACK_TITLE: '关注 GitHub',
   /** 背面说明 */
-  FUWARI_CONTACT_BACK_DESCRIPTION: '可提交问题、建议与合作意向。',
+  FUWARI_CONTACT_BACK_DESCRIPTION: '查看我的项目与代码',
   /** 背面行动文案 */
-  FUWARI_CONTACT_BACK_TEXT: '查看',
+  FUWARI_CONTACT_BACK_TEXT: '前往',
+  FUWARI_CONTACT_BACK_URL: 'https://github.com/systaven',
 
   // ---------------------------------------------------------------------------
   // 全站动效（按需开启，可能影响性能）

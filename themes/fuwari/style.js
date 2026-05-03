@@ -2,28 +2,34 @@
 
 const Style = () => {
   return <style jsx global>{`
+    @font-face {
+      font-family: 'AaMaoMaoXueTuanZiKeAiTi';
+      src: url('/fonts/AaMaoMaoXueTuanZiKeAiTi-2.woff2') format('woff2');
+      font-display: swap;
+    }
     #theme-fuwari {
-      --fuwari-bg: #f3f4f8;
-      --fuwari-bg-soft: #f6f4e8;
+      font-family: 'AaMaoMaoXueTuanZiKeAiTi', sans-serif;
+      --fuwari-bg: #FFF0F8;
+      --fuwari-bg-soft: #ffe4f2;
       --fuwari-surface: #ffffff;
-      --fuwari-muted: #72767d;
-      --fuwari-text: #232a37;
-      --fuwari-primary: #b8a320;
-      --fuwari-primary-soft: rgba(184, 163, 32, 0.14);
-      --fuwari-border: #e9e8df;
-      --fuwari-gradient: linear-gradient(135deg, #b8a320 0%, #e0ce63 100%);
+      --fuwari-muted: #9c768a;
+      --fuwari-text: #2d1a24;
+      --fuwari-primary: #df364e;
+      --fuwari-primary-soft: rgba(223, 54, 78, 0.12);
+      --fuwari-border: #f7d7e8;
+      --fuwari-gradient: linear-gradient(135deg, #df364e 0%, #ff708d 100%);
     }
 
     .dark #theme-fuwari {
-      --fuwari-bg: #0d1117;
-      --fuwari-bg-soft: #131a25;
-      --fuwari-surface: #171f2c;
-      --fuwari-muted: #9ca3af;
-      --fuwari-text: #f3f4f6;
-      --fuwari-primary: #d3bf53;
-      --fuwari-primary-soft: rgba(211, 191, 83, 0.2);
-      --fuwari-border: #283446;
-      --fuwari-gradient: linear-gradient(135deg, #8576ff 0%, #4ba9ff 100%);
+      --fuwari-bg: #1a0b12;
+      --fuwari-bg-soft: #241119;
+      --fuwari-surface: #2d161f;
+      --fuwari-muted: #a38b96;
+      --fuwari-text: #fce7f1;
+      --fuwari-primary: #f25d72;
+      --fuwari-primary-soft: rgba(242, 93, 114, 0.18);
+      --fuwari-border: #3d242e;
+      --fuwari-gradient: linear-gradient(135deg, #f25d72 0%, #ff9eaf 100%);
     }
 
     #theme-fuwari.fuwari-bg {
@@ -593,6 +599,9 @@ const Style = () => {
     #theme-fuwari .fuwari-card,
     #theme-fuwari #posts-wrapper > article {
       animation: fuwari-enter .28s ease both;
+    }
+    .animate-fuwari-enter {
+      animation: fuwari-enter .6s ease both;
     }
     /* Readmore 的 modal 使用 fixed 定位；文章主卡若保留 transform/animation 会把它困在卡片内 */
     #theme-fuwari article.fuwari-card {
