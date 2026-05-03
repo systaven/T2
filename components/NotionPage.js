@@ -250,13 +250,7 @@ function getMediumZoomMargin() {
 }
 
 // 代码
-const Code = dynamic(
-  () =>
-    import('react-notion-x/build/third-party/code').then(m => {
-      return m.Code
-    }),
-  { ssr: false }
-)
+const Code = dynamic(() => import('@/components/NotionCode'), { ssr: false })
 
 // 公式
 const Equation = dynamic(

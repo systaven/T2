@@ -1,5 +1,6 @@
 
 import { useRef, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { Container } from '../components/Container'
 import { useConfig } from '../../../lib/config'
 import { NotionRenderer } from 'react-notion-x'
@@ -14,6 +15,8 @@ import { PostHeader } from '../components/PostHeader'
 import { PostFooter } from '../components/PostFooter'
 import { TableOfContents } from '../components/TableOfContents'
 import { Comments } from '../../../components/Comments'
+
+const Code = dynamic(() => import('@/components/NotionCode'), { ssr: false })
 
 /**
  * 文章详情页布局
@@ -52,7 +55,7 @@ export const LayoutPost = ({ post, prev, next, blockMap, fullWidth = false }) =>
               {blockMap && (
                 <NotionRenderer
                   recordMap={blockMap}
-                  components={{ Collection }}
+                  components={{ Collection, Code }}
                   mapPageUrl={slug => `${BLOG.PATH}/${slug}`}
                 />
               )}
