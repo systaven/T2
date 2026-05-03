@@ -18,6 +18,7 @@ import ArticleLock from './components/ArticleLock'
 import Footer from './components/Footer'
 import Header from './components/Header'
 import ArticleHeroCover from './components/ArticleHeroCover'
+import CursorFollower from './components/CursorFollower'
 import HeroBanner from './components/HeroBanner'
 import Pagination from './components/Pagination'
 import PostList from './components/PostList'
@@ -52,6 +53,7 @@ const LayoutBase = props => {
       id='theme-fuwari'
       className={`${siteConfig('FONT_STYLE')} fuwari-bg min-h-screen text-[var(--fuwari-text)]`}>
       <Style />
+      <CursorFollower />
       <Header
         locale={locale}
         customNav={props.customNav}

@@ -606,6 +606,25 @@ const Style = () => {
     .typed-cursor {
       color: var(--fuwari-primary);
     }
+    /* 鼠标跟随 */
+    .cursor-follower {
+      position: fixed;
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--fuwari-primary);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 10000;
+      transition: transform 0.1s ease-out, border-color 0.3s ease, width 0.2s, height 0.2s;
+      background-color: var(--fuwari-primary-soft);
+    }
+    .cursor-active {
+      width: 40px;
+      height: 40px;
+      background-color: var(--fuwari-primary);
+      opacity: 0.5;
+    }
     /* 确保音乐播放器和看板娘在最顶层 */
     .aplayer.aplayer-fixed {
       z-index: 9999 !important;

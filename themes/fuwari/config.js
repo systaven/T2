@@ -150,7 +150,7 @@ const CONFIG = {
   /** Lenis 平滑滚动 */
   FUWARI_EFFECT_LENIS: false,
   /** 自定义光标圆点 */
-  FUWARI_EFFECT_CURSOR_DOT: false,
+  FUWARI_EFFECT_CURSOR_DOT: true,
 
   // ---------------------------------------------------------------------------
   // 文章页

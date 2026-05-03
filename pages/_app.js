@@ -16,6 +16,7 @@ import { getQueryParam } from '../lib/utils'
 // 各种扩展插件 这个要阻塞引入
 import BLOG from '@/blog.config'
 import ExternalPlugins from '@/components/ExternalPlugins'
+import GlobalStyle from '@/components/GlobalStyle'
 import SEO from '@/components/SEO'
 import { zhCN } from '@clerk/localizations'
 import dynamic from 'next/dynamic'
@@ -147,6 +148,7 @@ const MyApp = ({ Component, pageProps }) => {
 
   const content = (
     <GlobalContextProvider {...pageProps}>
+      {route.pathname === '/go' && <GlobalStyle />}
       {pageContent}
       {route.pathname !== '/go' && <ExternalPlugins {...pageProps} />}
     </GlobalContextProvider>
