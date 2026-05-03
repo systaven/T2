@@ -76,10 +76,8 @@ const MyApp = ({ Component, pageProps }) => {
       });
     };
 
-    // 延时执行一次，确保 Notion 内容渲染完成
-    const timer = setTimeout(() => {
-      rewriteLinks(document.body);
-    }, 500);
+    // 立即执行一次
+    rewriteLinks(document.body);
 
     // 使用 MutationObserver 监视动态添加的内容
     const observer = new MutationObserver(mutations => {
@@ -100,7 +98,6 @@ const MyApp = ({ Component, pageProps }) => {
 
     // 组件卸载时断开观察
     return () => {
-      clearTimeout(timer);
       observer.disconnect();
     };
 
