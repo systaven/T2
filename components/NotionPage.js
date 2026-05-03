@@ -56,14 +56,10 @@ const NotionPage = ({ post, className }) => {
      */
     const articleRoot =
       document.getElementById('notion-article') || document.body
-    const hasAnyImage = Boolean(articleRoot.querySelector('img'))
-    if (!hasAnyImage) {
-      return
-    }
 
     const observer = new MutationObserver((mutationsList, observer) => {
-      processFileUrl()
       mutationsList.forEach(mutation => {
+        processFileUrl()
         if (
           mutation.type === 'attributes' &&
           mutation.attributeName === 'class'
@@ -87,6 +83,7 @@ const NotionPage = ({ post, className }) => {
     // 监视正文容器，避免对整个 document.body 做高开销监听
     observer.observe(articleRoot, {
       attributes: true,
+      childList: true,
       subtree: true,
       attributeFilter: ['class']
     })
@@ -127,7 +124,6 @@ const NotionPage = ({ post, className }) => {
           Code,
           Collection,
           Equation,
-          Link: NotionLink,
           Modal,
           Pdf,
           Tweet
