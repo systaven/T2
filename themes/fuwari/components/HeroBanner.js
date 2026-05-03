@@ -34,10 +34,10 @@ const HeroBanner = (props) => {
           }
           typedInstance.current = new window.Typed('#fuwari-typed', {
             strings: strings,
-            typeSpeed: 120, // 适中的打字速度
-            backSpeed: 60,  // 较慢的删除速度
-            backDelay: 4000, // 增加打完后的停顿时间
-            startDelay: 1000, // 开始前的停顿
+            typeSpeed: 70,   // 更自然的打字速度
+            backSpeed: 40,   // 更自然的删除速度
+            backDelay: 5000, // 打完后停顿较长时间，方便阅读
+            startDelay: 500, // 初始停顿
             showCursor: true,
             smartBackspace: true,
             loop: true
@@ -91,7 +91,10 @@ const HeroBanner = (props) => {
           {title1 && <div className='text-sm font-medium opacity-80'>{title1}</div>}
           {(title2 || title3) && (
             <h1 className='text-4xl md:text-5xl font-bold tracking-tight min-h-[1.2em]'>
-              <span id='fuwari-typed'>{title2} {title3}</span>
+              {/* SEO 备选文字，对用户不可见 */}
+              <span className='sr-only'>{title2} {title3}</span>
+              {/* 动态打字区域，初始为空以确保从“打出”开始 */}
+              <span id='fuwari-typed'></span>
             </h1>
           )}
           {title4 && title5 && (
