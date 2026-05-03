@@ -1,4 +1,5 @@
 import { siteConfig } from '@/lib/config'
+import { BeiAnGongAn } from '@/components/BeiAnGongAn'
 
 const Footer = () => {
   const currentYear = new Date().getFullYear()
@@ -6,6 +7,8 @@ const Footer = () => {
   const copyrightDate = since < currentYear ? `${since}-${currentYear}` : `${currentYear}`
   const author = siteConfig('AUTHOR') || siteConfig('TITLE') || 'NotionNext'
   const version = siteConfig('VERSION') || ''
+  const BEI_AN = siteConfig('BEI_AN')
+  const BEI_AN_LINK = siteConfig('BEI_AN_LINK')
 
   return (
     <footer className='fuwari-footer py-6 text-center text-sm text-[var(--fuwari-muted)]'>
@@ -28,6 +31,18 @@ const Footer = () => {
             Fuwari
           </span>
         </p>
+
+        {(BEI_AN || siteConfig('BEI_AN_GONGAN')) && (
+          <p className='mt-2 flex flex-wrap justify-center items-center gap-x-2'>
+            {BEI_AN && (
+              <a href={BEI_AN_LINK} className='hover:text-[var(--fuwari-primary)] transition-colors'>
+                <i className='fas fa-shield-alt mr-1' />
+                {BEI_AN}
+              </a>
+            )}
+            <BeiAnGongAn />
+          </p>
+        )}
       </div>
     </footer>
   )
