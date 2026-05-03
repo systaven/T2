@@ -48,15 +48,16 @@ const MyApp = ({ Component, pageProps }) => {
       }
 
       const links = rootNode.querySelectorAll('a[href]');
+      const currentHost = window.location.hostname;
 
       links.forEach(link => {
         const href = link.getAttribute('href');
-        // 如果没有 href，或者是锚点链接，或者已经被重写，则跳过
-        if (!href || href.startsWith('#') || href.startsWith('/go?') || link.dataset.linkRewritten) {
+        // 如果没有 href，或者是锚点链接，或者是内部跳转，或者已经被重写，则跳过
+        if (!href || href.startsWith('#') || href.startsWith('/') || href.startsWith('mailto:') || href.startsWith('tel:') || link.dataset.linkRewritten) {
           return;
         }
 
-        const isExternal = /^https?:\/\//i.test(href) && !href.includes(location.hostname);
+        const isExternal = /^https?:\/\//i.test(href) && !href.includes(currentHost);
 
         if (isExternal) {
           const inWhitelist = whitelist.some(domain => href.includes(domain));
@@ -69,22 +70,27 @@ const MyApp = ({ Component, pageProps }) => {
 
           const newHref = `/go?target=${encodeURIComponent(href)}`;
           link.setAttribute('href', newHref);
+          // 移除任何可能干扰跳转的 target='_blank'（可选，由 go 页面处理跳转）
+          // link.setAttribute('target', '_self'); 
         }
       });
     };
 
-    // 首次加载时重写链接
-    rewriteLinks(document.body);
+    // 延时执行一次，确保 Notion 内容渲染完成
+    const timer = setTimeout(() => {
+      rewriteLinks(document.body);
+    }, 500);
 
     // 使用 MutationObserver 监视动态添加的内容
     const observer = new MutationObserver(mutations => {
-      for (const mutation of mutations) {
-        if (mutation.type === 'childList') {
-          for (const node of mutation.addedNodes) {
-            rewriteLinks(node);
+      mutations.forEach(mutation => {
+        mutation.addedNodes.forEach(node => {
+          rewriteLinks(node);
+          if (node.nodeType === 1) { // 如果是元素节点，也检查其子节点
+             rewriteLinks(node);
           }
-        }
-      }
+        });
+      });
     });
 
     observer.observe(document.body, {
@@ -94,6 +100,7 @@ const MyApp = ({ Component, pageProps }) => {
 
     // 组件卸载时断开观察
     return () => {
+      clearTimeout(timer);
       observer.disconnect();
     };
 
