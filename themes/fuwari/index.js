@@ -60,7 +60,7 @@ const LayoutBase = props => {
       />
       <AlgoliaSearchModal cRef={searchModal} {...props} />
 
-      {showHomeHero && <HeroBanner siteInfo={props.siteInfo} />}
+      {showHomeHero && <HeroBanner {...props} />}
 
       <main
         className={`max-w-6xl mx-auto px-3 md:px-4 pb-12 min-w-0 w-full ${showHomeHero ? 'fuwari-main-overlap' : ''}`}>

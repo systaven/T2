@@ -606,6 +606,13 @@ const Style = () => {
     .typed-cursor {
       color: var(--fuwari-primary);
     }
+    /* 确保音乐播放器和看板娘在最顶层 */
+    .aplayer.aplayer-fixed {
+      z-index: 9999 !important;
+    }
+    #live2d {
+      z-index: 9998 !important;
+    }
     /* Readmore 的 modal 使用 fixed 定位；文章主卡若保留 transform/animation 会把它困在卡片内 */
     #theme-fuwari article.fuwari-card {
       animation: none !important;

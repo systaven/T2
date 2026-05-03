@@ -1,29 +1,43 @@
 import SmartLink from '@/components/SmartLink'
 import { siteConfig } from '@/lib/config'
 import { loadExternalResource } from '@/lib/utils'
-import { useEffect } from 'react'
+import { useRouter } from 'next/router'
+import { useEffect, useRef } from 'react'
 import CONFIG from '../config'
 
-const HeroBanner = ({ siteInfo }) => {
+const HeroBanner = (props) => {
+  const { siteInfo, allNavPages } = props
+  const router = useRouter()
+  const typedInstance = useRef(null)
+
   useEffect(() => {
     const title2 = siteConfig('HEO_HERO_TITLE_2', null, CONFIG)
     const title3 = siteConfig('HEO_HERO_TITLE_3', null, CONFIG)
     const greetings = siteConfig('GREETING_WORDS', '', CONFIG)?.split(',') || []
     
     // 优先使用 HEO 标题组合，如果没有则使用全局欢迎语
-    const strings = (title2 || title3) 
+    // 注意：打字机至少需要两个不同的字符串才能体现循环打出的过程
+    let rawStrings = (title2 || title3) 
       ? [`${title2 || ''} ${title3 || ''}`.trim()]
       : greetings
+    
+    // 如果只有一个字符串，我们添加一个微小的差异字符串以产生循环效果
+    const strings = rawStrings.length === 1 
+      ? [rawStrings[0], rawStrings[0] + ' '] 
+      : rawStrings
 
     if (strings.length > 0 && window && document.getElementById('fuwari-typed')) {
       loadExternalResource('/js/typed.min.js', 'js').then(() => {
         if (window.Typed) {
-          // eslint-disable-next-line no-new
-          new window.Typed('#fuwari-typed', {
+          if (typedInstance.current) {
+            typedInstance.current.destroy()
+          }
+          typedInstance.current = new window.Typed('#fuwari-typed', {
             strings: strings,
-            typeSpeed: 100,
-            backSpeed: 50,
-            backDelay: 2000,
+            typeSpeed: 120, // 适中的打字速度
+            backSpeed: 60,  // 较慢的删除速度
+            backDelay: 4000, // 增加打完后的停顿时间
+            startDelay: 1000, // 开始前的停顿
             showCursor: true,
             smartBackspace: true,
             loop: true
@@ -31,9 +45,25 @@ const HeroBanner = ({ siteInfo }) => {
         }
       })
     }
+
+    return () => {
+      if (typedInstance.current) {
+        typedInstance.current.destroy()
+      }
+    }
   }, [])
 
   if (!siteConfig('FUWARI_HERO_ENABLE', true, CONFIG)) return null
+
+  /**
+   * 随机跳转文章
+   */
+  function handleClickBanner() {
+    if (!allNavPages || allNavPages.length === 0) return
+    const randomIndex = Math.floor(Math.random() * allNavPages.length)
+    const randomPost = allNavPages[randomIndex]
+    router.push(`${siteConfig('SUB_PATH', '')}/${randomPost?.slug}`)
+  }
 
   const cover =
     siteInfo?.pageCover ||
@@ -65,11 +95,11 @@ const HeroBanner = ({ siteInfo }) => {
             </h1>
           )}
           {title4 && title5 && (
-             <SmartLink href={siteConfig('HEO_HERO_TITLE_LINK', '/', CONFIG)} className='inline-flex items-center gap-2 mt-4 fuwari-hero-btn transition-transform hover:scale-105'>
+             <div onClick={handleClickBanner} className='cursor-pointer inline-flex items-center gap-2 mt-4 fuwari-hero-btn transition-transform hover:scale-105'>
                <span>{title4}</span>
                <span className='opacity-70'>{title5}</span>
                <i className='fas fa-arrow-right text-xs' />
-             </SmartLink>
+             </div>
           )}
         </div>
       </div>

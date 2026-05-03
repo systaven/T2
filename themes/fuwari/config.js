@@ -102,6 +102,12 @@ const CONFIG = {
 
   /** 音乐播放器 */
   MUSIC_PLAYER: true,
+  /** 音乐播放器在左下角显示 */
+  MUSIC_PLAYER_VISIBLE: true,
+  /** 音乐播放器自动播放 */
+  MUSIC_PLAYER_AUTO_PLAY: false,
+  /** 音乐播放器 MetingJS 支持 */
+  MUSIC_PLAYER_METING: true,
 
   // ---------------------------------------------------------------------------
   // 个人资料卡（适配 HEO 风格欢迎语）
