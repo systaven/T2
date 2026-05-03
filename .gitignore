@@ -7,6 +7,7 @@
 
 # testing
 /coverage
+/test-results
 
 # next.js
 /.next/
@@ -57,3 +58,7 @@ package-lock.json
 .notion-api-lock
 .gemini/
 gha-creds-*.json
+.tmp/
+.perf/
+tsconfig.tsbuildinfo
+webpack-internal:/

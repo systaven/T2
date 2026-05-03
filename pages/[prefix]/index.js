@@ -1,6 +1,6 @@
 import BLOG from '@/blog.config'
 import useNotification from '@/components/Notification'
-import OpenWrite from '@/components/OpenWrite'
+import TechGrow from '@/components/TechGrow'
 import { siteConfig } from '@/lib/config'
 import { fetchGlobalAllData, resolvePostProps } from '@/lib/db/SiteDataApi'
 import { useGlobal } from '@/lib/global'
@@ -148,9 +148,12 @@ const Slug = props => {
 
   return (
     <>
+      {/* 文章布局 */}
       <DynamicLayout theme={theme} layoutName='LayoutSlug' {...finalProps} />
-      {originalPost?.password && originalPost?.password !== '' && !finalLock && <Notification />}
-      <OpenWrite />
+      {/* 解锁密码提示框 */}
+      {post?.password && post?.password !== '' && !finalLock && <Notification />}
+      {/* 导流工具 */}
+      <TechGrow lock={finalLock} />
     </>
   )
 }
@@ -184,7 +187,6 @@ export async function getStaticPaths() {
   }
 
   const tops = getPriorityPages(allPages)
-  await prefetchAllBlockMaps(tops)
 
   return {
     paths: tops
