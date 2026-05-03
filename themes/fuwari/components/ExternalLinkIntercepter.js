@@ -21,16 +21,29 @@ const ExternalLinkIntercepter = () => {
       const href = link.getAttribute('href')
       if (!href) return
 
-      // 2. 检查是否是外链
+      // 2. 特殊处理 Notion 文件下载
+      // 判断是否为 Notion 文件：通常包含 notion-static / amazonaws.com 或者具有常见文件后缀
+      const isNotionFile = /amazonaws\.com|notion-static|file\.notion\.so/i.test(href) || 
+                          /\.(zip|rar|7z|pdf|docx?|xlsx?|pptx?|txt|exe|dmg|apk)$/i.test(href)
+
+      if (isNotionFile) {
+        link.setAttribute('target', '_blank')
+        link.setAttribute('download', '')
+        // 如果是文件链接，我们通常允许直接下载而不弹出“离开本站”确认
+        // 或者如果你希望文件也要确认，可以去掉下面的 return
+        return 
+      }
+
+      // 3. 检查是否是普通外链
       const isExternal = /^https?:\/\//i.test(href) && !href.includes(window.location.hostname)
       if (!isExternal) return
 
-      // 3. 检查白名单
+      // 4. 检查白名单
       const whitelist = BLOG.LINK_WHITELIST || []
       const inWhitelist = whitelist.some(domain => href.includes(domain))
       if (inWhitelist) return
 
-      // 4. 拦截点击，弹出确认
+      // 5. 拦截点击，弹出确认
       e.preventDefault()
       e.stopPropagation()
       setTargetUrl(href)
