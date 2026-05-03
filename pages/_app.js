@@ -39,69 +39,6 @@ const MyApp = ({ Component, pageProps }) => {
   const notionTheme = pageProps?.NOTION_CONFIG?.THEME
   const configTheme = BLOG.THEME
 
-  useEffect(() => {
-    const whitelist = BLOG.LINK_WHITELIST || [];
-
-    const rewriteLinks = (rootNode) => {
-      if (!rootNode || typeof rootNode.querySelectorAll !== 'function') {
-        return;
-      }
-
-      const links = rootNode.querySelectorAll('a[href]');
-      const currentHost = window.location.hostname;
-
-      links.forEach(link => {
-        const href = link.getAttribute('href');
-        // 如果没有 href，或者是锚点链接，或者是内部跳转，或者已经被重写，则跳过
-        if (!href || href.startsWith('#') || href.startsWith('/') || href.startsWith('mailto:') || href.startsWith('tel:') || link.dataset.linkRewritten) {
-          return;
-        }
-
-        const isExternal = /^https?:\/\//i.test(href) && !href.includes(currentHost);
-
-        if (isExternal) {
-          const inWhitelist = whitelist.some(domain => href.includes(domain));
-          // 标记为已处理，无论是否在白名单内
-          link.dataset.linkRewritten = "true";
-
-          if (inWhitelist) {
-            return; // 在白名单内，不重写
-          }
-
-          const newHref = `/go?target=${encodeURIComponent(href)}`;
-          link.setAttribute('href', newHref);
-          // 移除任何可能干扰跳转的 target='_blank'（可选，由 go 页面处理跳转）
-          // link.setAttribute('target', '_self'); 
-        }
-      });
-    };
-
-    // 立即执行一次
-    rewriteLinks(document.body);
-
-    // 使用 MutationObserver 监视动态添加的内容
-    const observer = new MutationObserver(mutations => {
-      mutations.forEach(mutation => {
-        mutation.addedNodes.forEach(node => {
-          rewriteLinks(node);
-          if (node.nodeType === 1) { // 如果是元素节点，也检查其子节点
-             rewriteLinks(node);
-          }
-        });
-      });
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-
-    // 组件卸载时断开观察
-    return () => {
-      observer.disconnect();
-    };
-
-  }, [route.asPath]);
   const theme = useMemo(() => {
     return queryTheme || notionTheme || configTheme
   }, [queryTheme, notionTheme, configTheme])
@@ -142,19 +79,16 @@ const MyApp = ({ Component, pageProps }) => {
 
   // 根据路由路径决定页面内容
   const pageContent = (
-    route.pathname === '/go'
-      ? <Component {...pageProps} />
-      : <GLayout {...pageProps}>
-          <SEO {...pageProps} />
-          <Component {...pageProps} />
-        </GLayout>
+    <GLayout {...pageProps}>
+      <SEO {...pageProps} />
+      <Component {...pageProps} />
+    </GLayout>
   )
 
   const content = (
     <GlobalContextProvider {...pageProps}>
-      {route.pathname === '/go' && <GlobalStyle />}
       {pageContent}
-      {route.pathname !== '/go' && <ExternalPlugins {...pageProps} />}
+      <ExternalPlugins {...pageProps} />
     </GlobalContextProvider>
   )
 
