@@ -6,6 +6,7 @@ import 'katex/dist/katex.min.css'
 import dynamic from 'next/dynamic'
 import { useEffect, useRef } from 'react'
 import { NotionRenderer } from 'react-notion-x'
+import SmartLink from '@/components/SmartLink'
 
 /**
  * 整个站点的核心组件
@@ -48,10 +49,14 @@ const NotionPage = ({ post, className }) => {
       processDisableDatabaseUrl()
     }
 
+    // 文件链接在新标签页打开并强制下载
+    processFileUrl()
+
     /**
      * 放大查看图片时替换成高清图像
      */
     const observer = new MutationObserver((mutationsList, observer) => {
+      processFileUrl()
       mutationsList.forEach(mutation => {
         if (
           mutation.type === 'attributes' &&
@@ -128,6 +133,7 @@ const NotionPage = ({ post, className }) => {
         mapPageUrl={mapPageUrl}
         mapImageUrl={mapImgUrl}
         components={{
+          Link: (props) => <SmartLink {...props} target='_blank' />,
           Code,
           Collection,
           Equation,
@@ -152,6 +158,20 @@ const processDisableDatabaseUrl = () => {
     const links = document.querySelectorAll('.notion-table a')
     for (const e of links) {
       e.removeAttribute('href')
+    }
+  }
+}
+
+/**
+ * 使Notion内容中的文件在新标签页打开并强制下载
+ */
+const processFileUrl = () => {
+  if (isBrowser) {
+    const links = document.querySelectorAll('.notion-file-link')
+    for (const e of links) {
+      e.setAttribute('target', '_blank')
+      e.setAttribute('rel', 'noopener noreferrer')
+      e.setAttribute('download', '')
     }
   }
 }

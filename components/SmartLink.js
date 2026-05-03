@@ -8,7 +8,7 @@ const filterDOMProps = props => {
 }
 
 const SmartLink = ({ href, children, ...rest }) => {
-  const LINK = 'https://blog.vachiika.me'
+  const LINK = siteConfig('LINK')
 
   // 获取 URL 字符串用于判断是否是外链
   let urlString = ''
