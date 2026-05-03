@@ -94,6 +94,7 @@ export default function GoPage() {
           返回上一页
         </button>
       </div>
+    </div>
     </>
   );
 }
