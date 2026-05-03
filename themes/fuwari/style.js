@@ -603,6 +603,9 @@ const Style = () => {
     .animate-fuwari-enter {
       animation: fuwari-enter .6s ease both;
     }
+    .typed-cursor {
+      color: var(--fuwari-primary);
+    }
     /* Readmore 的 modal 使用 fixed 定位；文章主卡若保留 transform/animation 会把它困在卡片内 */
     #theme-fuwari article.fuwari-card {
       animation: none !important;
