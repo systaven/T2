@@ -28,4 +28,3 @@ const ArchiveList = ({ archivePosts = {} }) => {
 }
 
 export default ArchiveList
-

@@ -76,9 +76,10 @@ const HeroBanner = (props) => {
   const title3 = siteConfig('HEO_HERO_TITLE_3', null, CONFIG)
   const title4 = siteConfig('HEO_HERO_TITLE_4', null, CONFIG)
   const title5 = siteConfig('HEO_HERO_TITLE_5', null, CONFIG)
+  const heroStyle = siteConfig('FUWARI_HERO_STYLE', 'banner', CONFIG)
 
   return (
-    <section className='fuwari-hero mb-4 overflow-hidden'>
+    <section className={`fuwari-hero mb-4 overflow-hidden hero-${heroStyle}`}>
       {cover && (
         <div
           className='fuwari-hero-bg'

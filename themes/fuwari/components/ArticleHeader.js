@@ -72,4 +72,3 @@ const ArticleHeader = ({ post }) => {
 }
 
 export default ArticleHeader
-

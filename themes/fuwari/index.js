@@ -21,10 +21,12 @@ import ArticleHeroCover from './components/ArticleHeroCover'
 import CursorFollower from './components/CursorFollower'
 import ExternalLinkIntercepter from './components/ExternalLinkIntercepter'
 import HeroBanner from './components/HeroBanner'
+import FullscreenWallpaper from './components/FullscreenWallpaper'
 import Pagination from './components/Pagination'
 import PostList from './components/PostList'
 import RightFloatArea from './components/RightFloatArea'
 import SidePanel from './components/SidePanel'
+import SidePanelRight from './components/SidePanelRight'
 import SearchInput from './components/SearchInput'
 import CONFIG from './config'
 import { Style } from './style'
@@ -46,15 +48,33 @@ const LayoutBase = props => {
   const locale = getLocale()
   const searchModal = useRef(null)
   const router = useRouter()
+  const [heroStyle, setHeroStyle] = useState(siteConfig('FUWARI_HERO_STYLE', 'banner', CONFIG))
+
+  useEffect(() => {
+    // 加载初始状态
+    const savedStyle = localStorage.getItem('FUWARI_HERO_STYLE')
+    if (savedStyle) setHeroStyle(savedStyle)
+
+    // 监听切换事件
+    const handleStyleChange = (e) => {
+      setHeroStyle(e.detail)
+    }
+    window.addEventListener('fuwari-hero-style-change', handleStyleChange)
+    return () => window.removeEventListener('fuwari-hero-style-change', handleStyleChange)
+  }, [])
+
   const showHomeHero =
     !props.post &&
-    (router.pathname === '/' || router.pathname === '/page/[page]')
+    (router.pathname === '/' || router.pathname === '/page/[page]') &&
+    heroStyle === 'banner'
+  const threeColumns = siteConfig('FUWARI_LAYOUT_THREE_COLUMNS', true, CONFIG)
 
   return (
     <div
       id='theme-fuwari'
-      className={`${siteConfig('FONT_STYLE')} fuwari-bg min-h-screen text-[var(--fuwari-text)]`}>
+      className={`${siteConfig('FONT_STYLE')} fuwari-bg min-h-screen text-[var(--fuwari-text)] ${heroStyle === 'fullscreen' ? 'fuwari-fullscreen-layout' : ''}`}>
       <Style />
+      <FullscreenWallpaper />
       <CursorFollower />
       <ExternalLinkIntercepter />
       <Header
@@ -62,23 +82,31 @@ const LayoutBase = props => {
         customNav={props.customNav}
         customMenu={props.customMenu}
         searchModal={searchModal}
+        siteInfo={props.siteInfo}
       />
       <AlgoliaSearchModal cRef={searchModal} {...props} />
 
       {showHomeHero && <HeroBanner {...props} />}
 
       <main
-        className={`max-w-6xl mx-auto px-3 md:px-4 pb-12 min-w-0 w-full ${showHomeHero ? 'fuwari-main-overlap' : ''}`}>
-        <div className='grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] gap-4 lg:gap-6 items-start min-w-0'>
+        className={`${threeColumns ? 'max-w-7xl' : 'max-w-6xl'} mx-auto px-3 md:px-4 pb-12 min-w-0 w-full ${showHomeHero ? 'fuwari-main-overlap' : 'pt-4 md:pt-8'}`}>
+        <div className={`grid grid-cols-1 ${threeColumns ? 'xl:grid-cols-[280px_minmax(0,1fr)_280px] lg:grid-cols-[280px_minmax(0,1fr)]' : 'lg:grid-cols-[280px_minmax(0,1fr)]'} gap-4 lg:gap-6 items-start min-w-0`}>
           <div className='hidden lg:block sticky top-4'>
-            <SidePanel {...props} />
+            <SidePanel {...props} isLeft={threeColumns} />
           </div>
+
           <section className='min-w-0 w-full max-w-full'>
             {children}
             <div className='lg:hidden mt-4'>
               <SidePanel {...props} />
             </div>
           </section>
+
+          {threeColumns && (
+            <div className='hidden xl:block'>
+              <SidePanelRight {...props} />
+            </div>
+          )}
         </div>
       </main>
       <Footer />

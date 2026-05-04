@@ -49,6 +49,10 @@ const CONFIG = {
   FUWARI_HERO_ENABLE: true,
   /** 是否开启波浪效果 */
   FUWARI_HERO_WAVES: true,
+  /** 是否开启三栏布局（左侧栏-中文章-右侧栏）；false 为默认双栏（左侧栏-右文章） */
+  FUWARI_LAYOUT_THREE_COLUMNS: true,
+  /** Hero 模式：'banner' (默认), 'fullscreen' (全屏), 'none' (无图) */
+  FUWARI_HERO_STYLE: 'banner',
   /** 自定义背景图 URL；留空则用 Notion 站点封面或 HOME_BANNER_IMAGE */
   FUWARI_HERO_BG_IMAGE: '',
   /** 右下角署名文案；留空不显示 */
@@ -104,12 +108,15 @@ const CONFIG = {
 
   /** 音乐播放器 */
   MUSIC_PLAYER: true,
-  /** 音乐播放器在左下角显示 */
-  MUSIC_PLAYER_VISIBLE: true,
+  /** 音乐播放器在左下角显示（三栏布局下建议关闭，使用侧栏嵌入版） */
+  MUSIC_PLAYER_VISIBLE: false,
   /** 音乐播放器自动播放 */
   MUSIC_PLAYER_AUTO_PLAY: false,
   /** 音乐播放器 MetingJS 支持 */
   MUSIC_PLAYER_METING: true,
+
+  /** 侧边栏个人头像 URL；留空则用 siteInfo.icon */
+  FUWARI_AVATAR: '',
 
   // ---------------------------------------------------------------------------
   // 个人资料卡（适配 HEO 风格欢迎语）

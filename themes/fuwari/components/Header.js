@@ -6,15 +6,17 @@ import { useEffect, useRef, useState } from 'react'
 import MenuList from './MenuList'
 import MobileNav from './MobileNav'
 import ThemeColorSwitch from './ThemeColorSwitch'
+import WallpaperSwitch from './WallpaperSwitch'
 import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 
-const Header = ({ locale, customNav, customMenu, searchModal }) => {
+const Header = ({ locale, customNav, customMenu, searchModal, siteInfo }) => {
   const router = useRouter()
   const { isDarkMode, toggleDarkMode } = useGlobal()
   const [showPalette, setShowPalette] = useState(false)
   const panelRef = useRef(null)
   const algoliaEnabled = Boolean(siteConfig('ALGOLIA_APP_ID'))
   const paletteFixed = siteConfig('FUWARI_THEME_COLOR_FIXED', false)
+  const threeColumns = siteConfig('FUWARI_LAYOUT_THREE_COLUMNS', true, CONFIG)
 
   const handleSearch = () => {
     if (algoliaEnabled) {
@@ -37,9 +39,12 @@ const Header = ({ locale, customNav, customMenu, searchModal }) => {
   }, [showPalette])
 
   return (
-    <header className='max-w-6xl mx-auto px-4 pt-0 pb-3 sticky top-0 z-40'>
+    <header className={`${threeColumns ? 'max-w-7xl' : 'max-w-6xl'} mx-auto px-4 pt-0 pb-3 sticky top-0 z-40`}>
       <div className='fuwari-card fuwari-navbar relative px-4 py-2.5 flex items-center justify-between md:grid md:grid-cols-[1fr_auto_1fr]'>
-        <SmartLink href='/' className='text-[1.35rem] md:text-[1.45rem] font-bold fuwari-title-gradient text-left'>
+        <SmartLink href='/' className='text-[1.35rem] md:text-[1.45rem] font-bold fuwari-title-gradient text-left flex items-center shrink-0'>
+          {siteInfo?.icon && (
+             <img src={siteInfo.icon} className='w-7 h-7 mr-2.5 object-contain rounded-lg' alt='logo' />
+          )}
           {siteConfig('TITLE')}
         </SmartLink>
         <MenuList locale={locale} customNav={customNav} customMenu={customMenu} />
@@ -78,6 +83,7 @@ const Header = ({ locale, customNav, customMenu, searchModal }) => {
               <i className='fas fa-palette' />
             </button>
           )}
+          <WallpaperSwitch />
           <button type='button' onClick={toggleDarkMode} className='fuwari-tool-btn'>
             {isDarkMode ? '☀' : '☾'}
           </button>
@@ -117,6 +123,7 @@ const Header = ({ locale, customNav, customMenu, searchModal }) => {
               <i className='fas fa-palette' />
             </button>
           )}
+          <WallpaperSwitch />
           <button type='button' onClick={toggleDarkMode} className='fuwari-tool-btn'>
             {isDarkMode ? '☀' : '☾'}
           </button>

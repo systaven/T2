@@ -3,6 +3,7 @@ import { siteConfig } from '@/lib/config'
 import { useEffect, useRef, useState } from 'react'
 import CONFIG from '../config'
 import { getFuwariMenuLinks } from './menu'
+import NotionIcon from './NotionIcon'
 
 const MobileNav = ({ locale, customNav, customMenu }) => {
   const [open, setOpen] = useState(false)
@@ -41,13 +42,14 @@ const MobileNav = ({ locale, customNav, customMenu }) => {
                   {!link.subMenus?.length && link.href ? (
                     <SmartLink
                       href={link.href}
-                      className='flex-1 px-3 py-2 rounded-lg font-semibold hover:bg-[var(--fuwari-bg-soft)]'
+                      className='flex-1 px-3 py-2 rounded-lg font-semibold hover:bg-[var(--fuwari-bg-soft)] flex items-center'
                       onClick={() => setOpen(false)}>
+                      <NotionIcon icon={link.icon} className='w-4 h-4 mr-2' />
                       {link.name || link.title}
                     </SmartLink>
                   ) : (
                     <span
-                      className={`flex-1 px-3 py-2 rounded-lg font-semibold hover:bg-[var(--fuwari-bg-soft)] select-none ${
+                      className={`flex-1 px-3 py-2 rounded-lg font-semibold hover:bg-[var(--fuwari-bg-soft)] select-none flex items-center ${
                         link.subMenus?.length ? 'cursor-pointer' : 'cursor-default'
                       }`}
                       role={link.subMenus?.length ? 'button' : undefined}
@@ -69,6 +71,7 @@ const MobileNav = ({ locale, customNav, customMenu }) => {
                           setOpenSub(prev => (prev === link.id ? '' : link.id))
                         }
                       }}>
+                      <NotionIcon icon={link.icon} className='w-4 h-4 mr-2' />
                       {link.name || link.title}
                     </span>
                   )}
@@ -88,8 +91,9 @@ const MobileNav = ({ locale, customNav, customMenu }) => {
                         key={sub.id || sub.href}
                         href={sub.href}
                         target={sub.target}
-                        className='block px-3 py-1.5 rounded-md text-xs hover:bg-[var(--fuwari-bg-soft)]'
+                        className='flex items-center px-3 py-1.5 rounded-md text-xs hover:bg-[var(--fuwari-bg-soft)]'
                         onClick={() => setOpen(false)}>
+                        <NotionIcon icon={sub.icon} className='w-3.5 h-3.5 mr-2' />
                         {sub.name}
                       </SmartLink>
                     ))}
@@ -105,4 +109,3 @@ const MobileNav = ({ locale, customNav, customMenu }) => {
 }
 
 export default MobileNav
-

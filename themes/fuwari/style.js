@@ -213,10 +213,32 @@ const Style = () => {
       border-radius: 0;
       margin-top: -92px;
       padding-top: 92px;
+      transition: all 0.5s ease;
     }
-    #theme-fuwari .fuwari-hero-content {
-      padding-top: clamp(3.5rem, 10vh, 7rem);
-      padding-bottom: 2rem;
+    #theme-fuwari .fuwari-hero.hero-fullscreen {
+      min-height: 100vh;
+      max-height: 100vh;
+    }
+    #theme-fuwari .fuwari-hero.hero-none {
+      display: none;
+    }
+    /* 全屏布局下的卡片透明度 */
+    .fuwari-fullscreen-layout .fuwari-card {
+      background-color: rgba(255, 255, 255, 0.45) !important;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .dark .fuwari-fullscreen-layout .fuwari-card {
+      background-color: rgba(20, 20, 20, 0.45) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    /* 侧栏卡片在全屏模式下也要透明 */
+    .fuwari-fullscreen-layout aside .fuwari-card {
+      background-color: rgba(255, 255, 255, 0.35) !important;
+    }
+    .dark .fuwari-fullscreen-layout aside .fuwari-card {
+      background-color: rgba(0, 0, 0, 0.35) !important;
     }
     @media (max-width: 768px) {
       #theme-fuwari .fuwari-hero {
@@ -224,6 +246,10 @@ const Style = () => {
         max-height: 36vh;
         margin-top: -72px;
         padding-top: 72px;
+      }
+      #theme-fuwari .fuwari-hero.hero-fullscreen {
+        min-height: 80vh;
+        max-height: 80vh;
       }
       #theme-fuwari .fuwari-main-overlap {
         margin-top: -18px;

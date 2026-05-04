@@ -26,13 +26,15 @@ const SidePanel = props => {
     notice,
     rightAreaSlot,
     postCount,
-    siteInfo
+    siteInfo,
+    isLeft // 新增标识，是否作为三栏布局的左侧栏
   } = props
   const { locale } = useGlobal()
   const title = siteConfig('TITLE')
   const description = siteConfig('DESCRIPTION')
   const greetings = siteConfig('FUWARI_PROFILE_GREETINGS', [], CONFIG)
   const [greetingIndex, setGreetingIndex] = useState(0)
+  const avatar = siteConfig('FUWARI_AVATAR', '', CONFIG) || siteInfo?.icon
 
   const showToc =
     siteConfig('FUWARI_ARTICLE_TOC', true, CONFIG) &&
@@ -49,7 +51,7 @@ const SidePanel = props => {
         <SmartLink href={siteConfig('FUWARI_PROFILE_PATH', '/about', CONFIG)} className='fuwari-profile-link block mb-2.5'>
           <div className='fuwari-profile-thumb relative overflow-hidden rounded-2xl'>
             <LazyImage
-              src={siteInfo?.icon}
+              src={avatar}
               alt={siteConfig('AUTHOR') || title}
               className='w-full aspect-square object-cover'
             />
@@ -80,10 +82,12 @@ const SidePanel = props => {
       </section>
 
       {/* 一言挂件 */}
-      <DailyQuote />
+      <div className={isLeft ? 'xl:hidden' : ''}>
+        <DailyQuote />
+      </div>
 
       {showToc && (
-        <section className='fuwari-card p-4'>
+        <section className={`fuwari-card p-4 ${isLeft ? 'xl:hidden' : ''}`}>
           <h3 className='text-sm font-semibold mb-3 px-3 tracking-wide uppercase text-[var(--fuwari-muted)]'>
             {locale?.ARTICLE?.TABLE_OF_CONTENT || '目录'}
           </h3>
@@ -94,7 +98,7 @@ const SidePanel = props => {
       {/* 移除独立公告挂件 */}
 
       {siteConfig('FUWARI_WIDGET_LATEST_POSTS', true, CONFIG) && latestPosts.length > 0 && (
-        <section className='fuwari-card p-5'>
+        <section className={`fuwari-card p-5 ${isLeft ? 'xl:hidden' : ''}`}>
           <h3 className='text-sm font-semibold mb-3 tracking-wide uppercase text-[var(--fuwari-muted)]'>
             {locale?.COMMON?.LATEST_POSTS || '最新发布'}
           </h3>
@@ -147,14 +151,16 @@ const SidePanel = props => {
         </section>
       )}
 
-      <ContactCard />
-      <AnalyticsCard
-        postCount={postCount}
-        categoryOptions={categoryOptions}
-        tagOptions={tagOptions}
-      />
-      <AdCard />
-      <PluginCard rightAreaSlot={rightAreaSlot} />
+      <div className={isLeft ? 'xl:hidden' : ''}>
+        <ContactCard />
+        <AnalyticsCard
+          postCount={postCount}
+          categoryOptions={categoryOptions}
+          tagOptions={tagOptions}
+        />
+        <AdCard />
+        <PluginCard rightAreaSlot={rightAreaSlot} />
+      </div>
     </aside>
   )
 }
