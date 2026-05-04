@@ -8,6 +8,7 @@ import MobileNav from './MobileNav'
 import ThemeColorSwitch from './ThemeColorSwitch'
 import WallpaperSwitch from './WallpaperSwitch'
 import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+import CONFIG from '../config'
 
 const Header = ({ locale, customNav, customMenu, searchModal, siteInfo }) => {
   const router = useRouter()
