@@ -4,6 +4,7 @@ import { loadExternalResource } from '@/lib/utils'
 import { useRouter } from 'next/router'
 import { useEffect, useRef } from 'react'
 import CONFIG from '../config'
+import WavesArea from './WavesArea'
 
 const HeroBanner = (props) => {
   const { siteInfo, allNavPages } = props
@@ -118,6 +119,8 @@ const HeroBanner = (props) => {
           </SmartLink>
         </div>
       )}
+
+      {siteConfig('FUWARI_HERO_WAVES', true, CONFIG) && <WavesArea />}
     </section>
   )
 }

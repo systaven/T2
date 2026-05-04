@@ -47,6 +47,8 @@ const CONFIG = {
   // ---------------------------------------------------------------------------
   /** 是否渲染 Hero 区块（无图时仍占位，可按需关） */
   FUWARI_HERO_ENABLE: true,
+  /** 是否开启波浪效果 */
+  FUWARI_HERO_WAVES: true,
   /** 自定义背景图 URL；留空则用 Notion 站点封面或 HOME_BANNER_IMAGE */
   FUWARI_HERO_BG_IMAGE: '',
   /** 右下角署名文案；留空不显示 */
