@@ -18,16 +18,14 @@ function hslToHex(h, s, l) {
 
 const ThemeColorSwitch = ({ onColorChange }) => {
   const enabled = siteConfig('FUWARI_WIDGET_THEME_COLOR_SWITCHER', true, CONFIG)
-  const defaultHue = siteConfig('FUWARI_THEME_COLOR_HUE', 250, CONFIG)
+  const defaultHue = siteConfig('FUWARI_THEME_COLOR_HUE', 350, CONFIG)
   const [hue, setHue] = useState(defaultHue)
   const color = useMemo(() => hslToHex(hue, 85, 62), [hue])
 
   const applyColor = (nextColor, nextHue) => {
     const root = document.getElementById('theme-fuwari')
     if (!root) return
-    root.style.setProperty('--fuwari-primary', nextColor)
-    root.style.setProperty('--fuwari-primary-soft', `hsla(${nextHue}, 85%, 62%, 0.14)`)
-    root.style.setProperty('--fuwari-gradient', `linear-gradient(135deg, hsl(${nextHue}, 85%, 62%) 0%, hsl(${(nextHue + 45) % 360}, 88%, 70%) 100%)`)
+    root.style.setProperty('--fuwari-hue', nextHue)
   }
 
   useEffect(() => {

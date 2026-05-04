@@ -74,7 +74,7 @@ const LayoutBase = props => {
       id='theme-fuwari'
       className={`${siteConfig('FONT_STYLE')} fuwari-bg min-h-screen text-[var(--fuwari-text)] ${heroStyle === 'fullscreen' ? 'fuwari-fullscreen-layout' : ''}`}>
       <Style />
-      <FullscreenWallpaper />
+      <FullscreenWallpaper {...props} />
       <CursorFollower />
       <ExternalLinkIntercepter />
       <Header
@@ -90,8 +90,8 @@ const LayoutBase = props => {
 
       <main
         className={`${threeColumns ? 'max-w-7xl' : 'max-w-6xl'} mx-auto px-3 md:px-4 pb-12 min-w-0 w-full ${showHomeHero ? 'fuwari-main-overlap' : 'pt-4 md:pt-8'}`}>
-        <div className={`grid grid-cols-1 ${threeColumns ? 'xl:grid-cols-[280px_minmax(0,1fr)_280px] lg:grid-cols-[280px_minmax(0,1fr)]' : 'lg:grid-cols-[280px_minmax(0,1fr)]'} gap-4 lg:gap-6 items-start min-w-0`}>
-          <div className='hidden lg:block sticky top-4'>
+        <div className={`grid grid-cols-1 ${threeColumns ? 'xl:grid-cols-[280px_minmax(0,1fr)_280px] lg:grid-cols-[280px_minmax(0,1fr)]' : 'lg:grid-cols-[280px_minmax(0,1fr)]'} gap-4 lg:gap-6 min-w-0`}>
+          <div className='hidden lg:block sticky top-4 self-start'>
             <SidePanel {...props} isLeft={threeColumns} />
           </div>
 
@@ -103,7 +103,7 @@ const LayoutBase = props => {
           </section>
 
           {threeColumns && (
-            <div className='hidden xl:block'>
+            <div className='hidden xl:block self-stretch'>
               <SidePanelRight {...props} />
             </div>
           )}

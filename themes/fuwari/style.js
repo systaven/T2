@@ -9,27 +9,28 @@ const Style = () => {
     }
     #theme-fuwari {
       font-family: 'AaMaoMaoXueTuanZiKeAiTi', sans-serif;
-      --fuwari-bg: #FFF0F8;
-      --fuwari-bg-soft: #ffe4f2;
+      --fuwari-hue: 350;
+      --fuwari-bg: hsl(var(--fuwari-hue), 100%, 97%);
+      --fuwari-bg-soft: hsl(var(--fuwari-hue), 100%, 94%);
       --fuwari-surface: #ffffff;
-      --fuwari-muted: #9c768a;
-      --fuwari-text: #2d1a24;
-      --fuwari-primary: #df364e;
-      --fuwari-primary-soft: rgba(223, 54, 78, 0.12);
-      --fuwari-border: #f7d7e8;
-      --fuwari-gradient: linear-gradient(135deg, #df364e 0%, #ff708d 100%);
+      --fuwari-muted: hsl(var(--fuwari-hue), 25%, 54%);
+      --fuwari-text: hsl(var(--fuwari-hue), 20%, 12%);
+      --fuwari-primary: hsl(var(--fuwari-hue), 72%, 55%);
+      --fuwari-primary-soft: hsla(var(--fuwari-hue), 72%, 55%, 0.12);
+      --fuwari-border: hsl(var(--fuwari-hue), 65%, 91%);
+      --fuwari-gradient: linear-gradient(135deg, hsl(var(--fuwari-hue), 72%, 55%) 0%, hsl(var(--fuwari-hue), 90%, 75%) 100%);
     }
 
     .dark #theme-fuwari {
-      --fuwari-bg: #1a0b12;
-      --fuwari-bg-soft: #241119;
-      --fuwari-surface: #2d161f;
-      --fuwari-muted: #a38b96;
-      --fuwari-text: #fce7f1;
-      --fuwari-primary: #f25d72;
-      --fuwari-primary-soft: rgba(242, 93, 114, 0.18);
-      --fuwari-border: #3d242e;
-      --fuwari-gradient: linear-gradient(135deg, #f25d72 0%, #ff9eaf 100%);
+      --fuwari-bg: hsl(var(--fuwari-hue), 30%, 7%);
+      --fuwari-bg-soft: hsl(var(--fuwari-hue), 30%, 11%);
+      --fuwari-surface: hsl(var(--fuwari-hue), 35%, 14%);
+      --fuwari-muted: hsl(var(--fuwari-hue), 15%, 65%);
+      --fuwari-text: hsl(var(--fuwari-hue), 60%, 95%);
+      --fuwari-primary: hsl(var(--fuwari-hue), 85%, 65%);
+      --fuwari-primary-soft: hsla(var(--fuwari-hue), 85%, 65%, 0.18);
+      --fuwari-border: hsl(var(--fuwari-hue), 25%, 22%);
+      --fuwari-gradient: linear-gradient(135deg, hsl(var(--fuwari-hue), 85%, 65%) 0%, hsl(var(--fuwari-hue), 95%, 80%) 100%);
     }
 
     #theme-fuwari.fuwari-bg {
@@ -37,6 +38,9 @@ const Style = () => {
         radial-gradient(circle at 10% -10%, var(--fuwari-primary-soft) 0, transparent 45%),
         radial-gradient(circle at 100% 10%, rgba(122, 199, 255, 0.14) 0, transparent 35%),
         var(--fuwari-bg);
+    }
+    #theme-fuwari.fuwari-fullscreen-layout {
+      background: transparent !important;
     }
 
     #theme-fuwari {

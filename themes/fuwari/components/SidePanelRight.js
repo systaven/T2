@@ -33,7 +33,7 @@ const SidePanelRight = props => {
     post.toc.length > 1
 
   return (
-    <aside className='space-y-4 pb-4'>
+    <aside className='h-full space-y-4 pb-4'>
       {/* 最新文章 */}
       {siteConfig('FUWARI_WIDGET_LATEST_POSTS', true, CONFIG) && latestPosts.length > 0 && (
         <section className='fuwari-card p-5'>
