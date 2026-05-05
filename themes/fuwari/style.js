@@ -256,10 +256,14 @@ const Style = () => {
         max-height: 80vh;
       }
       #theme-fuwari .fuwari-main-overlap {
-        margin-top: -18px;
+        margin-top: -12px;
       }
       #theme-fuwari .fuwari-navbar {
         border-radius: 0 0 14px 14px;
+      }
+      .mx-auto {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
       }
       #theme-fuwari #posts-wrapper > article {
         border-radius: 1rem;

@@ -23,7 +23,7 @@ const RightFloatArea = ({ post }) => {
   return (
     <>
       {showTocDrawer && hasToc && (
-        <div className='fuwari-toc-mobile lg:hidden'>
+        <div className='fuwari-toc-mobile md:hidden'>
           <div className='fuwari-toc-mask' onClick={() => setShowTocDrawer(false)} />
           <section className='fuwari-card fuwari-toc-panel p-4'>
             <div className='flex items-center justify-between mb-2'>
@@ -47,7 +47,7 @@ const RightFloatArea = ({ post }) => {
         </button>
         {hasToc && (
           <button
-            className='fuwari-float-btn lg:hidden'
+            className='fuwari-float-btn md:hidden'
             onClick={() => setShowTocDrawer(true)}>
             <i className='fas fa-list-ul' />
           </button>
