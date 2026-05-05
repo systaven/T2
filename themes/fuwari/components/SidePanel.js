@@ -12,6 +12,8 @@ import PluginCard from './PluginCard'
 import SocialButton from './SocialButton'
 import DailyQuote from './DailyQuote'
 import Toc from './Toc'
+import Calendar from './Calendar'
+import MusicPlayer from './MusicPlayer'
 
 import dynamic from 'next/dynamic'
 
@@ -69,97 +71,99 @@ const SidePanel = props => {
           </p>
         </div>
 
-        {/* 合并公告内容 */}
-        {siteConfig('FUWARI_WIDGET_NOTICE', true, CONFIG) && notice?.blockMap && (
-          <div id='announcement-content' className='mt-3 pt-3 border-t border-[var(--fuwari-border)] text-sm'>
-            <NotionPage post={notice} />
-          </div>
-        )}
-
         <div className='pt-3 mt-3 border-t border-[var(--fuwari-border)]'>
           <SocialButton />
         </div>
       </section>
 
-      {/* 一言挂件 */}
-      <div className={isLeft ? 'xl:hidden' : ''}>
-        <DailyQuote />
-      </div>
+      {/* 粘性区域：公告 + 分类 + 标签 */}
+      <div className='sticky top-24 space-y-4'>
+        {/* 合并公告内容 */}
+        {siteConfig('FUWARI_WIDGET_NOTICE', true, CONFIG) && notice?.blockMap && (
+          <section className='fuwari-card p-4'>
+            <h3 className='fuwari-section-title text-sm font-semibold mb-3 tracking-wide uppercase text-[var(--fuwari-muted)]'>
+              {locale?.COMMON?.ANNOUNCEMENT || '公告'}
+            </h3>
+            <div id='announcement-content' className='text-sm'>
+              <NotionPage post={notice} />
+            </div>
+          </section>
+        )}
 
-      {showToc && (
-        <section className={`fuwari-card p-4 ${isLeft ? 'xl:hidden' : ''}`}>
-          <h3 className='text-sm font-semibold mb-3 px-3 tracking-wide uppercase text-[var(--fuwari-muted)]'>
-            {locale?.ARTICLE?.TABLE_OF_CONTENT || '目录'}
-          </h3>
-          <Toc toc={post.toc} />
-        </section>
-      )}
+        {siteConfig('FUWARI_WIDGET_CATEGORY_LIST', true, CONFIG) && categoryOptions.length > 0 && (
+          <section className='fuwari-card p-5'>
+            <h3 className='fuwari-section-title text-sm font-semibold mb-3 tracking-wide uppercase text-[var(--fuwari-muted)]'>
+              {locale?.COMMON?.CATEGORY || '分类'}
+            </h3>
+            <div className='flex flex-wrap gap-2'>
+              {categoryOptions.slice(0, 14).map(c => (
+                <SmartLink
+                  key={c.name}
+                  href={`/category/${encodeURIComponent(c.name)}`}
+                  className='fuwari-chip'>
+                  {c.name} {c.count ? `(${c.count})` : ''}
+                </SmartLink>
+              ))}
+            </div>
+          </section>
+        )}
 
-      {/* 移除独立公告挂件 */}
+        {siteConfig('FUWARI_WIDGET_TAG_LIST', true, CONFIG) && tagOptions.length > 0 && (
+          <section className='fuwari-card p-5'>
+            <h3 className='fuwari-section-title text-sm font-semibold mb-3 tracking-wide uppercase text-[var(--fuwari-muted)]'>
+              {locale?.COMMON?.TAGS || '标签'}
+            </h3>
+            <div className='flex flex-wrap gap-2'>
+              {tagOptions.slice(0, 28).map(t => (
+                <SmartLink
+                  key={t.name}
+                  href={`/tag/${encodeURIComponent(t.name)}`}
+                  className='fuwari-chip'>
+                  #{t.name}
+                </SmartLink>
+              ))}
+            </div>
+          </section>
+        )}
 
-      {siteConfig('FUWARI_WIDGET_LATEST_POSTS', true, CONFIG) && latestPosts.length > 0 && (
-        <section className={`fuwari-card p-5 ${isLeft ? 'xl:hidden' : ''}`}>
-          <h3 className='text-sm font-semibold mb-3 tracking-wide uppercase text-[var(--fuwari-muted)]'>
-            {locale?.COMMON?.LATEST_POSTS || '最新发布'}
-          </h3>
-          <div className='space-y-2'>
-            {latestPosts.slice(0, 6).map(p => (
-              <SmartLink
-                key={p.id}
-                href={p.href || `/${p.slug}`}
-                className='block text-sm leading-6 hover:text-[var(--fuwari-primary)]'>
-                {p.title}
-              </SmartLink>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {siteConfig('FUWARI_WIDGET_CATEGORY_LIST', true, CONFIG) && categoryOptions.length > 0 && (
-        <section className='fuwari-card p-5'>
-          <h3 className='fuwari-section-title text-sm font-semibold mb-3 tracking-wide uppercase text-[var(--fuwari-muted)]'>
-            {locale?.COMMON?.CATEGORY || '分类'}
-          </h3>
-          <div className='flex flex-wrap gap-2'>
-            {categoryOptions.slice(0, 14).map(c => (
-              <SmartLink
-                key={c.name}
-                href={`/category/${encodeURIComponent(c.name)}`}
-                className='fuwari-chip'>
-                {c.name} {c.count ? `(${c.count})` : ''}
-              </SmartLink>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {siteConfig('FUWARI_WIDGET_TAG_LIST', true, CONFIG) && tagOptions.length > 0 && (
-        <section className='fuwari-card p-5'>
-          <h3 className='fuwari-section-title text-sm font-semibold mb-3 tracking-wide uppercase text-[var(--fuwari-muted)]'>
-            {locale?.COMMON?.TAGS || '标签'}
-          </h3>
-          <div className='flex flex-wrap gap-2'>
-            {tagOptions.slice(0, 28).map(t => (
-              <SmartLink
-                key={t.name}
-                href={`/tag/${encodeURIComponent(t.name)}`}
-                className='fuwari-chip'>
-                #{t.name}
-              </SmartLink>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <div className={isLeft ? 'xl:hidden' : ''}>
-        <ContactCard />
-        <AnalyticsCard
-          postCount={postCount}
-          categoryOptions={categoryOptions}
-          tagOptions={tagOptions}
-        />
-        <AdCard />
-        <PluginCard rightAreaSlot={rightAreaSlot} />
+        {/* 仅在非三栏布局时显示的组件 */}
+        <div className={isLeft ? 'xl:hidden' : ''}>
+          <DailyQuote />
+          {showToc && (
+            <section className='fuwari-card p-4'>
+              <h3 className='text-sm font-semibold mb-3 px-3 tracking-wide uppercase text-[var(--fuwari-muted)]'>
+                {locale?.ARTICLE?.TABLE_OF_CONTENT || '目录'}
+              </h3>
+              <Toc toc={post.toc} />
+            </section>
+          )}
+          {siteConfig('FUWARI_WIDGET_LATEST_POSTS', true, CONFIG) && latestPosts.length > 0 && (
+            <section className='fuwari-card p-5'>
+              <h3 className='text-sm font-semibold mb-3 tracking-wide uppercase text-[var(--fuwari-muted)]'>
+                {locale?.COMMON?.LATEST_POSTS || '最新发布'}
+              </h3>
+              <div className='space-y-2'>
+                {latestPosts.slice(0, 6).map(p => (
+                  <SmartLink
+                    key={p.id}
+                    href={p.href || `/${p.slug}`}
+                    className='block text-sm leading-6 hover:text-[var(--fuwari-primary)]'>
+                    {p.title}
+                  </SmartLink>
+                ))}
+              </div>
+            </section>
+          )}
+          <Calendar allNavPages={props.allNavPages} />
+          <MusicPlayer />
+          <AnalyticsCard
+            postCount={postCount}
+            categoryOptions={categoryOptions}
+            tagOptions={tagOptions}
+          />
+          <AdCard />
+          <PluginCard rightAreaSlot={rightAreaSlot} />
+        </div>
       </div>
     </aside>
   )
