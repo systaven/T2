@@ -58,7 +58,7 @@ const WallpaperSwitch = () => {
       case 'fullscreen':
         return <i className='fas fa-expand-arrows-alt' />
       case 'none':
-        return <i className='fas fa-image-slash' />
+        return <i className='fas fa-eye-slash' />
       default:
         return <i className='fas fa-image' />
     }
@@ -95,13 +95,13 @@ const WallpaperSwitch = () => {
             onClick={() => switchMode('none')}
             className={`flex items-center w-full px-3 py-2 rounded-lg text-sm transition-colors ${heroStyle === 'none' ? 'bg-[var(--fuwari-primary)] text-white' : 'hover:bg-[var(--fuwari-bg-soft)]'}`}
           >
-            <i className='fas fa-image-slash mr-3 w-4 text-center' />
+            <i className='fas fa-eye-slash mr-3 w-4 text-center' />
             None
           </button>
         </div>
       )}
     </div>
   )
-}
+  }
 
 export default WallpaperSwitch
