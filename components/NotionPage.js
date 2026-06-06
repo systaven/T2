@@ -1,6 +1,5 @@
 import { siteConfig } from '@/lib/config'
 import { compressImage, mapImgUrl } from '@/lib/db/notion/mapImage'
-import NotionLink from '@/components/NotionLink'
 import { isBrowser, loadExternalResource } from '@/lib/utils'
 import mediumZoom from '@fisch0920/medium-zoom'
 import 'katex/dist/katex.min.css'
@@ -31,6 +30,8 @@ const NotionPage = ({ post, className }) => {
 
   // 页面文章发生变化时会执行的勾子
   useEffect(() => {
+    processCollectionViewLinks()
+
     // 相册视图点击禁止跳转，只能放大查看图片
     if (POST_DISABLE_GALLERY_CLICK) {
       if (!zoomRef.current && isBrowser) {
@@ -59,6 +60,10 @@ const NotionPage = ({ post, className }) => {
 
     const observer = new MutationObserver((mutationsList, observer) => {
       mutationsList.forEach(mutation => {
+        processCollectionViewLinks()
+        if (POST_DISABLE_DATABASE_CLICK) {
+          processDisableDatabaseUrl()
+        }
         processFileUrl()
         if (
           mutation.type === 'attributes' &&
@@ -119,6 +124,7 @@ const NotionPage = ({ post, className }) => {
         recordMap={post?.blockMap}
         mapPageUrl={mapPageUrl}
         mapImageUrl={mapImgUrl}
+        isLinkCollectionToUrlProperty
         components={{
           Link: (props) => <SmartLink {...props} target='_blank' />,
           Code,
@@ -144,15 +150,61 @@ const hasCodeBlock = blockMap => {
   )
 }
 
+const COLLECTION_LINK_ROOT_SELECTORS = [
+  '.notion-collection-card',
+  '.notion-list-item.notion-page-link'
+].join(', ')
+
+const COLLECTION_EXTERNAL_LINK_SELECTORS = [
+  'form[action]',
+  'a.notion-link[href]',
+  'a[href^="http://"]',
+  'a[href^="https://"]'
+].join(', ')
 
 /**
- * 页面的数据库链接禁止跳转，只能查看
+ * 将数据库卡片或列表项的默认内部页面链接改写为 URL 属性里的外链
+ */
+const processCollectionViewLinks = () => {
+  if (isBrowser) {
+    const collectionLinks = document.querySelectorAll(
+      COLLECTION_LINK_ROOT_SELECTORS
+    )
+    for (const linkElement of collectionLinks) {
+      const externalUrl = getCollectionItemExternalUrl(linkElement)
+      if (externalUrl) {
+        applyExternalLink(linkElement, externalUrl)
+      }
+    }
+
+    const tableRows = document.querySelectorAll('.notion-table-row')
+    for (const rowElement of tableRows) {
+      const externalUrl = getCollectionItemExternalUrl(rowElement)
+      if (!externalUrl) continue
+
+      const titleLink = rowElement.querySelector(
+        '.notion-property-title .notion-page-link'
+      )
+      if (titleLink?.tagName === 'A') {
+        applyExternalLink(titleLink, externalUrl)
+      }
+    }
+  }
+}
+
+/**
+ * 页面的数据库内部页链接禁止跳转，只保留外链属性本身可点
  */
 const processDisableDatabaseUrl = () => {
   if (isBrowser) {
     const links = document.querySelectorAll('.notion-table a')
     for (const e of links) {
-      e.removeAttribute('href')
+      const href = e.getAttribute('href')
+      if (isInternalCollectionPageHref(href)) {
+        e.removeAttribute('href')
+        e.removeAttribute('target')
+        e.removeAttribute('rel')
+      }
     }
   }
 }
@@ -188,10 +240,58 @@ const processGalleryImg = zoom => {
 
       const cards = document.getElementsByClassName('notion-collection-card')
       for (const e of cards) {
-        e.removeAttribute('href')
+        const href = e.getAttribute('href')
+        if (isInternalCollectionPageHref(href)) {
+          e.removeAttribute('href')
+        }
       }
     }
   }, 800)
+}
+
+const getCollectionItemExternalUrl = element => {
+  if (!element) return null
+
+  const externalLinkElements = element.querySelectorAll(
+    COLLECTION_EXTERNAL_LINK_SELECTORS
+  )
+
+  for (const linkElement of externalLinkElements) {
+    const candidateUrl =
+      linkElement.tagName === 'FORM'
+        ? linkElement.getAttribute('action')
+        : linkElement.getAttribute('href')
+
+    const normalizedUrl = normalizeExternalCollectionUrl(candidateUrl)
+    if (normalizedUrl) {
+      return normalizedUrl
+    }
+  }
+
+  return null
+}
+
+const applyExternalLink = (element, href) => {
+  if (!element || !href) return
+
+  element.setAttribute('href', href)
+  element.setAttribute('target', '_blank')
+  element.setAttribute('rel', 'noopener noreferrer')
+}
+
+const normalizeExternalCollectionUrl = href => {
+  if (typeof href !== 'string' || !href.trim()) return null
+
+  try {
+    const url = new URL(href)
+    return /^https?:$/i.test(url.protocol) ? url.toString() : null
+  } catch {
+    return null
+  }
+}
+
+const isInternalCollectionPageHref = href => {
+  return typeof href === 'string' && href.startsWith('/')
 }
 
 /**

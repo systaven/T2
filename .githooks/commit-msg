@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -eu
+
+message_file="$1"
+trailer="Co-authored-by: Codex <codex@openai.com>"
+
+if command -v git >/dev/null 2>&1; then
+  git interpret-trailers \
+    --if-exists doNothing \
+    --trailer "$trailer" \
+    --in-place "$message_file"
+else
+  if ! grep -Fqx "$trailer" "$message_file"; then
+    printf '\n%s\n' "$trailer" >>"$message_file"
+  fi
+fi
