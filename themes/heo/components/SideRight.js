@@ -27,7 +27,7 @@ const FaceBookPage = dynamic(
  * @returns
  */
 export default function SideRight(props) {
-  const { post, tagOptions, currentTag, rightAreaSlot } = props
+  const { post, lock, tagOptions, currentTag, rightAreaSlot } = props
 
   // 只摘取标签的前60个，防止右侧过长
   const sortedTags = tagOptions?.slice(0, 60) || []
@@ -37,8 +37,8 @@ export default function SideRight(props) {
       <InfoCard {...props} className='w-72 wow fadeInUp' />
 
       <div className='sticky top-20 space-y-4'>
-        {/* 文章页显示目录 */}
-        {post && post.toc && post.toc.length > 0 && (
+        {/* 文章页显示目录（上锁文章不显示） */}
+        {!lock && post && post.toc && post.toc.length > 0 && (
           <Card className='bg-white dark:bg-[#701E49] wow fadeInUp'>
             <Catalog toc={post.toc} />
           </Card>
@@ -62,7 +62,6 @@ export default function SideRight(props) {
         <Live2D />
 
         <FaceBookPage />
-
 
         {/* 标签和成绩 */}
         <Card

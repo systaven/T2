@@ -2,18 +2,23 @@ import BLOG from '@/blog.config'
 import useNotification from '@/components/Notification'
 import TechGrow from '@/components/TechGrow'
 import { siteConfig } from '@/lib/config'
-import { fetchGlobalAllData, resolvePostProps } from '@/lib/db/SiteDataApi'
+import { resolvePostProps } from '@/lib/db/SiteDataApi'
 import { useGlobal } from '@/lib/global'
 import { getPageTableOfContents } from '@/lib/db/notion/getPageTableOfContents'
-import { getPasswordQuery } from '@/lib/utils/password'
+import {
+  getPasswordQuery,
+  getPasswordStoragePath,
+  sha256Digest
+} from '@/lib/utils/password'
 import { checkSlugHasNoSlash } from '@/lib/utils/post'
 import { DynamicLayout } from '@/themes/theme'
 import md5 from 'js-md5'
 import { useRouter } from 'next/router'
 import PropTypes from 'prop-types'
 import { useEffect, useState, useMemo } from 'react'
-import { isExport } from '@/lib/utils/buildMode'
-import { getPriorityPages, prefetchAllBlockMaps } from '@/lib/build/prefetch'
+import { getStaticPathsBase } from '@/lib/build/staticPaths'
+
+const isStaticExport = process.env.EXPORT === 'true'
 
 /**
  * 根据notion的slug访问页面
@@ -61,10 +66,11 @@ const Slug = props => {
         break
       }
     }
-
     // 综合判断是否锁定
     const hasDbPassword = post.password && post.password !== ''
-    const dbLockType = post.lock_by_login ? 'signin' : (hasDbPassword ? 'password' : null)
+    const dbLockType = post.lock_by_login
+      ? 'signin'
+      : (hasDbPassword ? 'password' : null)
     const finalLockType = dbLockType || contentLockType
     
     let isLocked = false
@@ -118,10 +124,18 @@ const Slug = props => {
 
   const validPassword = (passInput) => {
     if (!post) return false
-    const encrypt = md5(post?.slug + passInput)
-    if (passInput && encrypt === originalPost?.password) {
+    const legacy = md5(String(post?.slug ?? '') + passInput)
+    const nextHash = sha256Digest(passInput)
+    if (
+      passInput &&
+      (nextHash === originalPost?.password ||
+        legacy === originalPost?.password)
+    ) {
       setPasswordUnlocked(true)
-      localStorage.setItem('password_' + router.asPath, passInput)
+      localStorage.setItem(
+        'password_' + getPasswordStoragePath(router.asPath),
+        passInput
+      )
       showNotification(locale.COMMON.ARTICLE_UNLOCK_TIPS)
       return true
     }
@@ -135,7 +149,9 @@ const Slug = props => {
         if (validPassword(passInput)) break
       }
     }
-  }, [originalPost])
+    // validPassword 内部依赖 post / router 同时也已在依赖里
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [post, router.asPath])
 
   useEffect(() => {
     if (post && !finalLock) {
@@ -173,27 +189,11 @@ Slug.propTypes = {
 }
 
 export async function getStaticPaths() {
-  const from = 'slug-paths'
-  const { allPages } = await fetchGlobalAllData({ from })
-
-  if (isExport()) {
-    await prefetchAllBlockMaps(allPages)
-    return {
-      paths: allPages
-        ?.filter(row => checkSlugHasNoSlash(row))
-        .map(row => ({ params: { prefix: row.slug } })),
-      fallback: false
-    }
-  }
-
-  const tops = getPriorityPages(allPages)
-
-  return {
-    paths: tops
-      .filter(row => checkSlugHasNoSlash(row))
-      .map(row => ({ params: { prefix: row.slug } })),
-    fallback: 'blocking'
-  }
+  return getStaticPathsBase({
+    from: 'slug-paths',
+    filterFn: row => checkSlugHasNoSlash(row),
+    mapPageToParams: row => ({ params: { prefix: row.slug } })
+  })
 }
 
 export async function getStaticProps({ params: { prefix }, locale }) {
@@ -204,7 +204,7 @@ export async function getStaticProps({ params: { prefix }, locale }) {
 
   return {
     props,
-    revalidate: isExport()
+    revalidate: isStaticExport
       ? undefined
       : siteConfig(
         'NEXT_REVALIDATE_SECOND',

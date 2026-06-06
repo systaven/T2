@@ -8,8 +8,8 @@ FROM base AS deps
 # Add python3, make, gcc, and g++ for node-gyp/native dependencies
 RUN apk add --no-cache libc6-compat python3 make gcc g++
 WORKDIR /app
-COPY package.json ./
-RUN yarn install --frozen-lockfile
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile --network-timeout 600000
 
 # 2. Rebuild the source code only when needed
 FROM base AS builder
