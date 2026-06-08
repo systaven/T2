@@ -1,12 +1,20 @@
 import { siteConfig } from '@/lib/config'
 import { compressImage, mapImgUrl } from '@/lib/db/notion/mapImage'
-import { isBrowser, loadExternalResource } from '@/lib/utils'
+import {
+  checkStrIsNotionId,
+  checkStrIsUuid,
+  isBrowser,
+  isHttpLink,
+  isMailOrTelLink,
+  loadExternalResource
+} from '@/lib/utils'
 import mediumZoom from '@fisch0920/medium-zoom'
 import 'katex/dist/katex.min.css'
 import dynamic from 'next/dynamic'
 import { useEffect, useRef } from 'react'
 import { NotionRenderer } from 'react-notion-x'
 import SmartLink from '@/components/SmartLink'
+import { getTextContent } from 'notion-utils'
 
 /**
  * 整个站点的核心组件
@@ -30,7 +38,7 @@ const NotionPage = ({ post, className }) => {
 
   // 页面文章发生变化时会执行的勾子
   useEffect(() => {
-    processCollectionViewLinks()
+    processCollectionViewLinks(post?.blockMap)
 
     // 相册视图点击禁止跳转，只能放大查看图片
     if (POST_DISABLE_GALLERY_CLICK) {
@@ -60,7 +68,7 @@ const NotionPage = ({ post, className }) => {
 
     const observer = new MutationObserver((mutationsList, observer) => {
       mutationsList.forEach(mutation => {
-        processCollectionViewLinks()
+        processCollectionViewLinks(post?.blockMap)
         if (POST_DISABLE_DATABASE_CLICK) {
           processDisableDatabaseUrl()
         }
@@ -162,31 +170,38 @@ const COLLECTION_EXTERNAL_LINK_SELECTORS = [
   'a[href^="https://"]'
 ].join(', ')
 
+const COLLECTION_TEXT_LINK_SELECTORS = [
+  '.notion-property-text',
+  '.notion-property-email',
+  '.notion-property-phone_number',
+  '.notion-property-url'
+].join(', ')
+
 /**
  * 将数据库卡片或列表项的默认内部页面链接改写为 URL 属性里的外链
  */
-const processCollectionViewLinks = () => {
+const processCollectionViewLinks = blockMap => {
   if (isBrowser) {
     const collectionLinks = document.querySelectorAll(
       COLLECTION_LINK_ROOT_SELECTORS
     )
     for (const linkElement of collectionLinks) {
-      const externalUrl = getCollectionItemExternalUrl(linkElement)
-      if (externalUrl) {
-        applyExternalLink(linkElement, externalUrl)
+      const preferredLink = getCollectionItemPreferredLink(linkElement, blockMap)
+      if (preferredLink) {
+        applyPreferredLink(linkElement, preferredLink)
       }
     }
 
     const tableRows = document.querySelectorAll('.notion-table-row')
     for (const rowElement of tableRows) {
-      const externalUrl = getCollectionItemExternalUrl(rowElement)
-      if (!externalUrl) continue
+      const preferredLink = getCollectionItemPreferredLink(rowElement, blockMap)
+      if (!preferredLink) continue
 
       const titleLink = rowElement.querySelector(
         '.notion-property-title .notion-page-link'
       )
       if (titleLink?.tagName === 'A') {
-        applyExternalLink(titleLink, externalUrl)
+        applyPreferredLink(titleLink, preferredLink)
       }
     }
   }
@@ -249,8 +264,21 @@ const processGalleryImg = zoom => {
   }, 800)
 }
 
-const getCollectionItemExternalUrl = element => {
+const getCollectionItemPreferredLink = (element, blockMap) => {
   if (!element) return null
+
+  const block = getCollectionItemBlock(element, blockMap)
+  const collection = getCollectionItemCollection(block, blockMap)
+
+  const notionProvidedLink = getNotionProvidedCollectionLink(block)
+  if (notionProvidedLink) {
+    return notionProvidedLink
+  }
+
+  const typedPropertyLink = getSchemaBasedCollectionLink(block, collection)
+  if (typedPropertyLink) {
+    return typedPropertyLink
+  }
 
   const externalLinkElements = element.querySelectorAll(
     COLLECTION_EXTERNAL_LINK_SELECTORS
@@ -262,36 +290,261 @@ const getCollectionItemExternalUrl = element => {
         ? linkElement.getAttribute('action')
         : linkElement.getAttribute('href')
 
-    const normalizedUrl = normalizeExternalCollectionUrl(candidateUrl)
-    if (normalizedUrl) {
-      return normalizedUrl
+    const normalizedLink = normalizePreferredCollectionLink(candidateUrl)
+    if (normalizedLink) {
+      return normalizedLink
+    }
+  }
+
+  const textLinkElements = element.querySelectorAll(
+    COLLECTION_TEXT_LINK_SELECTORS
+  )
+
+  for (const textElement of textLinkElements) {
+    const normalizedLink = normalizePreferredCollectionLink(
+      textElement.textContent
+    , { allowTextGuess: true })
+    if (normalizedLink) {
+      return normalizedLink
     }
   }
 
   return null
 }
 
-const applyExternalLink = (element, href) => {
-  if (!element || !href) return
+const applyPreferredLink = (element, link) => {
+  if (!element || !link?.href) return
 
-  element.setAttribute('href', href)
-  element.setAttribute('target', '_blank')
-  element.setAttribute('rel', 'noopener noreferrer')
+  element.setAttribute('href', link.href)
+
+  if (link.target) {
+    element.setAttribute('target', link.target)
+  } else {
+    element.removeAttribute('target')
+  }
+
+  if (link.rel) {
+    element.setAttribute('rel', link.rel)
+  } else {
+    element.removeAttribute('rel')
+  }
 }
 
-const normalizeExternalCollectionUrl = href => {
+const normalizePreferredCollectionLink = (
+  href,
+  { allowTextGuess = false, protocol } = {}
+) => {
   if (typeof href !== 'string' || !href.trim()) return null
 
-  try {
-    const url = new URL(href)
-    return /^https?:$/i.test(url.protocol) ? url.toString() : null
-  } catch {
+  const rawHref = href.trim()
+  if (!rawHref) return null
+
+  const protocolHref = protocol ? `${protocol}:${rawHref}` : rawHref
+
+  if (isMailOrTelLink(protocolHref)) {
+    return {
+      href: protocolHref,
+      target: '_self'
+    }
+  }
+
+  if (isHttpLink(protocolHref)) {
+    return {
+      href: protocolHref,
+      target: '_blank',
+      rel: 'noopener noreferrer'
+    }
+  }
+
+  if (
+    rawHref.startsWith('/') &&
+    !isInternalCollectionPageHref(rawHref)
+  ) {
+    return {
+      href: rawHref,
+      target: '_self'
+    }
+  }
+
+  if (!allowTextGuess) {
     return null
+  }
+
+  const matchedUrlText = extractUrlLikeText(rawHref)
+  const candidateHref = matchedUrlText || rawHref
+
+  if (!candidateHref) return null
+
+  try {
+    const url = new URL(candidateHref)
+    if (!/^https?:$/i.test(url.protocol)) return null
+    return {
+      href: url.toString(),
+      target: '_blank',
+      rel: 'noopener noreferrer'
+    }
+  } catch {
+    try {
+      const url = new URL(`https://${candidateHref}`)
+      if (!/^https?:$/i.test(url.protocol)) return null
+      return {
+        href: url.toString(),
+        target: '_blank',
+        rel: 'noopener noreferrer'
+      }
+    } catch {
+      return null
+    }
   }
 }
 
 const isInternalCollectionPageHref = href => {
-  return typeof href === 'string' && href.startsWith('/')
+  if (typeof href !== 'string' || !href.startsWith('/')) return false
+
+  const path = href.split('?')[0].split('#')[0]
+  const lastSegment = path.split('/').filter(Boolean).pop()
+  return checkStrIsNotionId(lastSegment) || checkStrIsUuid(lastSegment)
+}
+
+const extractUrlLikeText = text => {
+  if (typeof text !== 'string') return null
+
+  const normalizedText = text.trim()
+  if (!normalizedText) return null
+
+  const matchedUrl = normalizedText.match(
+    /\b((?:https?:\/\/|www\.)[^\s<]+|(?:[a-z0-9-]+\.)+[a-z]{2,}(?:\/[^\s<]*)?)/i
+  )
+
+  return matchedUrl?.[1] || null
+}
+
+const getCollectionItemBlock = (element, blockMap) => {
+  const blockId = getCollectionItemBlockId(element)
+  if (!blockId || !blockMap?.block) return null
+  return getRecordValueById(blockMap.block, blockId)
+}
+
+const getCollectionItemCollection = (block, blockMap) => {
+  const collectionId = block?.parent_id
+  if (!collectionId || !blockMap?.collection) return null
+  return getRecordValueById(blockMap.collection, collectionId)
+}
+
+const getCollectionItemBlockId = element => {
+  const hrefCandidates = [
+    element?.getAttribute?.('href'),
+    element?.querySelector?.('.notion-property-title .notion-page-link')?.getAttribute?.('href'),
+    element?.querySelector?.('.notion-collection-card')?.getAttribute?.('href')
+  ].filter(Boolean)
+
+  for (const href of hrefCandidates) {
+    const path = href.split('?')[0].split('#')[0]
+    const lastSegment = path.split('/').filter(Boolean).pop()
+    if (checkStrIsNotionId(lastSegment) || checkStrIsUuid(lastSegment)) {
+      return lastSegment
+    }
+  }
+
+  return null
+}
+
+const getRecordValueById = (recordMapSection, id) => {
+  if (!recordMapSection || !id) return null
+
+  const idCandidates = new Set([id])
+  if (typeof id === 'string') {
+    idCandidates.add(id.replace(/-/g, ''))
+    if (checkStrIsNotionId(id)) {
+      idCandidates.add(
+        [
+          id.slice(0, 8),
+          id.slice(8, 12),
+          id.slice(12, 16),
+          id.slice(16, 20),
+          id.slice(20)
+        ].join('-')
+      )
+    }
+  }
+
+  for (const candidateId of idCandidates) {
+    const entry = recordMapSection[candidateId]
+    if (entry?.value) return entry.value
+    if (entry) return entry
+  }
+
+  return null
+}
+
+const getNotionProvidedCollectionLink = block => {
+  const properties = Object.values(block?.properties || {})
+  for (const propertyValue of properties) {
+    const link = getFirstDecoratedLink(propertyValue)
+    if (link) return link
+  }
+
+  return null
+}
+
+const getFirstDecoratedLink = propertyValue => {
+  if (!Array.isArray(propertyValue)) return null
+
+  for (const item of propertyValue) {
+    const decorations = item?.[1]
+    if (!Array.isArray(decorations)) continue
+
+    for (const decoration of decorations) {
+      const type = decoration?.[0]
+      const value = decoration?.[1]
+
+      if (type === 'a') {
+        const normalizedLink = normalizePreferredCollectionLink(value)
+        if (normalizedLink) return normalizedLink
+      }
+
+      if (type === 'lm') {
+        const normalizedLink = normalizePreferredCollectionLink(value?.href)
+        if (normalizedLink) return normalizedLink
+      }
+    }
+  }
+
+  return null
+}
+
+const getSchemaBasedCollectionLink = (block, collection) => {
+  const schemaEntries = Object.entries(collection?.schema || {})
+
+  for (const [propertyId, propertySchema] of schemaEntries) {
+    const propertyValue = block?.properties?.[propertyId]
+    if (!propertyValue) continue
+
+    if (propertySchema?.type === 'url') {
+      const normalizedLink = normalizePreferredCollectionLink(
+        getTextContent(propertyValue)
+      )
+      if (normalizedLink) return normalizedLink
+    }
+
+    if (propertySchema?.type === 'email') {
+      const normalizedLink = normalizePreferredCollectionLink(
+        getTextContent(propertyValue),
+        { protocol: 'mailto' }
+      )
+      if (normalizedLink) return normalizedLink
+    }
+
+    if (propertySchema?.type === 'phone_number') {
+      const normalizedLink = normalizePreferredCollectionLink(
+        getTextContent(propertyValue),
+        { protocol: 'tel' }
+      )
+      if (normalizedLink) return normalizedLink
+    }
+  }
+
+  return null
 }
 
 /**
