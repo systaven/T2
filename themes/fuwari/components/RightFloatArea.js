@@ -65,7 +65,7 @@ const RightFloatArea = ({ post }) => {
         )}
         {siteConfig('FUWARI_WIDGET_DARK_MODE', true, CONFIG) && (
           <button className='fuwari-float-btn' onClick={toggleDarkMode}>
-            {isDarkMode ? '☀' : '☾'}
+            <i className={isDarkMode ? 'fas fa-sun' : 'fas fa-moon'} />
           </button>
         )}
       </div>

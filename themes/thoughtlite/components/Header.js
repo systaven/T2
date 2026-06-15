@@ -40,7 +40,7 @@ export const Header = props => {
             className='tl-icon-btn'
             onClick={toggleDarkMode}
             aria-label={isDarkMode ? 'Light mode' : 'Dark mode'}>
-            <span className='text-base leading-none'>{isDarkMode ? '☀' : '☾'}</span>
+            <i className={isDarkMode ? 'fas fa-sun text-sm' : 'fas fa-moon text-sm'} />
           </button>
         </div>
       </div>

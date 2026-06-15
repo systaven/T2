@@ -81,7 +81,7 @@ const Header = ({ locale, customNav, customMenu, searchModal, siteInfo }) => {
           )}
           <WallpaperSwitch />
           <button type='button' onClick={toggleDarkMode} className='fuwari-tool-btn'>
-            {isDarkMode ? '☀' : '☾'}
+            <i className={isDarkMode ? 'fas fa-sun' : 'fas fa-moon'} />
           </button>
         </div>
         <div className='md:hidden flex items-center justify-end gap-2 relative'>
@@ -106,7 +106,7 @@ const Header = ({ locale, customNav, customMenu, searchModal, siteInfo }) => {
           )}
           <WallpaperSwitch />
           <button type='button' onClick={toggleDarkMode} className='fuwari-tool-btn'>
-            {isDarkMode ? '☀' : '☾'}
+            <i className={isDarkMode ? 'fas fa-sun' : 'fas fa-moon'} />
           </button>
           <MobileNav locale={locale} customNav={customNav} customMenu={customMenu} />
         </div>
