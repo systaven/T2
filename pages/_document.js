@@ -47,6 +47,13 @@ class MyDocument extends Document {
           <link rel="icon" href="/favicon.ico" />
           <style>{`
             @font-face {
+              font-family: "LXGW WenKai";
+              src: url("/fonts/LXGWWenKai-Regular.ttf") format("truetype");
+              font-weight: 400;
+              font-style: normal;
+              font-display: swap;
+            }
+            @font-face {
               font-family: "Font Awesome 6 Free";
               src: url("/webfonts/fa-regular-400.woff2") format("woff2");
               font-weight: 400;
@@ -66,6 +73,12 @@ class MyDocument extends Document {
             }
           `}</style>
           {/* 预加载字体 */}
+          <link
+            rel='preload'
+            href='/fonts/LXGWWenKai-Regular.ttf'
+            as='font'
+            type='font/ttf'
+          />
           {BLOG.FONT_AWESOME && (
             <>
               <link
