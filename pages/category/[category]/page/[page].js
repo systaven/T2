@@ -54,22 +54,25 @@ export async function getStaticPaths() {
     from
   })
   const paths = []
+  const categories = Array.isArray(categoryOptions) ? categoryOptions : []
 
-  categoryOptions?.forEach(category => {
+  categories.forEach(category => {
+    const categoryName = category?.name?.trim?.()
+    if (!categoryName) return
+
     // 过滤状态类型
     const categoryPosts = allPages
       ?.filter(page => page.type === 'Post' && page.status === 'Published')
       .filter(
-        post => post && post.category && post.category.includes(category.name)
+        post => post && post.category && post.category.includes(categoryName)
       )
     // 处理文章页数
     const postCount = categoryPosts.length
-    const totalPages = Math.ceil(
-      postCount / siteConfig('POSTS_PER_PAGE', null, NOTION_CONFIG)
-    )
+    const perPage = Number(siteConfig('POSTS_PER_PAGE', 12, NOTION_CONFIG)) || 12
+    const totalPages = Math.ceil(postCount / perPage)
     if (totalPages > 1) {
       for (let i = 1; i <= totalPages; i++) {
-        paths.push({ params: { category: category.name, page: '' + i } })
+        paths.push({ params: { category: categoryName, page: '' + i } })
       }
     }
   })

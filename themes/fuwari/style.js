@@ -2,13 +2,7 @@
 
 const Style = () => {
   return <style jsx global>{`
-    @font-face {
-      font-family: 'AaMaoMaoXueTuanZiKeAiTi';
-      src: url('/fonts/AaMaoMaoXueTuanZiKeAiTi-2.woff2') format('woff2');
-      font-display: swap;
-    }
     #theme-fuwari {
-      font-family: 'AaMaoMaoXueTuanZiKeAiTi', sans-serif;
       --fuwari-hue: 350;
       --fuwari-bg: hsl(var(--fuwari-hue), 100%, 97%);
       --fuwari-bg-soft: hsl(var(--fuwari-hue), 100%, 94%);
@@ -679,4 +673,3 @@ const Style = () => {
 }
 
 export { Style }
-

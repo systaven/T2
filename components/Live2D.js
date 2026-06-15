@@ -2,37 +2,61 @@
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { isMobile, loadExternalResource } from '@/lib/utils'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /**
  * 网页动画
  * @returns
  */
 export default function Live2D() {
-  const { theme, switchTheme } = useGlobal()
+  const { switchTheme } = useGlobal()
   const [isShown, setIsShown] = useState(true)
+  const [canLoad, setCanLoad] = useState(false)
+  const loadedRef = useRef(false)
   const showPet = JSON.parse(siteConfig('WIDGET_PET'))
   const petLink = siteConfig('WIDGET_PET_LINK')
   const petSwitchTheme = siteConfig('WIDGET_PET_SWITCH_THEME')
 
   useEffect(() => {
-    if (showPet && isShown && !isMobile()) {
-      Promise.all([
-        loadExternalResource(
-          'https://cdn.jsdelivr.net/gh/stevenjoezhang/live2d-widget@latest/live2d.min.js',
-          'js'
-        )
-      ]).then(e => {
-        if (typeof window?.loadlive2d !== 'undefined') {
-          try {
-            loadlive2d('live2d', petLink)
-          } catch (error) {
-            console.error('读取PET模型', error)
-          }
-        }
-      })
+    if (!showPet || isMobile()) return
+
+    let idleId
+    let timeoutId
+    const scheduleLoad = () => setCanLoad(true)
+
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      idleId = window.requestIdleCallback(scheduleLoad, { timeout: 2500 })
+    } else {
+      timeoutId = window.setTimeout(scheduleLoad, 1500)
     }
-  }, [theme, isShown])
+
+    return () => {
+      if (idleId && typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleId)
+      }
+      if (timeoutId) {
+        window.clearTimeout(timeoutId)
+      }
+    }
+  }, [showPet])
+
+  useEffect(() => {
+    if (!showPet || !isShown || !canLoad || isMobile() || loadedRef.current) return
+
+    loadExternalResource(
+      'https://cdn.jsdelivr.net/gh/stevenjoezhang/live2d-widget@latest/live2d.min.js',
+      'js'
+    ).then(() => {
+      if (typeof window?.loadlive2d !== 'undefined') {
+        try {
+          loadlive2d('live2d', petLink)
+          loadedRef.current = true
+        } catch (error) {
+          console.error('读取PET模型', error)
+        }
+      }
+    })
+  }, [canLoad, isShown, petLink, showPet])
 
   function handleClick() {
     if (petSwitchTheme) {

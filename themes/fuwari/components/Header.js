@@ -1,14 +1,18 @@
 import SmartLink from '@/components/SmartLink'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
 import MenuList from './MenuList'
 import MobileNav from './MobileNav'
 import ThemeColorSwitch from './ThemeColorSwitch'
 import WallpaperSwitch from './WallpaperSwitch'
-import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import CONFIG from '../config'
+
+const ClerkAuthControls = dynamic(() => import('./ClerkAuthControls'), {
+  ssr: false
+})
 
 const Header = ({ locale, customNav, customMenu, searchModal, siteInfo }) => {
   const router = useRouter()
@@ -44,28 +48,19 @@ const Header = ({ locale, customNav, customMenu, searchModal, siteInfo }) => {
       <div className='fuwari-card fuwari-navbar relative px-4 py-2.5 flex items-center justify-between md:grid md:grid-cols-[1fr_auto_1fr]'>
         <SmartLink href='/' className='text-[1.35rem] md:text-[1.45rem] font-bold fuwari-title-gradient text-left flex items-center shrink-0'>
           {siteInfo?.icon && (
-             <img src={siteInfo.icon} className='w-7 h-7 mr-2.5 object-contain rounded-lg' alt='logo' />
+            <img
+              src={siteInfo.icon}
+              className='w-7 h-7 mr-2.5 object-contain rounded-lg'
+              alt='logo'
+              width='28'
+              height='28'
+            />
           )}
           {siteConfig('TITLE')}
         </SmartLink>
         <MenuList locale={locale} customNav={customNav} customMenu={customMenu} />
         <div className='hidden md:flex items-center justify-end gap-2 relative'>
-          {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && (
-            <div className='flex items-center'>
-              <SignedOut>
-                <SignInButton mode='modal'>
-                   <button className='fuwari-tool-btn' title='Login'>
-                     <i className='fas fa-user' />
-                   </button>
-                </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                <div className='w-8 h-8 flex items-center justify-center'>
-                   <UserButton afterSignOutUrl='/' />
-                </div>
-              </SignedIn>
-            </div>
-          )}
+          <ClerkAuthControls />
           {algoliaEnabled ? (
             <button type='button' onClick={handleSearch} className='fuwari-tool-btn'>
               <i className='fas fa-search' />
@@ -90,22 +85,7 @@ const Header = ({ locale, customNav, customMenu, searchModal, siteInfo }) => {
           </button>
         </div>
         <div className='md:hidden flex items-center justify-end gap-2 relative'>
-          {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && (
-            <div className='flex items-center'>
-              <SignedOut>
-                <SignInButton mode='modal'>
-                   <button className='fuwari-tool-btn' title='Login'>
-                     <i className='fas fa-user' />
-                   </button>
-                </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                <div className='w-8 h-8 flex items-center justify-center'>
-                   <UserButton afterSignOutUrl='/' />
-                </div>
-              </SignedIn>
-            </div>
-          )}
+          <ClerkAuthControls />
           {algoliaEnabled ? (
             <button type='button' onClick={handleSearch} className='fuwari-tool-btn'>
               <i className='fas fa-search' />
@@ -143,4 +123,3 @@ const Header = ({ locale, customNav, customMenu, searchModal, siteInfo }) => {
 }
 
 export default Header
-

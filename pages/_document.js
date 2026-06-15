@@ -45,15 +45,29 @@ class MyDocument extends Document {
         <Head>
           {/* 网站 favicon */}
           <link rel="icon" href="/favicon.ico" />
+          <style>{`
+            @font-face {
+              font-family: "Font Awesome 6 Free";
+              src: url("/webfonts/fa-regular-400.woff2") format("woff2");
+              font-weight: 400;
+              font-display: swap;
+            }
+            @font-face {
+              font-family: "Font Awesome 6 Free";
+              src: url("/webfonts/fa-solid-900.woff2") format("woff2");
+              font-weight: 900;
+              font-display: swap;
+            }
+            @font-face {
+              font-family: "Font Awesome 6 Brands";
+              src: url("/webfonts/fa-brands-400.woff2") format("woff2");
+              font-weight: 400;
+              font-display: swap;
+            }
+          `}</style>
           {/* 预加载字体 */}
           {BLOG.FONT_AWESOME && (
             <>
-              <link
-                rel='preload'
-                href={BLOG.FONT_AWESOME}
-                as='style'
-                crossOrigin='anonymous'
-              />
               <link
                 rel='stylesheet'
                 href={BLOG.FONT_AWESOME}

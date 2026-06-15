@@ -18,7 +18,24 @@ export default function AOSAnimation() {
       }
     })
   }
+
   useEffect(() => {
-    initAOS()
+    let idleId
+    let timeoutId
+
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      idleId = window.requestIdleCallback(initAOS, { timeout: 2500 })
+    } else {
+      timeoutId = window.setTimeout(initAOS, 1200)
+    }
+
+    return () => {
+      if (idleId && typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleId)
+      }
+      if (timeoutId) {
+        window.clearTimeout(timeoutId)
+      }
+    }
   }, [])
 }

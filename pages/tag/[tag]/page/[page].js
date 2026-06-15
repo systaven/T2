@@ -43,19 +43,23 @@ export async function getStaticPaths() {
   const from = 'tag-page-static-path'
   const { tagOptions, allPages, NOTION_CONFIG } = await fetchGlobalAllData({ from })
   const paths = []
-  tagOptions?.forEach(tag => {
+  const tags = Array.isArray(tagOptions) ? tagOptions : []
+
+  tags.forEach(tag => {
+    const tagName = tag?.name?.trim?.()
+    if (!tagName) return
+
     // 过滤状态类型
     const tagPosts = allPages
       ?.filter(page => page.type === 'Post' && page.status === 'Published')
-      .filter(post => post && post?.tags && post?.tags.includes(tag.name))
+      .filter(post => post && post?.tags && post?.tags.includes(tagName))
     // 处理文章页数
     const postCount = tagPosts.length
-    const totalPages = Math.ceil(
-      postCount / siteConfig('POSTS_PER_PAGE', null, NOTION_CONFIG)
-    )
+    const perPage = Number(siteConfig('POSTS_PER_PAGE', 12, NOTION_CONFIG)) || 12
+    const totalPages = Math.ceil(postCount / perPage)
     if (totalPages > 1) {
       for (let i = 1; i <= totalPages; i++) {
-        paths.push({ params: { tag: tag.name, page: '' + i } })
+        paths.push({ params: { tag: tagName, page: '' + i } })
       }
     }
   })
