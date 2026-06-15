@@ -48,7 +48,7 @@ class MyDocument extends Document {
           <style>{`
             @font-face {
               font-family: "LXGW WenKai";
-              src: url("/fonts/LXGWWenKai-Regular.ttf") format("truetype");
+              src: url("/fonts/lxgw.woff2") format("woff2");
               font-weight: 400;
               font-style: normal;
               font-display: swap;
@@ -72,12 +72,13 @@ class MyDocument extends Document {
               font-display: swap;
             }
           `}</style>
+
           {/* 预加载字体 */}
           <link
             rel='preload'
-            href='/fonts/LXGWWenKai-Regular.ttf'
+            href='/fonts/lxgw.woff2'
             as='font'
-            type='font/ttf'
+            type='font/woff2'
           />
           {BLOG.FONT_AWESOME && (
             <>
