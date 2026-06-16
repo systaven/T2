@@ -15,7 +15,7 @@ import Artalk from './Artalk'
  */
 const Comment = ({ frontMatter, className }) => {
   const router = useRouter()
-  const [shouldLoad, setShouldLoad] = useState(false)
+  const [shouldLoad, setShouldLoad] = useState(!siteConfig('COMMENT_REVEAL_ON_SCROLL', true))
   const commentRef = useRef(null)
 
   const COMMENT_ARTALK_SERVER = siteConfig('COMMENT_ARTALK_SERVER')
@@ -29,6 +29,9 @@ const Comment = ({ frontMatter, className }) => {
   const COMMENT_WEBMENTION_ENABLE = siteConfig('COMMENT_WEBMENTION_ENABLE')
 
   useEffect(() => {
+    if (shouldLoad) {
+      return
+    }
     // Check if the component is visible in the viewport
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {

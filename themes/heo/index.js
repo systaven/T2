@@ -263,6 +263,7 @@ const LayoutSlug = props => {
   }, [])
 
   const commentEnable =
+    post?.comment !== 'Hide' && (
     siteConfig('COMMENT_TWIKOO_ENV_ID') ||
     siteConfig('COMMENT_WALINE_SERVER_URL') ||
     siteConfig('COMMENT_VALINE_APP_ID') ||
@@ -270,7 +271,7 @@ const LayoutSlug = props => {
     siteConfig('COMMENT_CUSDIS_APP_ID') ||
     siteConfig('COMMENT_UTTERRANCES_REPO') ||
     siteConfig('COMMENT_GITALK_CLIENT_ID') ||
-    siteConfig('COMMENT_WEBMENTION_ENABLE')
+    siteConfig('COMMENT_WEBMENTION_ENABLE'))
 
   const router = useRouter()
   const waiting404 = siteConfig('POST_WAITING_TIME_FOR_404') * 1000

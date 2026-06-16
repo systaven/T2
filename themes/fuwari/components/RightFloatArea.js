@@ -54,7 +54,8 @@ const RightFloatArea = ({ post }) => {
         )}
         {post &&
           siteConfig('FUWARI_WIDGET_TO_COMMENT', true, CONFIG) &&
-          isCommentServiceConfigured() && (
+          isCommentServiceConfigured() &&
+          post?.comment !== 'Hide' && (
           <button
             type='button'
             className='fuwari-float-btn'

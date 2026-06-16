@@ -151,7 +151,9 @@ const LayoutSlug = props => {
   const { post, lock, validPassword, prev, next } = props
   if (!post) return null
   const showComments =
-    siteConfig('FUWARI_ARTICLE_COMMENT', true, CONFIG) && isCommentServiceConfigured()
+    siteConfig('FUWARI_ARTICLE_COMMENT', true, CONFIG) &&
+    isCommentServiceConfigured() &&
+    post?.comment !== 'Hide'
   const articleCoverSrc =
     siteConfig('FUWARI_ARTICLE_COVER_HERO', true, CONFIG) &&
     (post.pageCover || post.pageCoverThumbnail)
