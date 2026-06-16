@@ -6,6 +6,10 @@ import { useEffect } from 'react'
  */
 const CursorFollower = () => {
   useEffect(() => {
+    // 检查是否为触摸屏
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.matchMedia('(pointer: coarse)').matches;
+    if (isTouchDevice) return;
+
     const cursor = document.createElement('div')
     cursor.className = 'cursor-follower'
     document.body.appendChild(cursor)

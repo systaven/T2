@@ -75,7 +75,7 @@ const LayoutBase = props => {
       className={`${siteConfig('FONT_STYLE')} fuwari-bg min-h-screen text-[var(--fuwari-text)] ${heroStyle === 'fullscreen' ? 'fuwari-fullscreen-layout' : ''}`}>
       <Style />
       <FullscreenWallpaper {...props} />
-      <CursorFollower />
+      {!siteConfig('FUWARI_EFFECT_CURSOR_DOT', false, CONFIG) && <CursorFollower />}
       <ExternalLinkIntercepter />
       <Header
         locale={locale}

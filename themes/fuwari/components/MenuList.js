@@ -1,16 +1,28 @@
 import SmartLink from '@/components/SmartLink'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { getFuwariMenuLinks } from './menu'
 import NotionIcon from './NotionIcon'
 
 const MenuList = ({ locale, customNav, customMenu, mobile = false }) => {
   const [hoverSubId, setHoverSubId] = useState(null)
+  const hoverTimer = useRef(null)
   const links = getFuwariMenuLinks({ locale, customNav, customMenu })
   if (!links.length) return null
 
   const displayLinks = mobile ? links.slice(0, 4) : links
 
   const isDesktopSubOpen = linkId => linkId != null && hoverSubId === linkId
+
+  const handleMouseEnter = (id) => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current)
+    setHoverSubId(id)
+  }
+
+  const handleMouseLeave = () => {
+    hoverTimer.current = setTimeout(() => {
+      setHoverSubId(null)
+    }, 150)
+  }
 
   if (mobile) {
     return (
@@ -29,13 +41,13 @@ const MenuList = ({ locale, customNav, customMenu, mobile = false }) => {
   }
 
   return (
-    <nav className='hidden md:flex items-center justify-center gap-0.5 text-[14px] text-[var(--fuwari-muted)]'>
+    <nav className='hidden md:flex items-center justify-center text-[14px] text-[var(--fuwari-muted)]'>
       {displayLinks.map((link, index) => (
         <div
           key={link.id || `${link.href}-${index}`}
           className='relative group'
-          onMouseEnter={() => setHoverSubId(link.id)}
-          onMouseLeave={() => setHoverSubId(null)}>
+          onMouseEnter={() => handleMouseEnter(link.id)}
+          onMouseLeave={handleMouseLeave}>
           {!link.subMenus?.length && link.href ? (
             <SmartLink
               href={link.href}
@@ -65,7 +77,9 @@ const MenuList = ({ locale, customNav, customMenu, mobile = false }) => {
 
           {!!link.subMenus?.length && (
             <div
-              className={`${isDesktopSubOpen(link.id) ? 'visible opacity-100 translate-y-0' : 'invisible opacity-0 -translate-y-2'} absolute left-0 top-full pt-2 min-w-[12rem] transition-all duration-300 ease-out z-50`}>
+              className={`${isDesktopSubOpen(link.id) ? 'visible opacity-100 translate-y-0' : 'invisible opacity-0 -translate-y-2'} absolute left-0 top-full pt-2 min-w-[12rem] transition-all duration-300 ease-out z-50`}
+              onMouseEnter={() => handleMouseEnter(link.id)}
+              onMouseLeave={handleMouseLeave}>
               {/* Bridge to prevent closing when moving mouse to menu */}
               <div className='absolute -top-4 left-0 w-full h-4' />
               
