@@ -21,7 +21,7 @@ import { adapterNotionBlockMap } from '@/lib/utils/notion.util'
  * @returns
  */
 const Index = props => {
-  const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
+  const theme = siteConfig('THEME', BLOG?.THEME, props.NOTION_CONFIG)
   return <DynamicLayout theme={theme} layoutName='LayoutIndex' {...props} />
 }
 
@@ -34,9 +34,9 @@ export async function getStaticProps(req) {
   const from = 'index'
   const props = await fetchGlobalAllData({ from, locale })
   if (process.env.NODE_ENV === 'development') {
-    const configTheme = BLOG.THEME
+    const configTheme = BLOG?.THEME
     const notionTheme = props?.NOTION_CONFIG?.THEME || null
-    const finalTheme = siteConfig('THEME', BLOG.THEME, props?.NOTION_CONFIG)
+    const finalTheme = siteConfig('THEME', BLOG?.THEME, props?.NOTION_CONFIG)
     const source = notionTheme ? 'notion:config' : 'blog/env:config'
     console.log(
       '[ThemeResolver][server-static-props]',
@@ -135,7 +135,7 @@ export async function getStaticProps(req) {
       ? undefined
       : siteConfig(
           'NEXT_REVALIDATE_SECOND',
-          BLOG.NEXT_REVALIDATE_SECOND,
+          BLOG?.NEXT_REVALIDATE_SECOND,
           props.NOTION_CONFIG
         )
   }
