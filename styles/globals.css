@@ -1,6 +1,12 @@
+@import url("https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  font-family: "LXGW WenKai", sans-serif !important;
+}
 
 html {
   overflow-x: hidden;
