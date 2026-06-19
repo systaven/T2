@@ -2,6 +2,37 @@ import { siteConfig } from '@/lib/config'
 import { loadExternalResource } from '@/lib/utils'
 import { useEffect, useRef, useState } from 'react'
 
+let TwikooWithClerk = null
+const enableClerk = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+
+if (enableClerk) {
+  try {
+    const { useUser, useAuth } = require('@clerk/nextjs')
+    TwikooWithClerk = () => {
+      const { isSignedIn, user } = useUser()
+      const { getToken } = useAuth()
+
+      useEffect(() => {
+        if (typeof window !== 'undefined') {
+          window.clerkUser = isSignedIn && user ? {
+            nick: user.fullName || user.username || 'Clerk User',
+            mail: user.primaryEmailAddress?.emailAddress || '',
+            avatar: user.imageUrl || '',
+            link: ''
+          } : null
+          window.getClerkToken = isSignedIn ? async () => {
+            return await getToken()
+          } : null
+        }
+      }, [isSignedIn, user, getToken])
+
+      return null
+    }
+  } catch (error) {
+    console.error('Failed to load Clerk hooks:', error)
+  }
+}
+
 /**
  * Giscus评论 @see https://giscus.app/zh-CN
  * Contribute by @txs https://github.com/txs/NotionNext/commit/1bf7179d0af21fb433e4c7773504f244998678cb
@@ -28,7 +59,9 @@ const Twikoo = ({ isDarkMode }) => {
         twikoo.init({
           envId: envId, // 腾讯云环境填 envId；Vercel 环境填地址（https://xxx.vercel.app）
           el: el, // 容器元素
-          lang: lang // 用于手动设定评论区语言，支持的语言列表 https://github.com/imaegoo/twikoo/blob/main/src/client/utils/i18n/index.js
+          lang: lang, // 用于手动设定评论区语言，支持的语言列表 https://github.com/imaegoo/twikoo/blob/main/src/client/utils/i18n/index.js
+          clerkUser: window?.clerkUser || null,
+          getClerkToken: window?.getClerkToken || null
           // region: 'ap-guangzhou', // 环境地域，默认为 ap-shanghai，腾讯云环境填 ap-shanghai 或 ap-guangzhou；Vercel 环境不填
           // path: location.pathname, // 用于区分不同文章的自定义 js 路径，如果您的文章路径不是 location.pathname，需传此参数
         })
@@ -51,7 +84,13 @@ const Twikoo = ({ isDarkMode }) => {
     }, 1000)
     return () => clearInterval(interval)
   }, [isDarkMode])
-  return <div id="twikoo"></div>
+
+  return (
+    <>
+      {TwikooWithClerk && <TwikooWithClerk />}
+      <div id="twikoo"></div>
+    </>
+  )
 }
 
 export default Twikoo
