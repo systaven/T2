@@ -2,37 +2,6 @@ import { siteConfig } from '@/lib/config'
 import { loadExternalResource } from '@/lib/utils'
 import { useEffect, useRef, useState } from 'react'
 
-let TwikooWithClerk = null
-const enableClerk = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-
-if (enableClerk) {
-  try {
-    const { useUser, useAuth } = require('@clerk/nextjs')
-    TwikooWithClerk = () => {
-      const { isSignedIn, user } = useUser()
-      const { getToken } = useAuth()
-
-      useEffect(() => {
-        if (typeof window !== 'undefined') {
-          window.clerkUser = isSignedIn && user ? {
-            nick: user.fullName || user.username || 'Clerk User',
-            mail: user.primaryEmailAddress?.emailAddress || '',
-            avatar: user.imageUrl || '',
-            link: ''
-          } : null
-          window.getClerkToken = isSignedIn ? async () => {
-            return await getToken()
-          } : null
-        }
-      }, [isSignedIn, user, getToken])
-
-      return null
-    }
-  } catch (error) {
-    console.error('Failed to load Clerk hooks:', error)
-  }
-}
-
 /**
  * Giscus评论 @see https://giscus.app/zh-CN
  * Contribute by @txs https://github.com/txs/NotionNext/commit/1bf7179d0af21fb433e4c7773504f244998678cb
@@ -46,6 +15,54 @@ const Twikoo = ({ isDarkMode }) => {
   const twikooCDNURL = siteConfig('COMMENT_TWIKOO_CDN_URL')
   const lang = siteConfig('LANG')
   const [isInit] = useState(useRef(false))
+
+  // 监听并同步 Clerk 登录状态
+  useEffect(() => {
+    const updateClerkState = () => {
+      const clerk = window.Clerk
+      if (clerk && clerk.user) {
+        window.clerkUser = {
+          nick: clerk.user.fullName || clerk.user.username || 'Clerk User',
+          mail: clerk.user.primaryEmailAddress?.emailAddress || '',
+          avatar: clerk.user.imageUrl || '',
+          link: ''
+        }
+        window.getClerkToken = async () => {
+          return await clerk.session?.getToken()
+        }
+      } else {
+        window.clerkUser = null
+        window.getClerkToken = null
+      }
+    }
+
+    // 初始读取
+    updateClerkState()
+
+    let unsubscribe = null
+    if (window.Clerk && typeof window.Clerk.addListener === 'function') {
+      unsubscribe = window.Clerk.addListener(updateClerkState)
+    } else {
+      // 如果 Clerk SDK 尚未加载完成，进行循环轮询直到加载
+      const interval = setInterval(() => {
+        if (window.Clerk) {
+          updateClerkState()
+          if (typeof window.Clerk.addListener === 'function') {
+            unsubscribe = window.Clerk.addListener(updateClerkState)
+          }
+          clearInterval(interval)
+        }
+      }, 500)
+      return () => {
+        clearInterval(interval)
+        if (unsubscribe) unsubscribe()
+      }
+    }
+
+    return () => {
+      if (unsubscribe) unsubscribe()
+    }
+  }, [])
 
   const loadTwikoo = async () => {
     try {
@@ -85,12 +102,7 @@ const Twikoo = ({ isDarkMode }) => {
     return () => clearInterval(interval)
   }, [isDarkMode])
 
-  return (
-    <>
-      {TwikooWithClerk && <TwikooWithClerk />}
-      <div id="twikoo"></div>
-    </>
-  )
+  return <div id="twikoo"></div>
 }
 
 export default Twikoo
