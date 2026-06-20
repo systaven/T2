@@ -1,22 +1,20 @@
 import BLOG from '@/blog.config'
 import { fetchGlobalAllData } from '@/lib/db/SiteDataApi'
-import { generateRss, shouldGenerateRssForLocale } from '@/lib/utils/rss'
 import { Feed } from 'feed'
+import {
+  clearRssRuntimeCache,
+  getRssRuntimeCache,
+  setRssRuntimeCache
+} from '@/lib/utils/rss_runtime_cache'
 
-/**
- * In-memory RSS cache to avoid regenerating on every request.
- * Survives across ISR revalidations within the same serverless instance.
- */
-let rssCache = {
-  xml: null,
-  atomXml: null,
-  json: null,
-  updatedAt: 0
+const CACHE_TTL_MS = 60 * 1000
+
+export function clearRssCache() {
+  clearRssRuntimeCache()
 }
 
-const CACHE_TTL_MS = 10 * 60 * 1000 // 10 minutes
-
 function isCacheFresh() {
+  const rssCache = getRssRuntimeCache()
   return rssCache.xml && Date.now() - rssCache.updatedAt < CACHE_TTL_MS
 }
 
@@ -101,20 +99,21 @@ export default async function handler(req, res) {
     if (!isCacheFresh()) {
       const content = await generateRssContent()
       if (content) {
-        rssCache = {
+        setRssRuntimeCache({
           ...content,
           updatedAt: Date.now()
-        }
+        })
       }
     }
 
+    const rssCache = getRssRuntimeCache()
     if (!rssCache.xml) {
       return res.status(503).json({ message: 'RSS feed not available' })
     }
 
     const format = req.query.format || 'rss'
 
-    res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=3600')
+    res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=59')
 
     if (format === 'atom') {
       res.setHeader('Content-Type', 'application/atom+xml; charset=utf-8')

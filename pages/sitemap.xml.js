@@ -38,7 +38,7 @@ export const getServerSideProps = async ctx => {
   // 缓存
   ctx.res.setHeader(
     'Cache-Control',
-    'public, max-age=3600, stale-while-revalidate=59'
+    'public, max-age=0, s-maxage=60, stale-while-revalidate=59'
   )
   return getServerSideSitemap(ctx, fields)
 }
@@ -146,4 +146,6 @@ function getUniqueFields(fields) {
   return Array.from(uniqueFieldsMap.values())
 }
 
-export default () => { }
+const Sitemap = () => null
+
+export default Sitemap
