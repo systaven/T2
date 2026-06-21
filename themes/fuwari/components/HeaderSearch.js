@@ -244,7 +244,7 @@ const HeaderSearch = ({ isMobile }) => {
       {/* Search Modal Overlay (Portaled to document.body) */}
       {isRendered && typeof window !== 'undefined' && createPortal(
         <div
-          className={`fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex justify-center items-start pt-[10vh] px-4 transition-all duration-300 ${
+          className={`fixed inset-0 z-50 flex justify-center items-start pt-[10vh] px-4 transition-all duration-300 ${
             isModalOpen ? 'opacity-100' : 'opacity-0'
           }`}
           onClick={closeModal}
