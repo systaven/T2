@@ -244,13 +244,13 @@ const HeaderSearch = ({ isMobile }) => {
       {/* Search Modal Overlay (Portaled to document.body) */}
       {isRendered && typeof window !== 'undefined' && createPortal(
         <div
-          className={`fixed inset-0 z-50 flex justify-center items-start pt-[10vh] px-4 transition-all duration-300 ${
+          className={`fixed inset-0 z-50 bg-black/60 flex justify-center items-start pt-[10vh] px-4 transition-all duration-300 ${
             isModalOpen ? 'opacity-100' : 'opacity-0'
           }`}
           onClick={closeModal}
         >
           <div
-            className={`search-modal-card bg-[var(--fuwari-surface)] w-full max-w-lg rounded-2xl border border-[var(--fuwari-border)] shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
+            className={`search-modal-card bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md w-full max-w-lg rounded-2xl border border-[var(--fuwari-border)] shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
               isModalOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
             }`}
             onClick={e => e.stopPropagation()}
