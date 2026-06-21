@@ -16,12 +16,16 @@ const NotionIcon = ({ icon, className = 'w-5 h-5 inline-block mr-1.5' }) => {
     return <LazyImage src={normalizedIcon} className={className} />
   }
 
-  // 2. 处理 FontAwesome 类名 (格式如: 'fas fa-xxx' 或 'fa-xxx')
+  // 2. 处理 FontAwesome / MDI 类名 (格式如: 'fas fa-xxx' 或 'mdi mdi-xxx')
   const isFontAwesomeIcon =
     /(^|\s)fa[srldb]?\s/.test(normalizedIcon) ||
     /(^|\s)fa-[\w-]+/.test(normalizedIcon)
+
+  const isMscIcon =
+    /(^|\s)msc\s/.test(normalizedIcon) ||
+    /(^|\s)msc-[\w-]+/.test(normalizedIcon)
   
-  if (isFontAwesomeIcon) {
+  if (isFontAwesomeIcon || isMscIcon) {
     return <i className={`${normalizedIcon} ${className}`} aria-hidden='true' />
   }
 

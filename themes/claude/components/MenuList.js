@@ -38,7 +38,12 @@ export const MenuList = ({ customNav, customMenu }) => {
     const isFontAwesomeIcon =
       /(^|\s)fa[srldb]?\s/.test(normalizedIcon) ||
       /(^|\s)fa-[\w-]+/.test(normalizedIcon)
-    if (isFontAwesomeIcon) {
+
+    const isMscIcon =
+      /(^|\s)msc\s/.test(normalizedIcon) ||
+      /(^|\s)msc-[\w-]+/.test(normalizedIcon)
+
+    if (isFontAwesomeIcon || isMscIcon) {
       return <i className={`${normalizedIcon} claude-nav-icon`} aria-hidden='true' />
     }
 

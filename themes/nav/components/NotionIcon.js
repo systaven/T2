@@ -8,15 +8,30 @@ import LazyImage from '@/components/LazyImage'
 const NotionIcon = ({ icon }) => {
   let imgSize = 8
   let fontSize = ''
-  if (!icon) {
-    return <></>
-  }
-  fontSize = (Math.round(imgSize / 2) - 1) > 0 ? (Math.round(imgSize / 2) - 1) : ''
-  if (icon.startsWith('http') || icon.startsWith('data:')) {
-    return <LazyImage src={icon} className={`w-10 h-10 inline`}/>
+  if (!icon || typeof icon !== 'string') {
+    return null
   }
 
-  return <span className={`mr-1 text-4xl`}>{icon}</span>
+  const normalizedIcon = icon.trim()
+  fontSize = (Math.round(imgSize / 2) - 1) > 0 ? (Math.round(imgSize / 2) - 1) : ''
+
+  if (normalizedIcon.startsWith('http') || normalizedIcon.startsWith('data:')) {
+    return <LazyImage src={normalizedIcon} className={`w-10 h-10 inline`}/>
+  }
+
+  const isFontAwesomeIcon =
+    /(^|\s)fa[srldb]?\s/.test(normalizedIcon) ||
+    /(^|\s)fa-[\w-]+/.test(normalizedIcon)
+
+  const isMscIcon =
+    /(^|\s)msc\s/.test(normalizedIcon) ||
+    /(^|\s)msc-[\w-]+/.test(normalizedIcon)
+
+  if (isFontAwesomeIcon || isMscIcon) {
+    return <i className={`${normalizedIcon} mr-1 text-4xl`} aria-hidden='true' />
+  }
+
+  return <span className={`mr-1 text-4xl`}>{normalizedIcon}</span>
 }
 
 export default NotionIcon

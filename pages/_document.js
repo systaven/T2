@@ -77,6 +77,17 @@ class MyDocument extends Document {
             </>
           )}
 
+          {BLOG.FONT_MSC && (
+            <>
+              <link
+                rel='stylesheet'
+                href={BLOG.FONT_MSC}
+                crossOrigin='anonymous'
+                referrerPolicy='no-referrer'
+              />
+            </>
+          )}
+
           {/* 预先设置深色模式，避免闪烁 */}
           <script dangerouslySetInnerHTML={{ __html: darkModeScript }} />
           {/* Umami Analytics */}
