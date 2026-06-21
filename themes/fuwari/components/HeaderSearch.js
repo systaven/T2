@@ -6,7 +6,7 @@ import SmartLink from '@/components/SmartLink'
 const HeaderSearch = () => {
   const router = useRouter()
   const { lang, locale } = useGlobal()
-  const [isOpen, setIsOpen] = useState(false)
+  const [isRendered, setIsRendered] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [keyword, setKeyword] = useState('')
   const [posts, setPosts] = useState([])
@@ -36,9 +36,23 @@ const HeaderSearch = () => {
     }
   }
 
-  const handleFocus = () => {
-    setIsOpen(true)
+  const openModal = () => {
+    setIsRendered(true)
     fetchPosts()
+    setTimeout(() => {
+      setIsModalOpen(true)
+    }, 20)
+  }
+
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setTimeout(() => {
+      setIsRendered(false)
+    }, 300)
+  }
+
+  const handleFocus = () => {
+    openModal()
   }
 
   const handleInputChange = (val) => {
@@ -59,15 +73,12 @@ const HeaderSearch = () => {
   // Limit to top 6 results for clean UI
   const results = filteredPosts.slice(0, 6)
 
-  // Handle outside clicks to close dropdown AND modal
+  // Handle outside clicks to close modal
   useEffect(() => {
     const onClickOutside = (e) => {
-      if (searchRef.current && !searchRef.current.contains(e.target)) {
-        setIsOpen(false)
-      }
       const modalElement = document.querySelector('.search-modal-card')
       if (isModalOpen && modalElement && !modalElement.contains(e.target)) {
-        setIsModalOpen(false)
+        closeModal()
       }
     }
     document.addEventListener('mousedown', onClickOutside)
@@ -78,14 +89,12 @@ const HeaderSearch = () => {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        setIsOpen(false)
-        setIsModalOpen(false)
+        closeModal()
       }
       // Open modal on Cmd+K or Ctrl+K
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
-        setIsModalOpen(true)
-        fetchPosts()
+        openModal()
       }
     }
     document.addEventListener('keydown', handleKeyDown)
@@ -106,8 +115,7 @@ const HeaderSearch = () => {
   // Route change hook to close search dropdown/modal
   useEffect(() => {
     const handleRouteChange = () => {
-      setIsOpen(false)
-      setIsModalOpen(false)
+      closeModal()
       setKeyword('')
     }
     router.events.on('routeChangeComplete', handleRouteChange)
@@ -132,7 +140,6 @@ const HeaderSearch = () => {
         const targetPost = results[activeIndex]
         router.push(targetPost.href || `/${targetPost.slug}`)
       } else if (keyword.trim()) {
-        // Fallback to standard search page on Enter if no item highlighted
         router.push(`/search/${encodeURIComponent(keyword)}`)
       }
     }
@@ -200,88 +207,45 @@ const HeaderSearch = () => {
     <>
       {/* Desktop Search Input Box */}
       <div className='hidden md:block relative z-50 select-none' ref={searchRef}>
-        <div className='relative flex items-center bg-[var(--fuwari-bg-soft)] rounded-lg transition-all duration-300 border border-transparent focus-within:border-[var(--fuwari-primary)] focus-within:shadow-sm w-44 focus-within:w-64 overflow-hidden'>
+        <div 
+          onClick={handleFocus}
+          className='relative flex items-center bg-[var(--fuwari-bg-soft)] rounded-lg transition-all duration-300 border border-transparent hover:border-[var(--fuwari-primary)] w-44 hover:w-64 cursor-pointer overflow-hidden'
+        >
           <i className='fas fa-search text-[var(--fuwari-muted)] ml-3 text-xs shrink-0' />
           <input
             ref={desktopInputRef}
             type='text'
             placeholder={locale?.SEARCH?.ARTICLES || '搜索文章...'}
-            value={keyword}
-            onChange={e => handleInputChange(e.target.value)}
-            onFocus={handleFocus}
-            onKeyDown={handleKeyDown}
-            className='bg-transparent text-xs text-[var(--fuwari-text)] pl-2 pr-8 py-1.5 w-full outline-none'
+            value=''
+            readOnly
+            className='bg-transparent text-xs text-[var(--fuwari-text)] pl-2 pr-8 py-1.5 w-full outline-none cursor-pointer'
           />
           <div className='absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5'>
-            {loading && (
-              <i className='fas fa-spinner animate-spin text-[var(--fuwari-muted)] text-[10px]' />
-            )}
-            {keyword ? (
-              <button onClick={clearSearch} className='text-[var(--fuwari-muted)] hover:text-[var(--fuwari-text)] flex items-center'>
-                <i className='fas fa-times text-[10px]' />
-              </button>
-            ) : (
-              <span className='text-[9px] px-1 py-0.2 bg-[var(--fuwari-bg-soft)] border border-[var(--fuwari-border)] text-[var(--fuwari-muted)] rounded opacity-60 font-mono'>
-                ⌘K
-              </span>
-            )}
+            <span className='text-[9px] px-1 py-0.2 bg-[var(--fuwari-bg-soft)] border border-[var(--fuwari-border)] text-[var(--fuwari-muted)] rounded opacity-60 font-mono'>
+              ⌘K
+            </span>
           </div>
         </div>
-
-        {/* Desktop Results Dropdown */}
-        {isOpen && (keyword || loading) && (
-          <div className='absolute right-0 top-10 w-96 max-h-[30rem] overflow-y-auto bg-[var(--fuwari-surface)] border border-[var(--fuwari-border)] rounded-xl shadow-xl p-2 z-50 animate__animated animate__fadeIn animate__faster flex flex-col gap-1'>
-            {loading ? (
-              <div className='flex items-center justify-center py-8 text-[var(--fuwari-muted)] text-xs gap-2'>
-                <i className='fas fa-spinner animate-spin text-sm' />
-                <span>{locale?.COMMON?.LOADING || '加载中...'}</span>
-              </div>
-            ) : results.length > 0 ? (
-              <>
-                <div className='px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--fuwari-muted)] border-b border-[var(--fuwari-border)] mb-1'>
-                  {locale?.SEARCH?.RESULT_OF_SEARCH || '搜索结果'} ({filteredPosts.length})
-                </div>
-                <div className='flex flex-col gap-1 max-h-[22rem] overflow-y-auto pr-1 scrollbar-thin'>
-                  {results.map((post, idx) => renderItem(post, idx, activeIndex === idx))}
-                </div>
-                {filteredPosts.length > 6 && (
-                  <SmartLink
-                    href={`/search/${encodeURIComponent(keyword)}`}
-                    className='text-center text-[10px] text-[var(--fuwari-primary)] hover:underline pt-2 pb-1 border-t border-[var(--fuwari-border)] font-medium mt-1 block'
-                  >
-                    查看全部结果 &raquo;
-                  </SmartLink>
-                )}
-              </>
-            ) : (
-              <div className='text-center py-8 text-[var(--fuwari-muted)] text-xs'>
-                没有找到相关文章
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Mobile Search Button */}
       <button
         type='button'
-        onClick={() => {
-          setIsModalOpen(true)
-          fetchPosts()
-        }}
+        onClick={handleFocus}
         className='md:hidden fuwari-tool-btn'
         title={locale?.NAV?.SEARCH}
       >
         <i className='fas fa-search' />
       </button>
 
-      {/* Mobile Search Modal Overlay */}
-      <div
-        className={`fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex justify-center items-start pt-[10vh] px-4 transition-all duration-300 ${
-          isModalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none invisible'
-        }`}
-        onClick={() => setIsModalOpen(false)}
-      >
+      {/* Search Modal Overlay */}
+      {isRendered && (
+        <div
+          className={`fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex justify-center items-start pt-[10vh] px-4 transition-all duration-300 ${
+            isModalOpen ? 'opacity-100' : 'opacity-0'
+          }`}
+          onClick={closeModal}
+        >
         <div
           className={`search-modal-card bg-[var(--fuwari-surface)] w-full max-w-lg rounded-2xl border border-[var(--fuwari-border)] shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
             isModalOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
@@ -311,7 +275,7 @@ const HeaderSearch = () => {
               )}
             </div>
             <button
-              onClick={() => setIsModalOpen(false)}
+              onClick={closeModal}
               className='ml-2 text-xs font-medium text-[var(--fuwari-muted)] hover:text-[var(--fuwari-text)] px-2 py-1.5 rounded-lg hover:bg-[var(--fuwari-bg-soft)]'
             >
               取消
@@ -352,6 +316,7 @@ const HeaderSearch = () => {
           </div>
         </div>
       </div>
+      )}
     </>
   )
 }
