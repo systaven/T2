@@ -67,7 +67,7 @@ const Header = ({ locale, customNav, customMenu, searchModal, siteInfo }) => {
               <i className='fas fa-search' />
             </button>
           ) : (
-            <HeaderSearch />
+            <HeaderSearch isMobile={false} />
           )}
           {!paletteFixed && (
             <button
@@ -91,7 +91,7 @@ const Header = ({ locale, customNav, customMenu, searchModal, siteInfo }) => {
               <i className='fas fa-search' />
             </button>
           ) : (
-            <HeaderSearch />
+            <HeaderSearch isMobile={true} />
           )}
           {!paletteFixed && (
             <button
