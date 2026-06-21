@@ -14,6 +14,7 @@ const HeaderSearch = ({ isMobile }) => {
   const [loading, setLoading] = useState(false)
   const [hasFetched, setHasFetched] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
+  const [portalTarget, setPortalTarget] = useState(null)
   
   const searchRef = useRef(null)
   const desktopInputRef = useRef(null)
@@ -60,6 +61,14 @@ const HeaderSearch = ({ isMobile }) => {
     setKeyword(val)
     setActiveIndex(-1)
   }
+
+  // Set portal target element safely in client side
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const target = document.getElementById('theme-fuwari') || document.body
+      setPortalTarget(target)
+    }
+  }, [])
 
   // Filter posts based on keyword
   const filteredPosts = keyword.trim() === '' ? [] : posts.filter(post => {
@@ -241,8 +250,8 @@ const HeaderSearch = ({ isMobile }) => {
         </div>
       )}
 
-      {/* Search Modal Overlay (Portaled to document.body) */}
-      {isRendered && typeof window !== 'undefined' && createPortal(
+      {/* Search Modal Overlay (Portaled to theme-fuwari) */}
+      {isRendered && portalTarget && createPortal(
         <div
           className={`fixed inset-0 z-50 bg-black/60 flex justify-center items-start pt-[10vh] px-4 transition-all duration-300 ${
             isModalOpen ? 'opacity-100' : 'opacity-0'
@@ -319,9 +328,8 @@ const HeaderSearch = ({ isMobile }) => {
             </div>
           </div>
         </div>,
-        document.body
+        portalTarget
       )}
-    </>
   )
 }
 
