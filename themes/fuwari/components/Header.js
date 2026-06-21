@@ -9,6 +9,7 @@ import MobileNav from './MobileNav'
 import ThemeColorSwitch from './ThemeColorSwitch'
 import WallpaperSwitch from './WallpaperSwitch'
 import CONFIG from '../config'
+import HeaderSearch from './HeaderSearch'
 
 const ClerkAuthControls = dynamic(() => import('./ClerkAuthControls'), {
   ssr: false
@@ -60,15 +61,12 @@ const Header = ({ locale, customNav, customMenu, searchModal, siteInfo }) => {
         </SmartLink>
         <MenuList locale={locale} customNav={customNav} customMenu={customMenu} />
         <div className='hidden md:flex items-center justify-end gap-2 relative'>
-          <ClerkAuthControls />
           {algoliaEnabled ? (
             <button type='button' onClick={handleSearch} className='fuwari-tool-btn'>
               <i className='fas fa-search' />
             </button>
           ) : (
-            <SmartLink href='/search' className='fuwari-tool-btn' title={locale?.NAV?.SEARCH}>
-              <i className='fas fa-search' />
-            </SmartLink>
+            <HeaderSearch />
           )}
           {!paletteFixed && (
             <button
@@ -83,31 +81,32 @@ const Header = ({ locale, customNav, customMenu, searchModal, siteInfo }) => {
           <button type='button' onClick={toggleDarkMode} className='fuwari-tool-btn'>
             <i className={isDarkMode ? 'fas fa-sun' : 'fas fa-moon'} />
           </button>
+          <ClerkAuthControls />
         </div>
         <div className='md:hidden flex items-center justify-end gap-2 relative'>
-          <ClerkAuthControls />
           {algoliaEnabled ? (
             <button type='button' onClick={handleSearch} className='fuwari-tool-btn'>
               <i className='fas fa-search' />
             </button>
           ) : (
-            <SmartLink href='/search' className='fuwari-tool-btn' title={locale?.NAV?.SEARCH}>
-              <i className='fas fa-search' />
-            </SmartLink>
+            <HeaderSearch />
           )}
           {!paletteFixed && (
             <button
               type='button'
               data-fuwari-palette-trigger
               onClick={() => setShowPalette(v => !v)}
-              className='fuwari-tool-btn'>
+              className='fuwari-tool-btn hidden sm:inline-flex'>
               <i className='fas fa-palette' />
             </button>
           )}
-          <WallpaperSwitch />
+          <div className='hidden sm:block'>
+            <WallpaperSwitch />
+          </div>
           <button type='button' onClick={toggleDarkMode} className='fuwari-tool-btn'>
             <i className={isDarkMode ? 'fas fa-sun' : 'fas fa-moon'} />
           </button>
+          <ClerkAuthControls />
           <MobileNav locale={locale} customNav={customNav} customMenu={customMenu} />
         </div>
         {showPalette && !paletteFixed && (
