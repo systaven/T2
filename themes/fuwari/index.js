@@ -41,6 +41,7 @@ const AlgoliaSearchModal = dynamic(
 const Lenis = dynamic(() => import('@/components/Lenis'), { ssr: false })
 const CursorDot = dynamic(() => import('@/components/CursorDot'), { ssr: false })
 const Live2D = dynamic(() => import('@/components/Live2D'), { ssr: false })
+const MusicPlayer = dynamic(() => import('./components/MusicPlayer'), { ssr: false })
 const getLocale = () => generateLocaleDict(siteConfig('LANG', 'zh-CN'))
 
 const LayoutBase = props => {
@@ -49,25 +50,36 @@ const LayoutBase = props => {
   const searchModal = useRef(null)
   const router = useRouter()
   const [heroStyle, setHeroStyle] = useState(siteConfig('FUWARI_HERO_STYLE', 'banner', CONFIG))
+  const [postListLayout, setPostListLayout] = useState('list')
 
   useEffect(() => {
     // 加载初始状态
     const savedStyle = localStorage.getItem('FUWARI_HERO_STYLE')
     if (savedStyle) setHeroStyle(savedStyle)
 
+    const savedLayout = localStorage.getItem('FUWARI_POST_LIST_LAYOUT') || siteConfig('FUWARI_POST_LIST_LAYOUT', 'list', CONFIG)
+    setPostListLayout(savedLayout)
+
     // 监听切换事件
     const handleStyleChange = (e) => {
       setHeroStyle(e.detail)
     }
+    const handleLayoutChange = (e) => {
+      setPostListLayout(e.detail)
+    }
     window.addEventListener('fuwari-hero-style-change', handleStyleChange)
-    return () => window.removeEventListener('fuwari-hero-style-change', handleStyleChange)
+    window.addEventListener('fuwari-post-list-layout-change', handleLayoutChange)
+    return () => {
+      window.removeEventListener('fuwari-hero-style-change', handleStyleChange)
+      window.removeEventListener('fuwari-post-list-layout-change', handleLayoutChange)
+    }
   }, [])
 
   const showHomeHero =
-    !props.post &&
-    (router.pathname === '/' || router.pathname === '/page/[page]') &&
+    (router.pathname === '/' || router.pathname === '/page/[page]' || props.post) &&
     heroStyle === 'banner'
   const threeColumns = siteConfig('FUWARI_LAYOUT_THREE_COLUMNS', true, CONFIG)
+  const showRightSidebar = threeColumns && postListLayout !== 'grid'
 
   return (
     <div
@@ -89,8 +101,8 @@ const LayoutBase = props => {
       {showHomeHero && <HeroBanner {...props} />}
 
       <main
-        className={`${threeColumns ? 'max-w-7xl' : 'max-w-6xl'} mx-auto px-3 md:px-4 pb-12 min-w-0 w-full ${showHomeHero ? 'fuwari-main-overlap' : 'pt-4 md:pt-8'}`}>
-        <div className={`grid grid-cols-1 ${threeColumns ? 'xl:grid-cols-[280px_minmax(0,1fr)_280px] md:grid-cols-[240px_minmax(0,1fr)]' : 'md:grid-cols-[280px_minmax(0,1fr)]'} gap-4 lg:gap-6 min-w-0`}>
+        className={`${showRightSidebar ? 'max-w-7xl' : 'max-w-6xl'} mx-auto px-3 md:px-4 pb-12 min-w-0 w-full ${showHomeHero ? 'fuwari-main-overlap' : 'pt-4 md:pt-8'}`}>
+        <div className={`grid grid-cols-1 ${showRightSidebar ? 'xl:grid-cols-[280px_minmax(0,1fr)_280px] md:grid-cols-[240px_minmax(0,1fr)]' : 'md:grid-cols-[280px_minmax(0,1fr)]'} gap-4 lg:gap-6 min-w-0`}>
           <div className='hidden md:block sticky top-4 self-start'>
             <SidePanel {...props} isLeft={threeColumns} />
           </div>
@@ -102,7 +114,7 @@ const LayoutBase = props => {
             </div>
           </section>
 
-          {threeColumns && (
+          {showRightSidebar && (
             <div className='hidden xl:block self-stretch'>
               <SidePanelRight {...props} />
             </div>
@@ -116,6 +128,7 @@ const LayoutBase = props => {
       </div>
       {siteConfig('FUWARI_EFFECT_LENIS', false, CONFIG) && <Lenis />}
       {siteConfig('FUWARI_EFFECT_CURSOR_DOT', false, CONFIG) && <CursorDot />}
+      <MusicPlayer />
     </div>
   )
 }
@@ -171,8 +184,8 @@ const LayoutSlug = props => {
             <NotionPage post={post} />
             {siteConfig('FUWARI_ARTICLE_SHARE', true, CONFIG) && <ShareBar post={post} />}
           </div>
-          <ArticleCopyright post={post} />
-          <ArticleAdjacent prev={prev} next={next} />
+          {post?.type === 'Post' && <ArticleCopyright post={post} />}
+          {post?.type === 'Post' && <ArticleAdjacent prev={prev} next={next} />}
           {showComments && (
             <section className='mt-8 pt-6 border-t border-[var(--fuwari-border)]' aria-label={locale?.COMMON?.COMMENTS || 'Comments'}>
               <h2 className='text-base font-semibold mb-4 text-[var(--fuwari-text)] flex items-center gap-2'>

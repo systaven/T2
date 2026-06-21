@@ -7,6 +7,10 @@ import { useEffect, useRef, useState } from 'react'
  * @returns
  */
 const Player = () => {
+  const theme = siteConfig('THEME')
+  if (theme === 'fuwari') {
+    return null
+  }
   const [player, setPlayer] = useState()
   const ref = useRef(null)
   const lrcType = JSON.parse(siteConfig('MUSIC_PLAYER_LRC_TYPE'))

@@ -10,6 +10,7 @@ import ThemeColorSwitch from './ThemeColorSwitch'
 import WallpaperSwitch from './WallpaperSwitch'
 import CONFIG from '../config'
 import HeaderSearch from './HeaderSearch'
+import LayoutSwitchButton from './LayoutSwitchButton'
 
 const ClerkAuthControls = dynamic(() => import('./ClerkAuthControls'), {
   ssr: false
@@ -78,6 +79,7 @@ const Header = ({ locale, customNav, customMenu, searchModal, siteInfo }) => {
             </button>
           )}
           <WallpaperSwitch />
+          <LayoutSwitchButton />
           <button type='button' onClick={toggleDarkMode} className='fuwari-tool-btn'>
             <i className={isDarkMode ? 'fas fa-sun' : 'fas fa-moon'} />
           </button>

@@ -35,6 +35,10 @@ const CONFIG = {
   FUWARI_POST_LIST_TAG: true,
   /** 桌面端列表卡片封面列宽度（px），增大则更扁长横向 */
   FUWARI_POST_LIST_COVER_COL_WIDTH: 280,
+  /** 默认文章列表布局：'list' (列表) 或 'grid' (网格) */
+  FUWARI_POST_LIST_LAYOUT: 'list',
+  /** 是否允许用户切换文章列表布局 */
+  FUWARI_POST_LIST_LAYOUT_ALLOW_SWITCH: true,
 
   // ---------------------------------------------------------------------------
   // 移动端
