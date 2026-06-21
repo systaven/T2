@@ -7,12 +7,10 @@ import { useEffect, useRef, useState } from 'react'
  * @returns
  */
 const Player = () => {
-  const theme = siteConfig('THEME')
-  if (theme === 'fuwari') {
-    return null
-  }
   const [player, setPlayer] = useState()
   const ref = useRef(null)
+  const theme = siteConfig('THEME')
+  const isFuwari = theme === 'fuwari'
   const lrcType = JSON.parse(siteConfig('MUSIC_PLAYER_LRC_TYPE'))
   const playerVisible = JSON.parse(siteConfig('MUSIC_PLAYER_VISIBLE'))
   const autoPlay = JSON.parse(siteConfig('MUSIC_PLAYER_AUTO_PLAY'))
@@ -57,11 +55,14 @@ const Player = () => {
   }
 
   useEffect(() => {
+    if (isFuwari) return
     initMusicPlayer()
     return () => {
       setPlayer(undefined)
     }
   }, [])
+
+  if (isFuwari) return null
 
   return (
     <div className={playerVisible ? 'visible' : 'invisible'}>

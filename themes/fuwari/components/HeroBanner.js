@@ -91,32 +91,24 @@ const HeroBanner = (props) => {
     ? (post.pageCover || post.pageCoverThumbnail || siteConfig('FUWARI_HERO_BG_IMAGE', '', CONFIG) || siteConfig('HOME_BANNER_IMAGE'))
     : (siteInfo?.pageCover || siteConfig('FUWARI_HERO_BG_IMAGE', '', CONFIG) || siteConfig('HOME_BANNER_IMAGE'))
 
-  // 背景图片平滑淡入淡出（实现类似 Astro Mizuki 路由切换时的横幅渐变过渡效果）
-  const [currentImage, setCurrentImage] = useState(cover)
-  const [fadeImage, setFadeImage] = useState(null)
-  const [fadeOpacity, setFadeOpacity] = useState(1)
+  // 背景图片平滑淡入淡出（实现类似 Astro Mizuki 路由切换时的横幅渐变过渡效果，双层交替以彻底解决二次切换无动画或闪现的 bug）
+  const [bgImage1, setBgImage1] = useState(cover)
+  const [bgImage2, setBgImage2] = useState('')
+  const [showImage2, setShowImage2] = useState(false)
 
   useEffect(() => {
-    if (cover !== currentImage) {
-      setFadeImage(currentImage)
-      setFadeOpacity(1)
-      setCurrentImage(cover)
-
-      // 在下一帧触发渐变透明
-      const animFrame = requestAnimationFrame(() => {
-        setFadeOpacity(0)
-      })
-
-      const timer = setTimeout(() => {
-        setFadeImage(null)
-      }, 1000) // 渐变动画时间与 CSS 的 transition 相同 (1s)
-
-      return () => {
-        cancelAnimationFrame(animFrame)
-        clearTimeout(timer)
+    if (showImage2) {
+      if (cover !== bgImage2) {
+        setBgImage1(cover)
+        setShowImage2(false)
+      }
+    } else {
+      if (cover !== bgImage1) {
+        setBgImage2(cover)
+        setShowImage2(true)
       }
     }
-  }, [cover, currentImage])
+  }, [cover])
 
   const displayTitle1 = isPostPage
     ? (post.category || '文章详情')
@@ -145,38 +137,36 @@ const HeroBanner = (props) => {
 
       {/* 背景图片容器 - 双层交替以支持渐变切换 */}
       <div className="absolute inset-0 z-0 overflow-hidden">
-        {/* 新背景（在底部，不透明） */}
-        {currentImage && (
+        {bgImage1 && (
           <div
-            className='fuwari-hero-bg'
-            style={{ backgroundImage: `url(${currentImage})` }}
+            className='fuwari-hero-bg transition-opacity duration-1000 ease-in-out absolute inset-0'
+            style={{ 
+              backgroundImage: `url(${bgImage1})`,
+              opacity: showImage2 ? 0 : 1
+            }}
           />
         )}
-        
-        {/* 旧背景（在上方，缓慢变为透明） */}
-        {fadeImage && (
+        {bgImage2 && (
           <div
-            className='fuwari-hero-bg transition-opacity duration-1000 ease-in-out'
+            className='fuwari-hero-bg transition-opacity duration-1000 ease-in-out absolute inset-0'
             style={{ 
-              backgroundImage: `url(${fadeImage})`,
-              opacity: fadeOpacity
+              backgroundImage: `url(${bgImage2})`,
+              opacity: showImage2 ? 1 : 0
             }}
           />
         )}
       </div>
 
-      <div className='fuwari-hero-mask' />
-
       <div className='max-w-6xl mx-auto px-6 h-full flex flex-col justify-center items-center text-center relative z-10 text-white'>
-        <div className='space-y-2 animate-fuwari-enter flex flex-col items-center justify-center w-full'>
-          {displayTitle1 && <div className='text-sm font-medium opacity-80 text-center'>{displayTitle1}</div>}
+        <div className='space-y-2 animate-fuwari-enter flex flex-col items-center justify-center w-full pt-10 md:pt-16'>
+          {displayTitle1 && <div className='text-sm font-bold opacity-90 text-center'>{displayTitle1}</div>}
           {isPostPage ? (
-            <h1 className='text-3xl md:text-4xl font-bold tracking-tight text-center'>
+            <h1 className='text-3xl md:text-4xl font-extrabold tracking-tight text-center'>
               {post.title}
             </h1>
           ) : (
             (title2 || title3 || strings.length > 0) && (
-              <h1 className='text-4xl md:text-5xl font-bold tracking-tight min-h-[1.2em] flex items-center justify-center flex-wrap text-center'>
+              <h1 className='text-4xl md:text-5xl font-extrabold tracking-tight min-h-[1.2em] flex items-center justify-center flex-wrap text-center'>
                 <span className='sr-only'>{title2} {title3}</span>
                 <span>{displayText}</span>
                 <span className='fuwari-typewriter-cursor'>|</span>

@@ -9,6 +9,7 @@ import PluginCard from './PluginCard'
 import Toc from './Toc'
 import ReadingProgress from './ReadingProgress'
 import Calendar from './Calendar'
+import MusicPlayer from './MusicPlayer'
 import SmartLink from '@/components/SmartLink'
 
 /**
@@ -75,6 +76,7 @@ const SidePanelRight = props => {
         {/* 一言挂件 */}
         <DailyQuote />
         <Calendar allNavPages={allNavPages} />
+        <MusicPlayer />
       </div>
     </aside>
   )

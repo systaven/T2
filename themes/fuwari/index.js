@@ -41,7 +41,6 @@ const AlgoliaSearchModal = dynamic(
 const Lenis = dynamic(() => import('@/components/Lenis'), { ssr: false })
 const CursorDot = dynamic(() => import('@/components/CursorDot'), { ssr: false })
 const Live2D = dynamic(() => import('@/components/Live2D'), { ssr: false })
-const MusicPlayer = dynamic(() => import('./components/MusicPlayer'), { ssr: false })
 const getLocale = () => generateLocaleDict(siteConfig('LANG', 'zh-CN'))
 
 const LayoutBase = props => {
@@ -128,7 +127,6 @@ const LayoutBase = props => {
       </div>
       {siteConfig('FUWARI_EFFECT_LENIS', false, CONFIG) && <Lenis />}
       {siteConfig('FUWARI_EFFECT_CURSOR_DOT', false, CONFIG) && <CursorDot />}
-      <MusicPlayer />
     </div>
   )
 }

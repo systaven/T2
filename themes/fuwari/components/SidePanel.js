@@ -13,6 +13,7 @@ import SocialButton from './SocialButton'
 import DailyQuote from './DailyQuote'
 import Toc from './Toc'
 import Calendar from './Calendar'
+import MusicPlayer from './MusicPlayer'
 
 import dynamic from 'next/dynamic'
 
@@ -154,6 +155,7 @@ const SidePanel = props => {
             </section>
           )}
           <Calendar allNavPages={props.allNavPages} />
+          {!isLeft && <MusicPlayer />}
           <AnalyticsCard
             postCount={postCount}
             categoryOptions={categoryOptions}

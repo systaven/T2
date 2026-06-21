@@ -59,16 +59,20 @@ const HeaderSearch = () => {
   // Limit to top 6 results for clean UI
   const results = filteredPosts.slice(0, 6)
 
-  // Handle outside clicks to close dropdown
+  // Handle outside clicks to close dropdown AND modal
   useEffect(() => {
     const onClickOutside = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
         setIsOpen(false)
       }
+      const modalElement = document.querySelector('.search-modal-card')
+      if (isModalOpen && modalElement && !modalElement.contains(e.target)) {
+        setIsModalOpen(false)
+      }
     }
     document.addEventListener('mousedown', onClickOutside)
     return () => document.removeEventListener('mousedown', onClickOutside)
-  }, [])
+  }, [isModalOpen])
 
   // Handle ESC or other shortcuts (like CMD+K / Ctrl+K)
   useEffect(() => {
@@ -88,12 +92,14 @@ const HeaderSearch = () => {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [hasFetched, loading])
 
-  // Focus mobile input when modal opens
+  // Focus mobile input when modal opens, blur when closed
   useEffect(() => {
     if (isModalOpen) {
       setTimeout(() => {
         mobileInputRef.current?.focus()
       }, 100)
+    } else {
+      mobileInputRef.current?.blur()
     }
   }, [isModalOpen])
 
@@ -270,77 +276,82 @@ const HeaderSearch = () => {
       </button>
 
       {/* Mobile Search Modal Overlay */}
-      {isModalOpen && (
-        <div className='fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex justify-center items-start pt-[10vh] px-4 animate__animated animate__fadeIn animate__faster' onClick={() => setIsModalOpen(false)}>
-          <div
-            className='bg-[var(--fuwari-surface)] w-full max-w-lg rounded-2xl border border-[var(--fuwari-border)] shadow-2xl overflow-hidden flex flex-col animate__animated animate__zoomIn animate__faster'
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Modal Search Input Header */}
-            <div className='relative flex items-center border-b border-[var(--fuwari-border)] p-3 bg-[var(--fuwari-bg-soft)]'>
-              <i className='fas fa-search text-[var(--fuwari-muted)] ml-2 text-sm shrink-0' />
-              <input
-                ref={mobileInputRef}
-                type='text'
-                placeholder={locale?.SEARCH?.ARTICLES || '搜索文章...'}
-                value={keyword}
-                onChange={e => handleInputChange(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className='bg-transparent text-sm text-[var(--fuwari-text)] pl-3 pr-8 py-1.5 w-full outline-none'
-              />
-              <div className='absolute right-12 top-1/2 -translate-y-1/2 flex items-center'>
-                {loading && (
-                  <i className='fas fa-spinner animate-spin text-[var(--fuwari-muted)] text-xs' />
-                )}
-                {keyword && !loading && (
-                  <button onClick={clearSearch} className='text-[var(--fuwari-muted)] hover:text-[var(--fuwari-text)]'>
-                    <i className='fas fa-times text-xs' />
-                  </button>
-                )}
-              </div>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className='ml-2 text-xs font-medium text-[var(--fuwari-muted)] hover:text-[var(--fuwari-text)] px-2 py-1.5 rounded-lg hover:bg-[var(--fuwari-bg-soft)]'
-              >
-                取消
-              </button>
-            </div>
-
-            {/* Modal Results List */}
-            <div className='p-2 max-h-[60vh] overflow-y-auto flex flex-col gap-1'>
-              {loading ? (
-                <div className='flex items-center justify-center py-10 text-[var(--fuwari-muted)] text-xs gap-2'>
-                  <i className='fas fa-spinner animate-spin text-sm' />
-                  <span>{locale?.COMMON?.LOADING || '加载中...'}</span>
-                </div>
-              ) : keyword.trim() === '' ? (
-                <div className='text-center py-12 text-[var(--fuwari-muted)] text-xs'>
-                  输入关键词搜索文章
-                </div>
-              ) : results.length > 0 ? (
-                <>
-                  <div className='px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--fuwari-muted)] mb-1'>
-                    {locale?.SEARCH?.RESULT_OF_SEARCH || '搜索结果'} ({filteredPosts.length})
-                  </div>
-                  {results.map((post, idx) => renderItem(post, idx, activeIndex === idx))}
-                  {filteredPosts.length > 6 && (
-                    <SmartLink
-                      href={`/search/${encodeURIComponent(keyword)}`}
-                      className='text-center text-xs text-[var(--fuwari-primary)] hover:underline pt-3 pb-2 border-t border-[var(--fuwari-border)] font-medium mt-2 block'
-                    >
-                      查看全部 {filteredPosts.length} 个结果 &raquo;
-                    </SmartLink>
-                  )}
-                </>
-              ) : (
-                <div className='text-center py-12 text-[var(--fuwari-muted)] text-xs'>
-                  没有找到相关文章
-                </div>
+      <div
+        className={`fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex justify-center items-start pt-[10vh] px-4 transition-all duration-300 ${
+          isModalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none invisible'
+        }`}
+        onClick={() => setIsModalOpen(false)}
+      >
+        <div
+          className={`search-modal-card bg-[var(--fuwari-surface)] w-full max-w-lg rounded-2xl border border-[var(--fuwari-border)] shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
+            isModalOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          }`}
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Modal Search Input Header */}
+          <div className='relative flex items-center border-b border-[var(--fuwari-border)] p-3 bg-[var(--fuwari-bg-soft)]'>
+            <i className='fas fa-search text-[var(--fuwari-muted)] ml-2 text-sm shrink-0' />
+            <input
+              ref={mobileInputRef}
+              type='text'
+              placeholder={locale?.SEARCH?.ARTICLES || '搜索文章...'}
+              value={keyword}
+              onChange={e => handleInputChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className='bg-transparent text-sm text-[var(--fuwari-text)] pl-3 pr-8 py-1.5 w-full outline-none'
+            />
+            <div className='absolute right-12 top-1/2 -translate-y-1/2 flex items-center'>
+              {loading && (
+                <i className='fas fa-spinner animate-spin text-[var(--fuwari-muted)] text-xs' />
+              )}
+              {keyword && !loading && (
+                <button onClick={clearSearch} className='text-[var(--fuwari-muted)] hover:text-[var(--fuwari-text)]'>
+                  <i className='fas fa-times text-xs' />
+                </button>
               )}
             </div>
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className='ml-2 text-xs font-medium text-[var(--fuwari-muted)] hover:text-[var(--fuwari-text)] px-2 py-1.5 rounded-lg hover:bg-[var(--fuwari-bg-soft)]'
+            >
+              取消
+            </button>
+          </div>
+
+          {/* Modal Results List */}
+          <div className='p-2 max-h-[60vh] overflow-y-auto flex flex-col gap-1'>
+            {loading ? (
+              <div className='flex items-center justify-center py-10 text-[var(--fuwari-muted)] text-xs gap-2'>
+                <i className='fas fa-spinner animate-spin text-sm' />
+                <span>{locale?.COMMON?.LOADING || '加载中...'}</span>
+              </div>
+            ) : keyword.trim() === '' ? (
+              <div className='text-center py-12 text-[var(--fuwari-muted)] text-xs'>
+                输入关键词搜索文章
+              </div>
+            ) : results.length > 0 ? (
+              <>
+                <div className='px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--fuwari-muted)] mb-1'>
+                  {locale?.SEARCH?.RESULT_OF_SEARCH || '搜索结果'} ({filteredPosts.length})
+                </div>
+                {results.map((post, idx) => renderItem(post, idx, activeIndex === idx))}
+                {filteredPosts.length > 6 && (
+                  <SmartLink
+                    href={`/search/${encodeURIComponent(keyword)}`}
+                    className='text-center text-xs text-[var(--fuwari-primary)] hover:underline pt-3 pb-2 border-t border-[var(--fuwari-border)] font-medium mt-2 block'
+                  >
+                    查看全部 {filteredPosts.length} 个结果 &raquo;
+                  </SmartLink>
+                )}
+              </>
+            ) : (
+              <div className='text-center py-12 text-[var(--fuwari-muted)] text-xs'>
+                没有找到相关文章
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </>
   )
 }

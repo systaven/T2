@@ -5,7 +5,7 @@ import { useGlobal } from '@/lib/global'
 import { useEffect, useRef, useState } from 'react'
 
 /**
- * Mizuki Style Music Player for Fuwari Theme
+ * Mizuki-style Sidebar Card Music Player for Fuwari Theme
  */
 const MusicPlayer = () => {
   const { locale } = useGlobal()
@@ -28,8 +28,6 @@ const MusicPlayer = () => {
   })
 
   const [isPlaying, setIsPlaying] = useState(autoPlay)
-  const [isExpanded, setIsExpanded] = useState(false)
-  const [isHidden, setIsHidden] = useState(false) // Start in mini player mode
   const [showPlaylist, setShowPlaylist] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -403,22 +401,6 @@ const MusicPlayer = () => {
     }
   }
 
-  const toggleExpanded = () => {
-    setIsExpanded(prev => !prev)
-    if (!isExpanded) {
-      setShowPlaylist(false)
-      setIsHidden(false)
-    }
-  }
-
-  const toggleHidden = () => {
-    setIsHidden(prev => !prev)
-    if (!isHidden) {
-      setIsExpanded(false)
-      setShowPlaylist(false)
-    }
-  }
-
   const togglePlaylist = () => {
     setShowPlaylist(prev => !prev)
   }
@@ -521,319 +503,221 @@ const MusicPlayer = () => {
         </div>
       )}
 
-      <div className={`music-player fixed bottom-4 right-4 z-[90] transition-all duration-300 ease-in-out ${isExpanded ? 'expanded' : ''} ${isHidden ? 'hidden-mode' : ''}`}>
-        {/* Orb Button (Minimized Ball) */}
-        <div
-          onClick={toggleHidden}
-          className={`orb-player w-12 h-12 rounded-full shadow-lg cursor-pointer flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-500 ease-in-out ${
-            !isHidden ? 'opacity-0 scale-0 pointer-events-none' : 'opacity-100 scale-100'
-          }`}
-          role='button'
-          tabIndex={0}
-          aria-label='显示音乐播放器'
-        >
-          {isLoading ? (
-            <i className='fas fa-spinner fa-spin text-white text-md' />
-          ) : isPlaying ? (
-            <div className='flex space-x-0.5 items-end h-4'>
-              <div className='w-0.5 h-3 bg-white rounded-full animate-pulse' />
-              <div className='w-0.5 h-4 bg-white rounded-full animate-pulse' style={{ animationDelay: '150ms' }} />
-              <div className='w-0.5 h-2 bg-white rounded-full animate-pulse' style={{ animationDelay: '300ms' }} />
-            </div>
-          ) : (
-            <i className='fas fa-music text-white text-md' />
-          )}
-        </div>
-
-        {/* Mini Player */}
-        <div
-          className={`mini-player fuwari-card bg-[var(--fuwari-surface)] border border-[var(--fuwari-border)] shadow-xl rounded-2xl p-3 transition-all duration-500 ease-in-out ${
-            isExpanded || isHidden ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
-          }`}
-        >
-          <div className='flex items-center gap-3'>
-            {/* Cover art toggle play */}
-            <div
-              onClick={togglePlay}
-              className='cover-container relative w-12 h-12 rounded-full overflow-hidden cursor-pointer'
-              role='button'
-              tabIndex={0}
-              aria-label={isPlaying ? '暂停' : '播放'}
-            >
-              <img
-                src={getAssetPath(currentSong.cover)}
-                alt='封面'
-                className={`w-full h-full object-cover transition-transform duration-300 ${isPlaying && !isLoading ? 'spinning' : ''} ${isLoading ? 'animate-pulse' : ''}`}
-              />
-              <div className='absolute inset-0 bg-black/25 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity'>
-                {isLoading ? (
-                  <i className='fas fa-spinner fa-spin text-white text-lg' />
-                ) : isPlaying ? (
-                  <i className='fas fa-pause text-white text-lg' />
-                ) : (
-                  <i className='fas fa-play text-white text-lg ml-0.5' />
-                )}
-              </div>
-            </div>
-
-            {/* Click info to expand */}
-            <div
-              onClick={toggleExpanded}
-              className='flex-1 min-w-0 cursor-pointer'
-              role='button'
-              tabIndex={0}
-              aria-label='展开音乐播放器'
-            >
-              <div className='text-sm font-medium text-[var(--fuwari-text)] truncate'>{currentSong.title}</div>
-              <div className='text-xs text-[var(--fuwari-muted)] truncate'>{currentSong.artist}</div>
-            </div>
-
-            {/* Minimise / Expand Button */}
-            <div className='flex items-center gap-1'>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  toggleHidden()
-                }}
-                className='w-8 h-8 rounded-lg flex items-center justify-center text-[var(--fuwari-text)] opacity-70 hover:opacity-100 hover:bg-[var(--fuwari-bg-soft)] transition-colors'
-                title='隐藏播放器'
-              >
-                <i className='fas fa-eye-slash text-sm' />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  toggleExpanded()
-                }}
-                className='w-8 h-8 rounded-lg flex items-center justify-center text-[var(--fuwari-text)] opacity-70 hover:opacity-100 hover:bg-[var(--fuwari-bg-soft)] transition-colors'
-              >
-                <i className='fas fa-chevron-up text-sm' />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Expanded Player */}
-        <div
-          className={`expanded-player fuwari-card bg-[var(--fuwari-surface)] border border-[var(--fuwari-border)] shadow-xl rounded-2xl p-4 transition-all duration-500 ease-in-out ${
-            !isExpanded ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'
-          }`}
-        >
-          <div className='flex items-center gap-4 mb-4'>
-            <div className='cover-container relative w-16 h-16 rounded-full overflow-hidden flex-shrink-0'>
-              <img
-                src={getAssetPath(currentSong.cover)}
-                alt='封面'
-                className={`w-full h-full object-cover transition-transform duration-300 ${isPlaying && !isLoading ? 'spinning' : ''} ${isLoading ? 'animate-pulse' : ''}`}
-              />
-            </div>
-            <div className='flex-1 min-w-0'>
-              <div className='song-title text-base font-bold text-[var(--fuwari-text)] truncate mb-1'>{currentSong.title}</div>
-              <div className='song-artist text-xs text-[var(--fuwari-muted)] truncate'>{currentSong.artist}</div>
-              <div className='text-[10px] text-[var(--fuwari-muted)] opacity-80 mt-1.5'>
-                {formatTime(currentTime)} / {formatTime(duration)}
-              </div>
-            </div>
-            <div className='flex items-center gap-1 self-start'>
-              <button
-                onClick={toggleHidden}
-                className='w-8 h-8 rounded-lg flex items-center justify-center text-[var(--fuwari-text)] opacity-70 hover:opacity-100 hover:bg-[var(--fuwari-bg-soft)] transition-colors'
-                title='隐藏播放器'
-              >
-                <i className='fas fa-eye-slash text-sm' />
-              </button>
-              <button
-                onClick={togglePlaylist}
-                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
-                  showPlaylist ? 'text-[var(--fuwari-primary)] bg-[var(--fuwari-bg-soft)]' : 'text-[var(--fuwari-text)] opacity-70 hover:opacity-100 hover:bg-[var(--fuwari-bg-soft)]'
-                }`}
-                title='播放列表'
-              >
-                <i className='fas fa-list text-sm' />
-              </button>
-            </div>
-          </div>
-
-          {/* Progress Section */}
-          <div className='progress-section mb-4'>
-            <div
-              ref={progressBarRef}
-              onClick={setProgress}
-              className='progress-bar w-full h-1.5 bg-[var(--fuwari-bg-soft)] hover:h-2.5 rounded-full cursor-pointer transition-all relative'
-              role='slider'
-              tabIndex={0}
-              aria-label='播放进度'
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={duration > 0 ? Math.floor((currentTime / duration) * 100) : 0}
-            >
-              <div
-                className='h-full bg-[var(--fuwari-primary)] rounded-full transition-all duration-100'
-                style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Controls */}
-          <div className='controls flex items-center justify-center gap-3 mb-4'>
-            <button
-              onClick={toggleShuffle}
-              disabled={playlist.length <= 1}
-              className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
-                isShuffled
-                  ? 'bg-[var(--fuwari-primary)] text-white'
-                  : 'text-[var(--fuwari-text)] opacity-70 hover:opacity-100 hover:bg-[var(--fuwari-bg-soft)] disabled:opacity-30'
-              }`}
-              title='随机播放'
-            >
-              <i className='fas fa-random text-sm' />
-            </button>
-            <button
-              onClick={playPreviousSong}
-              disabled={playlist.length <= 1}
-              className='w-9 h-9 rounded-lg flex items-center justify-center text-[var(--fuwari-text)] opacity-70 hover:opacity-100 hover:bg-[var(--fuwari-bg-soft)] disabled:opacity-30 transition-colors'
-              title='上一首'
-            >
-              <i className='fas fa-backward text-sm' />
-            </button>
-            <button
-              onClick={togglePlay}
-              disabled={isLoading}
-              className='w-11 h-11 rounded-full flex items-center justify-center bg-[var(--fuwari-primary)] hover:scale-105 active:scale-95 text-white transition-all shadow-md shadow-[var(--fuwari-primary-soft)] disabled:opacity-50'
-              title={isPlaying ? '暂停' : '播放'}
-            >
+      <section className="fuwari-card p-4 flex flex-col gap-3 min-w-0 w-full select-none">
+        {/* Upper part: Cover & Meta Info */}
+        <div className="flex items-center gap-3">
+          {/* Cover Art (rotates when playing) */}
+          <div
+            onClick={togglePlay}
+            className="cover-container relative w-16 h-16 rounded-full overflow-hidden cursor-pointer shrink-0 border border-[var(--fuwari-border)]/50"
+            role="button"
+            tabIndex={0}
+            aria-label={isPlaying ? '暂停' : '播放'}
+          >
+            <img
+              src={getAssetPath(currentSong.cover)}
+              alt="封面"
+              className={`w-full h-full object-cover transition-transform duration-300 ${isPlaying && !isLoading ? 'spinning' : ''} ${isLoading ? 'animate-pulse' : ''}`}
+            />
+            <div className="absolute inset-0 bg-black/25 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
               {isLoading ? (
-                <i className='fas fa-spinner fa-spin text-sm' />
+                <i className="fas fa-spinner fa-spin text-white text-md" />
               ) : isPlaying ? (
-                <i className='fas fa-pause text-sm' />
+                <i className="fas fa-pause text-white text-md" />
               ) : (
-                <i className='fas fa-play text-sm ml-0.5' />
+                <i className="fas fa-play text-white text-md ml-0.5" />
               )}
-            </button>
-            <button
-              onClick={() => {
-                const { playlist, currentIndex, isShuffled } = stateRef.current
-                playNextSong(playlist, currentIndex, isShuffled)
-              }}
-              disabled={playlist.length <= 1}
-              className='w-9 h-9 rounded-lg flex items-center justify-center text-[var(--fuwari-text)] opacity-70 hover:opacity-100 hover:bg-[var(--fuwari-bg-soft)] disabled:opacity-30 transition-colors'
-              title='下一首'
-            >
-              <i className='fas fa-forward text-sm' />
-            </button>
-            <button
-              onClick={toggleRepeat}
-              className={`w-9 h-9 rounded-lg flex items-center justify-center transition-colors ${
-                isRepeating > 0
-                  ? 'bg-[var(--fuwari-primary)] text-white'
-                  : 'text-[var(--fuwari-text)] opacity-70 hover:opacity-100 hover:bg-[var(--fuwari-bg-soft)]'
-              }`}
-              title={isRepeating === 1 ? '单曲循环' : isRepeating === 2 ? '列表循环' : '无循环'}
-            >
-              {isRepeating === 1 ? (
-                <div className='relative flex items-center justify-center'>
-                  <i className='fas fa-redo text-sm' />
-                  <span className='absolute text-[8px] font-bold mt-[-2px]' style={{ fontSize: '7px', color: 'inherit' }}>1</span>
-                </div>
-              ) : (
-                <i className={`fas fa-redo text-sm ${isRepeating === 0 ? 'opacity-40' : ''}`} />
-              )}
-            </button>
+            </div>
           </div>
 
-          {/* Bottom Volume & Expand Controls */}
-          <div className='bottom-controls flex items-center gap-3'>
-            <button
-              onClick={toggleMute}
-              className='w-8 h-8 rounded-lg flex items-center justify-center text-[var(--fuwari-text)] opacity-70 hover:opacity-100 hover:bg-[var(--fuwari-bg-soft)] transition-colors'
-              title={isMuted ? '取消静音' : '静音'}
-            >
-              {isMuted || volume === 0 ? (
-                <i className='fas fa-volume-mute text-sm' />
-              ) : volume < 0.5 ? (
-                <i className='fas fa-volume-down text-sm' />
-              ) : (
-                <i className='fas fa-volume-up text-sm' />
-              )}
-            </button>
-            
-            {/* Volume slider */}
-            <div
-              ref={volumeBarRef}
-              onMouseDown={startVolumeDrag}
-              className='flex-1 h-1.5 bg-[var(--fuwari-bg-soft)] hover:h-2.5 rounded-full cursor-pointer relative transition-all'
-              role='slider'
-              tabIndex={0}
-              aria-label='音量控制'
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={Math.floor(volume * 100)}
-            >
-              <div
-                className='h-full bg-[var(--fuwari-primary)] rounded-full'
-                style={{
-                  width: `${volume * 100}%`,
-                  transition: isVolumeDragging ? 'none' : 'width 100ms'
-                }}
-              />
+          {/* Title & Artist */}
+          <div className="flex-1 min-w-0">
+            <div className="font-bold text-sm text-[var(--fuwari-text)] truncate">{currentSong.title}</div>
+            <div className="text-xs text-[var(--fuwari-muted)] truncate">{currentSong.artist}</div>
+            <div className="text-[10px] text-[var(--fuwari-muted)] opacity-80 mt-1">
+              {formatTime(currentTime)} / {formatTime(duration)}
             </div>
-
-            <button
-              onClick={toggleExpanded}
-              className='w-8 h-8 rounded-lg flex items-center justify-center text-[var(--fuwari-text)] opacity-70 hover:opacity-100 hover:bg-[var(--fuwari-bg-soft)] transition-colors'
-              title='收起播放器'
-            >
-              <i className='fas fa-chevron-down text-sm' />
-            </button>
           </div>
         </div>
 
-        {/* Playlist Panel */}
+        {/* Progress Bar */}
+        <div className="progress-section my-0.5">
+          <div
+            ref={progressBarRef}
+            onClick={setProgress}
+            className="progress-bar w-full h-1.5 bg-[var(--fuwari-bg-soft)] rounded-full cursor-pointer relative hover:h-2 transition-all"
+            role="slider"
+            tabIndex={0}
+            aria-label="播放进度"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={duration > 0 ? Math.floor((currentTime / duration) * 100) : 0}
+          >
+            <div
+              className="h-full bg-[var(--fuwari-primary)] rounded-full transition-all duration-100"
+              style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Playback Controls */}
+        <div className="controls flex items-center justify-between gap-1 px-1">
+          <button
+            onClick={toggleShuffle}
+            disabled={playlist.length <= 1}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+              isShuffled ? 'text-[var(--fuwari-primary)] bg-[var(--fuwari-primary-soft)]/20' : 'text-[var(--fuwari-text)] opacity-70 hover:opacity-100 hover:bg-[var(--fuwari-bg-soft)]'
+            }`}
+            title="随机播放"
+          >
+            <i className="fas fa-random text-xs" />
+          </button>
+
+          <button
+            onClick={playPreviousSong}
+            disabled={playlist.length <= 1}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--fuwari-text)] opacity-70 hover:opacity-100 hover:bg-[var(--fuwari-bg-soft)] transition-colors disabled:opacity-30"
+            title="上一首"
+          >
+            <i className="fas fa-backward text-xs" />
+          </button>
+
+          <button
+            onClick={togglePlay}
+            disabled={isLoading}
+            className="w-10 h-10 rounded-full flex items-center justify-center bg-[var(--fuwari-primary)] text-white hover:scale-105 active:scale-95 transition-all shadow-md shadow-[var(--fuwari-primary-soft)]"
+            title={isPlaying ? '暂停' : '播放'}
+          >
+            {isLoading ? (
+              <i className="fas fa-spinner fa-spin text-xs" />
+            ) : isPlaying ? (
+              <i className="fas fa-pause text-xs" />
+            ) : (
+              <i className="fas fa-play text-xs ml-0.5" />
+            )}
+          </button>
+
+          <button
+            onClick={() => {
+              const { playlist, currentIndex, isShuffled } = stateRef.current
+              playNextSong(playlist, currentIndex, isShuffled)
+            }}
+            disabled={playlist.length <= 1}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--fuwari-text)] opacity-70 hover:opacity-100 hover:bg-[var(--fuwari-bg-soft)] transition-colors disabled:opacity-30"
+            title="下一首"
+          >
+            <i className="fas fa-forward text-xs" />
+          </button>
+
+          <button
+            onClick={toggleRepeat}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+              isRepeating > 0 ? 'text-[var(--fuwari-primary)] bg-[var(--fuwari-primary-soft)]/20' : 'text-[var(--fuwari-text)] opacity-70 hover:opacity-100 hover:bg-[var(--fuwari-bg-soft)]'
+            }`}
+            title={isRepeating === 1 ? '单曲循环' : isRepeating === 2 ? '列表循环' : '无循环'}
+          >
+            {isRepeating === 1 ? (
+              <div className="relative flex items-center justify-center">
+                <i className="fas fa-redo text-xs" />
+                <span className="absolute text-[7px] font-bold mt-[-2px]" style={{ color: 'inherit' }}>1</span>
+              </div>
+            ) : (
+              <i className={`fas fa-redo text-xs ${isRepeating === 0 ? 'opacity-40' : ''}`} />
+            )}
+          </button>
+        </div>
+
+        {/* Volume & Playlist Panel Trigger */}
+        <div className="bottom-bar flex items-center justify-between gap-2 mt-1">
+          <button
+            onClick={toggleMute}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--fuwari-text)] opacity-70 hover:opacity-100 hover:bg-[var(--fuwari-bg-soft)] transition-colors shrink-0"
+            title={isMuted ? '取消静音' : '静音'}
+          >
+            {isMuted || volume === 0 ? (
+              <i className="fas fa-volume-mute text-xs" />
+            ) : volume < 0.5 ? (
+              <i className="fas fa-volume-down text-xs" />
+            ) : (
+              <i className="fas fa-volume-up text-xs" />
+            )}
+          </button>
+
+          {/* Volume Slider */}
+          <div
+            ref={volumeBarRef}
+            onMouseDown={startVolumeDrag}
+            className="flex-1 h-1.5 bg-[var(--fuwari-bg-soft)] hover:h-2 rounded-full cursor-pointer relative transition-all"
+            role="slider"
+            tabIndex={0}
+            aria-label="音量控制"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.floor(volume * 100)}
+          >
+            <div
+              className="h-full bg-[var(--fuwari-primary)] rounded-full"
+              style={{
+                width: `${volume * 100}%`,
+                transition: isVolumeDragging ? 'none' : 'width 100ms'
+              }}
+            />
+          </div>
+
+          <button
+            onClick={togglePlaylist}
+            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0 ${
+              showPlaylist ? 'text-[var(--fuwari-primary)] bg-[var(--fuwari-primary-soft)]/20' : 'text-[var(--fuwari-text)] opacity-70 hover:opacity-100 hover:bg-[var(--fuwari-bg-soft)]'
+            }`}
+            title="播放列表"
+          >
+            <i className="fas fa-list text-xs" />
+          </button>
+        </div>
+
+        {/* Inline Playlist Panel */}
         <div
-          className={`playlist-panel fuwari-card bg-[var(--fuwari-surface)] border border-[var(--fuwari-border)] shadow-xl rounded-2xl fixed bottom-24 right-4 w-80 max-h-96 overflow-hidden z-[91] transition-all duration-300 ease-in-out ${
-            !showPlaylist ? 'opacity-0 translate-y-4 pointer-events-none' : 'opacity-100 translate-y-0'
+          className={`playlist-panel border-t border-[var(--fuwari-border)]/50 mt-2 transition-all duration-300 ease-in-out origin-top overflow-hidden ${
+            showPlaylist ? 'opacity-100 max-h-60 py-2' : 'opacity-0 max-h-0 pointer-events-none'
           }`}
         >
-          <div className='playlist-header flex items-center justify-between p-4 border-b border-[var(--fuwari-border)]'>
-            <h3 className='text-md font-semibold text-[var(--fuwari-text)]'>{playlistLabel}</h3>
-            <button
-              onClick={togglePlaylist}
-              className='w-8 h-8 rounded-lg flex items-center justify-center text-[var(--fuwari-text)] opacity-70 hover:opacity-100 hover:bg-[var(--fuwari-bg-soft)] transition-colors'
-            >
-              <i className='fas fa-times text-sm' />
-            </button>
+          <div className="playlist-header flex items-center justify-between pb-2 mb-2 border-b border-[var(--fuwari-border)]/30">
+            <span className="text-xs font-semibold text-[var(--fuwari-text)]">{playlistLabel}</span>
+            <span className="text-[10px] text-[var(--fuwari-muted)]">{playlist.length} 首歌曲</span>
           </div>
-          <div className='playlist-content overflow-y-auto max-h-[300px] divide-y divide-[var(--fuwari-border)]/50'>
+          
+          {/* Playlist Content List */}
+          <div className="playlist-content overflow-y-auto max-h-[160px] divide-y divide-[var(--fuwari-border)]/20 pr-1 select-text">
             {playlist.map((song, index) => {
               const isCurrent = index === currentIndex
               return (
                 <div
                   key={song.id}
                   onClick={() => playSongByIndex(index)}
-                  className={`playlist-item flex items-center gap-3 p-3 hover:bg-[var(--fuwari-bg-soft)] cursor-pointer transition-colors ${
-                    isCurrent ? 'bg-[var(--fuwari-primary-soft)]/20' : ''
+                  className={`playlist-item flex items-center gap-2 py-2 px-1 hover:bg-[var(--fuwari-bg-soft)] cursor-pointer transition-colors rounded-lg ${
+                    isCurrent ? 'bg-[var(--fuwari-primary-soft)]/10' : ''
                   }`}
-                  role='button'
+                  role="button"
                   tabIndex={0}
                   aria-label={`播放 ${song.title} - ${song.artist}`}
                 >
-                  <div className='w-6 h-6 flex items-center justify-center shrink-0'>
+                  <div className="w-5 h-5 flex items-center justify-center shrink-0">
                     {isCurrent && isPlaying ? (
-                      <i className='fas fa-volume-up text-[var(--fuwari-primary)] animate-pulse' />
+                      <i className="fas fa-volume-up text-[var(--fuwari-primary)] text-xs animate-pulse" />
                     ) : isCurrent ? (
-                      <i className='fas fa-pause text-[var(--fuwari-primary)]' />
+                      <i className="fas fa-pause text-[var(--fuwari-primary)] text-xs" />
                     ) : (
-                      <span className='text-xs text-[var(--fuwari-muted)]'>{index + 1}</span>
+                      <span className="text-[10px] text-[var(--fuwari-muted)]">{index + 1}</span>
                     )}
                   </div>
-                  <div className='w-10 h-10 rounded-lg overflow-hidden bg-[var(--fuwari-bg-soft)] shrink-0'>
-                    <img src={getAssetPath(song.cover)} alt={song.title} className='w-full h-full object-cover' />
+                  <div className="w-8 h-8 rounded bg-[var(--fuwari-bg-soft)] shrink-0 overflow-hidden">
+                    <img src={getAssetPath(song.cover)} alt={song.title} className="w-full h-full object-cover" />
                   </div>
-                  <div className='flex-1 min-w-0'>
-                    <div className={`font-medium text-sm truncate ${isCurrent ? 'text-[var(--fuwari-primary)]' : 'text-[var(--fuwari-text)]'}`}>
+                  <div className="flex-1 min-w-0">
+                    <div className={`font-semibold text-xs truncate ${isCurrent ? 'text-[var(--fuwari-primary)]' : 'text-[var(--fuwari-text)]'}`}>
                       {song.title}
                     </div>
-                    <div className={`text-xs truncate ${isCurrent ? 'text-[var(--fuwari-primary)] opacity-80' : 'text-[var(--fuwari-muted)]'}`}>
+                    <div className={`text-[10px] truncate ${isCurrent ? 'text-[var(--fuwari-primary)] opacity-80' : 'text-[var(--fuwari-muted)]'}`}>
                       {song.artist}
                     </div>
                   </div>
@@ -842,71 +726,11 @@ const MusicPlayer = () => {
             })}
           </div>
         </div>
-      </div>
+      </section>
 
       <style jsx global>{`
-        .music-player {
-          user-select: none;
-          width: auto;
-        }
-        .orb-player {
-          position: relative;
-          background-color: var(--fuwari-primary);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-        }
-        .orb-player::before {
-          content: '';
-          position: absolute;
-          inset: -2px;
-          background: linear-gradient(45deg, var(--fuwari-primary), transparent, var(--fuwari-primary));
-          border-radius: 50%;
-          z-index: -1;
-          opacity: 0;
-          transition: opacity 0.3s ease;
-        }
-        .orb-player:hover::before {
-          opacity: 0.3;
-          animation: orb-rotate 2s linear infinite;
-        }
-        .orb-player .animate-pulse {
-          animation: musicWave 1.5s ease-in-out infinite;
-        }
-        @keyframes orb-rotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes musicWave {
-          0%, 100% { transform: scaleY(0.5); }
-          50% { transform: scaleY(1); }
-        }
-        .music-player.hidden-mode {
-          width: 48px;
-          height: 48px;
-        }
-        .mini-player {
-          width: 280px;
-          position: absolute;
-          bottom: 0;
-          right: 0;
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-        }
-        .expanded-player {
-          width: 320px;
-          position: absolute;
-          bottom: 0;
-          right: 0;
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-        }
-        
-        .progress-bar:hover {
-          transform: scaleY(1.2);
-        }
-
         .cover-container img {
-          animation: spin-continuous 5s linear infinite;
+          animation: spin-continuous 6s linear infinite;
           animation-play-state: paused;
         }
         .cover-container img.spinning {
@@ -916,41 +740,19 @@ const MusicPlayer = () => {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
-
-        @keyframes slide-up {
-          from {
-            transform: translateY(100%);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
+        
+        .playlist-content::-webkit-scrollbar {
+          width: 4px;
         }
-        .animate-slide-up {
-          animation: slide-up 0.3s ease-out;
+        .playlist-content::-webkit-scrollbar-track {
+          background: transparent;
         }
-
-        @media (max-width: 768px) {
-          .music-player {
-            bottom: 8px !important;
-            right: 8px !important;
-          }
-          .music-player.expanded {
-            width: calc(100vw - 16px);
-          }
-          .mini-player {
-            width: 280px;
-            right: 0;
-          }
-          .expanded-player {
-            width: calc(100vw - 16px);
-            right: 0;
-          }
-          .playlist-panel {
-            width: calc(100vw - 16px) !important;
-            right: 8px !important;
-          }
+        .playlist-content::-webkit-scrollbar-thumb {
+          background: var(--fuwari-border);
+          border-radius: 4px;
+        }
+        .playlist-content::-webkit-scrollbar-thumb:hover {
+          background: var(--fuwari-primary);
         }
       `}</style>
     </>
