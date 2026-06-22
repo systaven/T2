@@ -239,6 +239,7 @@ const HeaderSearch = ({ isMobile }) => {
               placeholder={locale?.SEARCH?.ARTICLES || '搜索文章...'}
               value=''
               readOnly
+              onFocus={handleFocus}
               className='bg-transparent text-xs text-[var(--fuwari-text)] pl-2 pr-8 py-1.5 w-full outline-none cursor-pointer'
             />
             <div className='absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5'>
@@ -254,7 +255,7 @@ const HeaderSearch = ({ isMobile }) => {
       {isRendered && portalTarget && createPortal(
         <div
           className={`fixed inset-0 z-50 bg-black/60 flex justify-center items-start pt-[10vh] px-4 transition-all duration-300 ${
-            isModalOpen ? 'opacity-100' : 'opacity-0'
+            isModalOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none invisible'
           }`}
           onClick={closeModal}
         >
@@ -330,6 +331,7 @@ const HeaderSearch = ({ isMobile }) => {
         </div>,
         portalTarget
       )}
+    </>
   )
 }
 
