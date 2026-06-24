@@ -1,34 +1,8 @@
-const EXTERNAL_HTTP_LINK = /^https?:\/\//i
-
-const mergeRelValues = (...values) => {
-  const rel = new Set()
-
-  values
-    .filter(Boolean)
-    .join(' ')
-    .split(/\s+/)
-    .filter(Boolean)
-    .forEach(token => rel.add(token))
-
-  return rel.size > 0 ? Array.from(rel).join(' ') : undefined
-}
-
-const isExternalHttpLink = (href, siteOrigin) => {
-  if (typeof href !== 'string' || !EXTERNAL_HTTP_LINK.test(href)) {
-    return false
-  }
-
-  if (!siteOrigin) {
-    return true
-  }
-
-  try {
-    const hrefUrl = new URL(href)
-    return hrefUrl.origin !== siteOrigin
-  } catch {
-    return true
-  }
-}
+import {
+  buildExternalRedirectPath,
+  isExternalHttpLink,
+  mergeRelValues
+} from '@/lib/utils/externalLink'
 
 export const shouldOpenNotionLinkInNewTab = (href, target, siteOrigin) => {
   if (target === '_blank') {
@@ -48,11 +22,19 @@ const NotionLink = ({ href, target, rel, ...props }) => {
   const shouldOpenInNewTab = shouldOpenNotionLinkInNewTab(href, target)
   const normalizedTarget = shouldOpenInNewTab ? '_blank' : target
   const normalizedRel = shouldOpenInNewTab
-    ? mergeRelValues(rel, 'noopener noreferrer')
+    ? mergeRelValues(rel, 'noopener noreferrer nofollow external')
     : rel
+  const normalizedHref = shouldOpenInNewTab
+    ? buildExternalRedirectPath(href)
+    : href
 
   return (
-    <a {...props} href={href} target={normalizedTarget} rel={normalizedRel} />
+    <a
+      {...props}
+      href={normalizedHref}
+      target={normalizedTarget}
+      rel={normalizedRel}
+    />
   )
 }
 

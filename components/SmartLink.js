@@ -1,5 +1,9 @@
 import Link from 'next/link'
 import { siteConfig } from '@/lib/config'
+import {
+  buildExternalRedirectPath,
+  mergeRelValues
+} from '@/lib/utils/externalLink'
 
 // 过滤 <a> 标签不能识别的 props
 const filterDOMProps = props => {
@@ -94,13 +98,16 @@ const SmartLink = ({ href, children, ...rest }) => {
     // 对于外部链接，必须是 string 类型
     const externalUrl =
       typeof href === 'string' ? href : new URL(href.pathname, LINK).toString()
+    const target = rest.target || '_blank'
+    const rel = mergeRelValues(rest.rel, 'noopener noreferrer nofollow external')
 
     return (
       <a
-        href={externalUrl}
-        target='_blank'
-        rel='noopener noreferrer'
-        {...filterDOMProps(rest)}>
+        {...filterDOMProps(rest)}
+        href={buildExternalRedirectPath(externalUrl)}
+        target={target}
+        rel={rel}
+      >
         {children}
       </a>
     )

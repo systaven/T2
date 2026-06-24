@@ -1,22 +1,24 @@
+import {
+  decodeExternalUrl,
+  validateExternalRedirectTarget
+} from '@/lib/utils/externalLink'
 import { siteConfig } from '@/lib/config'
-import { validateExternalRedirectTarget } from '@/lib/utils/externalLink'
 
 const applyNoIndexHeaders = res => {
   res.setHeader('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet')
   res.setHeader('Cache-Control', 'private, no-store, max-age=0, must-revalidate')
 }
 
-export default function GoPage() {
+export default function RedirectPage() {
   return null
 }
 
 export function getServerSideProps(context) {
-  const { query, res } = context
+  const { params, res } = context
   applyNoIndexHeaders(res)
 
-  const rawTarget =
-    typeof query?.target === 'string' ? query.target : Array.isArray(query?.target) ? query.target[0] : null
   const siteOrigin = siteConfig('LINK') || undefined
+  const rawTarget = decodeExternalUrl(params?.token)
   const target = validateExternalRedirectTarget(rawTarget, siteOrigin)
 
   if (!target) {
