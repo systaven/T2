@@ -1,9 +1,6 @@
 import Link from 'next/link'
 import { siteConfig } from '@/lib/config'
-import {
-  buildExternalRedirectPath,
-  mergeRelValues
-} from '@/lib/utils/externalLink'
+import { mergeRelValues } from '@/lib/utils/externalLink'
 
 // 过滤 <a> 标签不能识别的 props
 const filterDOMProps = props => {
@@ -104,7 +101,7 @@ const SmartLink = ({ href, children, ...rest }) => {
     return (
       <a
         {...filterDOMProps(rest)}
-        href={buildExternalRedirectPath(externalUrl)}
+        href={externalUrl}
         target={target}
         rel={rel}
       >

@@ -59,6 +59,7 @@ const NotionPage = ({ post, className }) => {
 
     // 文件链接在新标签页打开并强制下载
     processFileUrl()
+    processArticleHyperlinks()
 
     /**
      * 放大查看图片时替换成高清图像
@@ -73,6 +74,7 @@ const NotionPage = ({ post, className }) => {
           processDisableDatabaseUrl()
         }
         processFileUrl()
+        processArticleHyperlinks()
         if (
           mutation.type === 'attributes' &&
           mutation.attributeName === 'class'
@@ -134,7 +136,13 @@ const NotionPage = ({ post, className }) => {
         mapImageUrl={mapImgUrl}
         isLinkCollectionToUrlProperty
         components={{
-          Link: (props) => <ArticleLink {...props} target='_blank' />,
+          Link: (props) => (
+            <ArticleLink
+              {...props}
+              target='_blank'
+              useShortlink={useShortlinkForArticle}
+            />
+          ),
           Code,
           Collection,
           Equation,
@@ -176,6 +184,12 @@ const COLLECTION_TEXT_LINK_SELECTORS = [
   '.notion-property-phone_number',
   '.notion-property-url'
 ].join(', ')
+
+const ARTICLE_LINK_SELECTOR = '#notion-article a[href]'
+const FORCE_DOWNLOAD_FILE_PATTERN =
+  /amazonaws\.com|notion-static|file\.notion\.so|secure\.notion-static\.com/i
+const FORCE_DOWNLOAD_EXT_PATTERN =
+  /\.(zip|rar|7z|pdf|docx?|xlsx?|pptx?|txt|csv|json|xml|mp3|mp4|mov|avi|apk|dmg|exe|iso)(?:[?#]|$)/i
 
 /**
  * 将数据库卡片或列表项的默认内部页面链接改写为 URL 属性里的外链
@@ -234,6 +248,42 @@ const processFileUrl = () => {
       e.setAttribute('target', '_blank')
       e.setAttribute('rel', 'noopener noreferrer')
       e.setAttribute('download', '')
+    }
+  }
+}
+
+/**
+ * 强制正文中的普通超链接新标签页打开，并为文件类链接补充 download 标志
+ */
+const processArticleHyperlinks = () => {
+  if (!isBrowser) return
+
+  const links = document.querySelectorAll(ARTICLE_LINK_SELECTOR)
+  for (const link of links) {
+    const href = link.getAttribute('href')
+    if (!href) continue
+
+    if (
+      href.startsWith('#') ||
+      href.startsWith('mailto:') ||
+      href.startsWith('tel:') ||
+      href.startsWith('javascript:')
+    ) {
+      continue
+    }
+
+    if (isHttpLink(href)) {
+      link.setAttribute('target', '_blank')
+      link.setAttribute('rel', 'noopener noreferrer nofollow external')
+    }
+
+    if (
+      FORCE_DOWNLOAD_FILE_PATTERN.test(href) ||
+      FORCE_DOWNLOAD_EXT_PATTERN.test(href)
+    ) {
+      link.setAttribute('target', '_blank')
+      link.setAttribute('rel', 'noopener noreferrer')
+      link.setAttribute('download', '')
     }
   }
 }
@@ -662,3 +712,4 @@ const Tweet = ({ id }) => {
 }
 
 export default NotionPage
+  const useShortlinkForArticle = post?.type === 'Post'

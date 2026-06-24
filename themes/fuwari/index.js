@@ -87,7 +87,7 @@ const LayoutBase = props => {
       <Style />
       <FullscreenWallpaper {...props} />
       {!siteConfig('FUWARI_EFFECT_CURSOR_DOT', false, CONFIG) && <CursorFollower />}
-      <ExternalLinkIntercepter />
+      <ExternalLinkIntercepter enabled={props.post?.type === 'Post'} />
       <Header
         locale={locale}
         customNav={props.customNav}
@@ -360,4 +360,3 @@ export {
   LayoutTagIndex,
   CONFIG as THEME_CONFIG
 }
-

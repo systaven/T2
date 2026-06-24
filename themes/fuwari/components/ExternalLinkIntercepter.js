@@ -7,9 +7,9 @@ import { buildExternalRedirectPath } from '@/lib/utils/externalLink'
  * 外部链接静默改写器
  * 将正文中的非白名单外链改写为站内中转短链
  */
-const ExternalLinkIntercepter = () => {
+const ExternalLinkIntercepter = ({ enabled = true }) => {
   useEffect(() => {
-    if (!isBrowser) return
+    if (!isBrowser || !enabled) return
 
     const whitelist = BLOG.LINK_WHITELIST || []
     const articleSelector =
@@ -82,7 +82,7 @@ const ExternalLinkIntercepter = () => {
     })
 
     return () => observer.disconnect()
-  }, [])
+  }, [enabled])
 
   return null
 }

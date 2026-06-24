@@ -53,7 +53,7 @@ const buildPreviewPosition = rect => {
   }
 }
 
-const ExternalArticleLink = ({ href, children, ...rest }) => {
+const ExternalArticleLink = ({ href, children, useShortlink = false, ...rest }) => {
   const anchorRef = useRef(null)
   const hoverTimerRef = useRef(null)
   const [open, setOpen] = useState(false)
@@ -70,7 +70,8 @@ const ExternalArticleLink = ({ href, children, ...rest }) => {
     !FILE_LIKE_URL_PATTERN.test(urlString) &&
     typeof window !== 'undefined'
 
-  const finalHref = isExternal ? buildExternalRedirectPath(urlString) : href
+  const finalHref =
+    isExternal && useShortlink ? buildExternalRedirectPath(urlString) : href
   const rel = isExternal
     ? mergeRelValues(rest.rel, 'noopener noreferrer nofollow external')
     : rest.rel
