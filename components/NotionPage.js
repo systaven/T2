@@ -13,7 +13,7 @@ import 'katex/dist/katex.min.css'
 import dynamic from 'next/dynamic'
 import { useEffect, useRef } from 'react'
 import { NotionRenderer } from 'react-notion-x'
-import SmartLink from '@/components/SmartLink'
+import ArticleLink from '@/components/ArticleLink'
 import { getTextContent } from 'notion-utils'
 
 /**
@@ -134,7 +134,7 @@ const NotionPage = ({ post, className }) => {
         mapImageUrl={mapImgUrl}
         isLinkCollectionToUrlProperty
         components={{
-          Link: (props) => <SmartLink {...props} target='_blank' />,
+          Link: (props) => <ArticleLink {...props} target='_blank' />,
           Code,
           Collection,
           Equation,
