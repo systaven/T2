@@ -27,6 +27,7 @@ const NotionPage = ({ post, className }) => {
   const POST_DISABLE_GALLERY_CLICK = siteConfig('POST_DISABLE_GALLERY_CLICK')
   const POST_DISABLE_DATABASE_CLICK = siteConfig('POST_DISABLE_DATABASE_CLICK')
   const SPOILER_TEXT_TAG = siteConfig('SPOILER_TEXT_TAG')
+  const useShortlinkForArticle = post?.type === 'Post'
 
   const zoomRef = useRef(null)
   const IMAGE_ZOOM_IN_WIDTH = siteConfig('IMAGE_ZOOM_IN_WIDTH', 1200)
@@ -712,4 +713,3 @@ const Tweet = ({ id }) => {
 }
 
 export default NotionPage
-  const useShortlinkForArticle = post?.type === 'Post'
