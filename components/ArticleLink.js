@@ -70,6 +70,8 @@ const shouldDecorateHyperlink = className => {
   )
 }
 
+const isFileLikeLink = href => FILE_LIKE_URL_PATTERN.test(href)
+
 const ExternalArticleLink = ({ href, children, useShortlink = false, ...rest }) => {
   const anchorRef = useRef(null)
   const hoverTimerRef = useRef(null)
@@ -81,16 +83,18 @@ const ExternalArticleLink = ({ href, children, useShortlink = false, ...rest }) 
   const linkPreviewEnabled = siteConfig('LINK_PREVIEW_ENABLE', true)
   const urlString = getUrlString(href)
   const isExternal = isExternalHttpLink(urlString, LINK)
+  const isFileLike = isFileLikeLink(urlString)
   const shouldShowPreview =
     linkPreviewEnabled &&
     isExternal &&
     shouldDecorateHyperlink(rest.className) &&
-    !FILE_LIKE_URL_PATTERN.test(urlString) &&
+    !isFileLike &&
     typeof window !== 'undefined'
   const shouldDecorate = isExternal && shouldDecorateHyperlink(rest.className)
+  const shouldUseShortlink =
+    isExternal && useShortlink && shouldDecorate && !isFileLike
 
-  const finalHref =
-    isExternal && useShortlink ? buildExternalRedirectPath(urlString) : href
+  const finalHref = shouldUseShortlink ? buildExternalRedirectPath(urlString) : href
   const rel = isExternal
     ? mergeRelValues(rest.rel, 'noopener noreferrer nofollow external')
     : rest.rel
@@ -215,6 +219,7 @@ const ExternalArticleLink = ({ href, children, useShortlink = false, ...rest }) 
         href={finalHref}
         rel={rel}
         target='_blank'
+        download={isFileLike ? '' : rest.download}
       >
         {children}
       </a>
@@ -229,6 +234,7 @@ const ExternalArticleLink = ({ href, children, useShortlink = false, ...rest }) 
         href={finalHref}
         rel={rel}
         target='_blank'
+        download={isFileLike ? '' : rest.download}
         onMouseEnter={openPreview}
         onMouseLeave={closePreview}
         onFocus={() => setOpen(true)}

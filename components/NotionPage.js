@@ -191,6 +191,7 @@ const FORCE_DOWNLOAD_FILE_PATTERN =
   /amazonaws\.com|notion-static|file\.notion\.so|secure\.notion-static\.com/i
 const FORCE_DOWNLOAD_EXT_PATTERN =
   /\.(zip|rar|7z|pdf|docx?|xlsx?|pptx?|txt|csv|json|xml|mp3|mp4|mov|avi|apk|dmg|exe|iso)(?:[?#]|$)/i
+const FORCE_NEW_TAB_SHORTLINK_PATTERN = /^\/(?:r\/|go(?:\?|$))/i
 
 /**
  * 将数据库卡片或列表项的默认内部页面链接改写为 URL 属性里的外链
@@ -278,7 +279,13 @@ const processArticleHyperlinks = () => {
       link.setAttribute('rel', 'noopener noreferrer nofollow external')
     }
 
+    if (FORCE_NEW_TAB_SHORTLINK_PATTERN.test(href)) {
+      link.setAttribute('target', '_blank')
+      link.setAttribute('rel', 'noopener noreferrer nofollow external')
+    }
+
     if (
+      link.classList.contains('notion-file-link') ||
       FORCE_DOWNLOAD_FILE_PATTERN.test(href) ||
       FORCE_DOWNLOAD_EXT_PATTERN.test(href)
     ) {
