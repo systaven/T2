@@ -15,6 +15,13 @@ const PREVIEW_OFFSET = 14
 const PREVIEW_HOVER_DELAY_MS = 320
 const FILE_LIKE_URL_PATTERN =
   /\.(pdf|zip|rar|7z|docx?|xlsx?|pptx?|txt|mp3|mp4|mov|avi|apk|dmg|exe)(?:[?#]|$)/i
+const NON_TEXTUAL_LINK_CLASS_PATTERNS = [
+  'notion-file-link',
+  'notion-page-link',
+  'notion-bookmark',
+  'notion-collection-card',
+  'notion-property-title'
+]
 const previewCache = new Map()
 
 const getUrlString = href => {
@@ -53,6 +60,16 @@ const buildPreviewPosition = rect => {
   }
 }
 
+const shouldDecorateHyperlink = className => {
+  if (typeof className !== 'string' || !className.includes('notion-link')) {
+    return false
+  }
+
+  return !NON_TEXTUAL_LINK_CLASS_PATTERNS.some(pattern =>
+    className.includes(pattern)
+  )
+}
+
 const ExternalArticleLink = ({ href, children, useShortlink = false, ...rest }) => {
   const anchorRef = useRef(null)
   const hoverTimerRef = useRef(null)
@@ -67,8 +84,10 @@ const ExternalArticleLink = ({ href, children, useShortlink = false, ...rest }) 
   const shouldShowPreview =
     linkPreviewEnabled &&
     isExternal &&
+    shouldDecorateHyperlink(rest.className) &&
     !FILE_LIKE_URL_PATTERN.test(urlString) &&
     typeof window !== 'undefined'
+  const shouldDecorate = isExternal && shouldDecorateHyperlink(rest.className)
 
   const finalHref =
     isExternal && useShortlink ? buildExternalRedirectPath(urlString) : href
@@ -188,6 +207,20 @@ const ExternalArticleLink = ({ href, children, useShortlink = false, ...rest }) 
     )
   }
 
+  if (!shouldDecorate) {
+    return (
+      <a
+        {...rest}
+        ref={anchorRef}
+        href={finalHref}
+        rel={rel}
+        target='_blank'
+      >
+        {children}
+      </a>
+    )
+  }
+
   return (
     <>
       <a
@@ -195,7 +228,7 @@ const ExternalArticleLink = ({ href, children, useShortlink = false, ...rest }) 
         ref={anchorRef}
         href={finalHref}
         rel={rel}
-        target={rest.target || '_blank'}
+        target='_blank'
         onMouseEnter={openPreview}
         onMouseLeave={closePreview}
         onFocus={() => setOpen(true)}
