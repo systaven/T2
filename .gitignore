@@ -45,6 +45,7 @@ yarn-error.log*
 /pnpm-lock.yaml
 .idea
 .vscode
+tsconfig.tsbuildinfo
 
 
 # sitemap
