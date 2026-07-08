@@ -5,8 +5,6 @@ const { extractLangPrefix } = require('./lib/utils/pageId')
 const { isExport } = require('./lib/utils/buildMode')
 const { getStaticPageGenerationTimeoutSec } = require('./lib/build/buildEnv')
 
-const nextBuildCpus = Number.parseInt(process.env.NEXT_BUILD_CPUS || '1', 10)
-
 // 打包时是否分析代码
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: BLOG.BUNDLE_ANALYZER
@@ -107,13 +105,7 @@ const preBuild = (function () {
   const sessionFile = path.join(notionCacheRoot, 'build-session.json')
   const sessionId = `${process.env.npm_lifecycle_event}-${Date.now()}-${process.pid}`
 
-  if (process.env.NOTION_BUILD_CACHE_PURGE_DATA === 'true') {
-    fs.rmSync(dataDir, { recursive: true, force: true })
-    console.log('Purged persistent Notion data cache')
-  } else {
-    pruneTransientNotionDataCache(dataDir)
-    console.log('Preserved versioned Notion page block cache')
-  }
+  fs.rmSync(dataDir, { recursive: true, force: true })
   fs.rmSync(prefetchDir, { recursive: true, force: true })
   fs.mkdirSync(notionCacheRoot, { recursive: true })
   fs.writeFileSync(
@@ -131,38 +123,6 @@ const preBuild = (function () {
   )
   console.log('Prepared Notion build session', sessionId)
 })()
-
-function isVersionedPageBlockCacheKey(key) {
-  return /^page_block_.+_\d{10,}$/.test(String(key || ''))
-}
-
-function pruneTransientNotionDataCache(dataDir) {
-  if (!fs.existsSync(dataDir)) {
-    return
-  }
-
-  let removed = 0
-  let kept = 0
-  for (const name of fs.readdirSync(dataDir)) {
-    if (!name.endsWith('.json')) continue
-
-    const file = path.join(dataDir, name)
-    try {
-      const entry = JSON.parse(fs.readFileSync(file, 'utf8'))
-      if (isVersionedPageBlockCacheKey(entry?.key)) {
-        kept++
-        continue
-      }
-    } catch {}
-
-    fs.rmSync(file, { force: true })
-    removed++
-  }
-
-  console.log(
-    `Pruned transient Notion cache entries: removed=${removed} kept=${kept}`
-  )
-}
 
 /**
  * 扫描指定目录下的文件夹名，用于获取所有主题
@@ -337,15 +297,6 @@ const nextConfig = {
           ]
         },
         {
-          source: '/vendor/fontawesome/:path*',
-          headers: [
-            {
-              key: 'Cache-Control',
-              value: 'public, max-age=31536000, immutable'
-            }
-          ]
-        },
-        {
           source: '/:path*{/}?',
           headers: [
             // 为了博客兼容性，不做过多安全限制
@@ -444,7 +395,7 @@ const nextConfig = {
   }
   ,
   experimental: {
-    cpus: Number.isFinite(nextBuildCpus) && nextBuildCpus > 0 ? nextBuildCpus : 1,
+    // cpus: 1,
     scrollRestoration: true,
     // 性能优化实验性功能
     optimizePackageImports: ['@heroicons/react', 'lodash']

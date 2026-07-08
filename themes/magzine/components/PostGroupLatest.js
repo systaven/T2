@@ -48,8 +48,6 @@ const PostGroupLatest = props => {
                 <LazyImage
                   alt={post?.title}
                   src={`${headerImage}`}
-                  width={80}
-                  height={56}
                   className='object-cover w-full h-full'
                 />
               </div>

@@ -100,7 +100,7 @@ const CONFIG = {
   /** 顶栏调色板内的色相滑块等；false 时展开调色板无控件 */
   FUWARI_WIDGET_THEME_COLOR_SWITCHER: true,
   /** 默认品牌色相 0–360 (HEO 风格推荐 350 左右) */
-  FUWARI_THEME_COLOR_HUE: 235,
+  FUWARI_THEME_COLOR_HUE: 350,
   /** true：隐藏顶栏调色盘按钮，无法在站内改色相 */
   FUWARI_THEME_COLOR_FIXED: false,
   /** 文章页右侧浮动区：跳转评论区按钮 */
@@ -174,7 +174,7 @@ const CONFIG = {
   FUWARI_ARTICLE_META: true,
   /** 分享条 */
   FUWARI_ARTICLE_SHARE: true,
-  /** 文章版权声明：true 全部显示；false 全部关闭；custom 仅填写 copyright 时显示 */
+  /** 文末版权信息块 */
   FUWARI_ARTICLE_COPYRIGHT: true,
   /** 文末评论区（需在 `blog.config.js` 配置任一种评论服务，如 COMMENT_GISCUS_REPO / COMMENT_TWIKOO_ENV_ID 等，否则不渲染） */
   FUWARI_ARTICLE_COMMENT: true,

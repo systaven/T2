@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react'
 import CONFIG from '../config'
 import { siteConfig } from '@/lib/config'
 import NotByAI from '@/components/NotByAI'
-import { resolveArticleCopyrightText } from '@/lib/utils/articleCopyright'
 
 export default function ArticleCopyright({ post }) {
   const router = useRouter()
@@ -15,13 +14,8 @@ export default function ArticleCopyright({ post }) {
   })
 
   const { locale } = useGlobal()
-  const copyrightText = resolveArticleCopyrightText({
-    post,
-    locale,
-    mode: siteConfig('MATERY_ARTICLE_COPYRIGHT', null, CONFIG)
-  })
 
-  if (!copyrightText) {
+  if (!siteConfig('MATERY_ARTICLE_COPYRIGHT', null, CONFIG)) {
     return <></>
   }
 
@@ -42,7 +36,7 @@ export default function ArticleCopyright({ post }) {
         </li>
         <li>
           <strong className='mr-2'>{locale.COMMON.COPYRIGHT}:</strong>
-          {copyrightText}
+          {post.copyright || locale.COMMON.COPYRIGHT_NOTICE}
         </li>
         {siteConfig('MATERY_ARTICLE_NOT_BY_AI', false, CONFIG) && (
           <li>

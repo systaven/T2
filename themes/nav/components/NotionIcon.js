@@ -16,7 +16,7 @@ const NotionIcon = ({ icon }) => {
   fontSize = (Math.round(imgSize / 2) - 1) > 0 ? (Math.round(imgSize / 2) - 1) : ''
 
   if (normalizedIcon.startsWith('http') || normalizedIcon.startsWith('data:')) {
-    return <LazyImage src={normalizedIcon} width={40} height={40} className={`w-10 h-10 inline`}/>
+    return <LazyImage src={normalizedIcon} className={`w-10 h-10 inline`}/>
   }
 
   const isFontAwesomeIcon =

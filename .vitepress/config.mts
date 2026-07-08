@@ -1,11 +1,7 @@
 import { defineConfig } from 'vitepress'
-import { execFileSync } from 'node:child_process'
-import { existsSync, readFileSync, statSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
 import { getThemeSidebarItems } from '../scripts/lib/builtin-themes.mjs'
 
 const themeDocLinks = getThemeSidebarItems()
-const projectRoot = fileURLToPath(new URL('../', import.meta.url))
 
 const giscusEnabled = process.env.VITE_GISCUS_ENABLED !== 'false'
 const giscusRepoId = process.env.VITE_GISCUS_REPO_ID || ''
@@ -16,80 +12,6 @@ const giscusCategoryId = process.env.VITE_GISCUS_CATEGORY_ID || ''
  * 根目录 README 仍作为 GitHub 目录说明，不进入 VitePress。
  */
 const srcExclude = ['**/README.md', '**/README.en.md']
-
-function getMarkdownTitle(filePath: string) {
-  const content = readFileSync(filePath, 'utf8')
-  const title = content.match(/^#\s+(.+)$/m)?.[1]?.trim()
-  return title || filePath.split(/[\\/]/).pop()?.replace(/\.md$/, '') || filePath
-}
-
-function getLastUpdatedAt(filePath: string) {
-  try {
-    const timestamp = execFileSync('git', ['log', '-1', '--format=%ct', '--', filePath], {
-      cwd: projectRoot,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore']
-    }).trim()
-
-    if (timestamp) {
-      return Number(timestamp) * 1000
-    }
-  } catch {
-    // Fall back to filesystem time when git history is unavailable in a deploy checkout.
-  }
-
-  return statSync(filePath).mtimeMs
-}
-
-function toDocLink(repoPath: string) {
-  let link = `/${repoPath.replace(/^docs\//, '').replace(/\.md$/, '')}`
-
-  if (link.endsWith('/index')) {
-    link = link.slice(0, -'/index'.length) || '/'
-  }
-
-  return link
-}
-
-function getUpdatedDocs() {
-  const trackedDocs = execFileSync('git', ['ls-files', 'docs'], {
-    cwd: projectRoot,
-    encoding: 'utf8'
-  })
-    .split(/\r?\n/)
-    .filter((repoPath) => {
-      return (
-        repoPath.endsWith('.md') &&
-        !repoPath.endsWith('/README.md') &&
-        !repoPath.endsWith('/README.en.md') &&
-        !repoPath.includes('/public/')
-      )
-    })
-
-  return trackedDocs
-    .map((repoPath) => {
-      const filePath = fileURLToPath(new URL(`../${repoPath}`, import.meta.url))
-
-      if (!existsSync(filePath)) {
-        return null
-      }
-
-      return {
-        link: toDocLink(repoPath),
-        title: getMarkdownTitle(filePath),
-        updatedAt: Math.floor(getLastUpdatedAt(filePath)),
-        isIndex: repoPath.endsWith('/index.md')
-      }
-    })
-    .filter(
-      (item): item is { link: string; title: string; updatedAt: number; isIndex: boolean } =>
-        Boolean(item)
-    )
-    .sort((a, b) => b.updatedAt - a.updatedAt)
-}
-
-const updatedDocs = getUpdatedDocs()
-const recentUpdatedDocs = updatedDocs.filter((doc) => !doc.isIndex).slice(0, 5)
 
 export default defineConfig({
   title: 'NotionNext 使用说明',
@@ -116,11 +38,8 @@ export default defineConfig({
   },
   themeConfig: {
     logo: '/brand/notionnext-logo.png',
-    updatedDocs,
-    recentUpdatedDocs,
     nav: [
       { text: '开始搭建', link: '/user-guide/start-here', activeMatch: '/user-guide/' },
-      { text: '更新日志', link: '/user-guide/changelog/latest', activeMatch: '/user-guide/changelog/' },
       { text: '主题', link: '/user-guide/themes/THEMES_CATALOG', activeMatch: '/user-guide/themes/' },
       { text: '参考手册', link: '/user-guide/reference/features', activeMatch: '/user-guide/reference/' },
       { text: '开发文档', link: '/developer/', activeMatch: '/developer/' },
@@ -146,16 +65,6 @@ export default defineConfig({
             { text: '配置站点', link: '/user-guide/config-site' },
             { text: '菜单 Menu', link: '/user-guide/menu-secondary' },
             { text: '升级', link: '/user-guide/update' }
-          ]
-        },
-        {
-          text: '更新日志',
-          items: [
-            { text: '最新版本', link: '/user-guide/changelog/latest' },
-            { text: 'V4 历史', link: '/user-guide/changelog/v4-history' },
-            { text: 'V3 历史', link: '/user-guide/changelog/v3-history' },
-            { text: 'V2 历史', link: '/user-guide/changelog/v2-history' },
-            { text: 'V1 历史', link: '/user-guide/changelog/v1-history' }
           ]
         },
         {
@@ -191,7 +100,6 @@ export default defineConfig({
           collapsed: true,
           items: [
             { text: 'Notion 数据库', link: '/user-guide/notion-database' },
-            { text: '社区站数据库模板', link: '/user-guide/notion/community-site-template' },
             { text: '排版示例', link: '/user-guide/notion/example-article' },
             { text: '备份 Notion', link: '/user-guide/notion/notion-backup' },
             { text: 'Notion 模板', link: '/user-guide/notion/notion-template' },
@@ -222,8 +130,6 @@ export default defineConfig({
             { text: 'Iconfont', link: '/user-guide/config/notion-next-iconfont' },
             { text: '代码样式', link: '/user-guide/config/notion-next-code-style' },
             { text: '自定义属性', link: '/user-guide/config/notion-next-custom-properties' },
-            { text: '文章复制权限', link: '/user-guide/config/copy-permission' },
-            { text: '文章版权声明', link: '/user-guide/config/article-copyright' },
             { text: '多语言站点', link: '/user-guide/config/notion-next-mulity-languages' },
             { text: '多站点聚合', link: '/user-guide/config/notion-next-site-combine' },
             { text: 'API Base URL', link: '/user-guide/config/notion-next-api_base_url' },
@@ -328,6 +234,17 @@ export default defineConfig({
             { text: '迁移索引', link: '/user-guide/ARTICLE_INDEX' }
           ]
         },
+        {
+          text: '更新日志',
+          collapsed: true,
+          items: [
+            { text: '最新版本', link: '/user-guide/changelog/latest' },
+            { text: 'V4 历史', link: '/user-guide/changelog/v4-history' },
+            { text: 'V3 历史', link: '/user-guide/changelog/v3-history' },
+            { text: 'V2 历史', link: '/user-guide/changelog/v2-history' },
+            { text: 'V1 历史', link: '/user-guide/changelog/v1-history' }
+          ]
+        }
       ],
       '/developer/': [
         {
@@ -335,8 +252,6 @@ export default defineConfig({
           items: [
             { text: '开发文档首页', link: '/developer/' },
             { text: '快速上手', link: '/developer/GETTING_STARTED' },
-            { text: '愿景与路线图', link: '/developer/VISION_ROADMAP' },
-            { text: '开放生态长期计划', link: '/developer/LONG_TERM_PLAN' },
             { text: '架构总览', link: '/developer/ARCHITECTURE' },
             { text: '目录与模块', link: '/developer/PROJECT_STRUCTURE' },
             { text: '配置体系', link: '/developer/CONFIGURATION' },
@@ -351,7 +266,6 @@ export default defineConfig({
             { text: '维护者手册', link: '/developer/MAINTAINER_RUNBOOK.zh-CN' },
             { text: '版本更新说明', link: '/developer/UPDATE' },
             { text: '社区路线图', link: '/developer/COMMUNITY_SITE_ROADMAP' },
-            { text: '5.0 愿景与参与方向', link: '/developer/VISION_ROADMAP' },
             { text: 'RFC', link: '/developer/rfc/' }
           ]
         },

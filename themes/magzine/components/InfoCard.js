@@ -23,7 +23,6 @@ const InfoCard = props => {
           <LazyImage
             src={siteInfo?.icon}
             width={120}
-            height={120}
             alt={siteConfig('AUTHOR')}
           />
         </div>

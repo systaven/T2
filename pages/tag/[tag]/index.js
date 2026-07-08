@@ -26,14 +26,9 @@ export async function getStaticProps({ params: { tag }, locale }) {
   props.postCount = props.posts.length
 
   // 处理分页
-  const POST_LIST_STYLE = siteConfig(
-    'POST_LIST_STYLE',
-    'page',
-    props?.NOTION_CONFIG
-  )
-  if (POST_LIST_STYLE === 'scroll') {
+  if (siteConfig('POST_LIST_STYLE') === 'scroll') {
     // 滚动列表 给前端返回所有数据
-  } else if (POST_LIST_STYLE === 'page') {
+  } else if (siteConfig('POST_LIST_STYLE') === 'page') {
     props.posts = props.posts?.slice(
       0,
       siteConfig('POSTS_PER_PAGE', 12, props?.NOTION_CONFIG)

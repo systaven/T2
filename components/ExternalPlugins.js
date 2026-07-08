@@ -3,7 +3,7 @@ import { convertInnerUrl } from '@/lib/db/notion/convertInnerUrl'
 import { isBrowser, loadExternalResource } from '@/lib/utils'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { GlobalStyle } from './GlobalStyle'
 import { initGoogleAdsense } from './GoogleAdsense'
 
@@ -12,7 +12,6 @@ import ExternalScript from './ExternalScript'
 import WebWhiz from './Webwhiz'
 import { useGlobal } from '@/lib/global'
 import IconFont from './IconFont'
-import { getPageCanCopy } from '@/lib/utils/copyPermission'
 
 /**
  * 各种插件脚本
@@ -23,7 +22,6 @@ const ExternalPlugin = props => {
   // 读取自Notion的配置
   const { NOTION_CONFIG } = props
   const { lang } = useGlobal()
-  const [pluginsIdle, setPluginsIdle] = useState(false)
   const DISABLE_PLUGIN = siteConfig('DISABLE_PLUGIN', null, NOTION_CONFIG)
   const THEME_SWITCH = siteConfig('THEME_SWITCH', null, NOTION_CONFIG)
   const DEBUG = siteConfig('DEBUG', null, NOTION_CONFIG)
@@ -59,7 +57,6 @@ const ExternalPlugin = props => {
     NOTION_CONFIG
   )
   const CAN_COPY = siteConfig('CAN_COPY', null, NOTION_CONFIG)
-  const canCopy = getPageCanCopy(CAN_COPY, props?.post)
   const WEB_WHIZ_ENABLED = siteConfig('WEB_WHIZ_ENABLED', null, NOTION_CONFIG)
   const AD_WWADS_BLOCK_DETECT = siteConfig(
     'AD_WWADS_BLOCK_DETECT',
@@ -221,18 +218,6 @@ const ExternalPlugin = props => {
     }
   }, [GLOBAL_JS])
 
-  useEffect(() => {
-    if (!isBrowser) return
-    if (window.requestIdleCallback) {
-      const id = window.requestIdleCallback(() => setPluginsIdle(true), {
-        timeout: 3000
-      })
-      return () => window.cancelIdleCallback(id)
-    }
-    const id = window.setTimeout(() => setPluginsIdle(true), 2000)
-    return () => window.clearTimeout(id)
-  }, [])
-
   if (DISABLE_PLUGIN) {
     return null
   }
@@ -243,7 +228,7 @@ const ExternalPlugin = props => {
       <GlobalStyle />
       {ENABLE_ICON_FONT && <IconFont />}
       {MOUSE_FOLLOW && <MouseFollow />}
-      {pluginsIdle && THEME_SWITCH && <ThemeSwitch />}
+      {THEME_SWITCH && <ThemeSwitch />}
       {DEBUG && <DebugPanel />}
       {ANALYTICS_ACKEE_TRACKER && <Ackee />}
       {ANALYTICS_GOOGLE_ID && <Gtag />}
@@ -259,16 +244,14 @@ const ExternalPlugin = props => {
       {COMMENT_TWIKOO_COUNT_ENABLE && <TwikooCommentCounter {...props} />}
       {RIBBON && <Ribbon />}
       {DIFY_CHATBOT_ENABLED && <DifyChatbot />}
-      {CUSTOM_RIGHT_CLICK_CONTEXT_MENU && (
-        <CustomContextMenu {...props} canCopy={canCopy} />
-      )}
-      {!canCopy && <DisableCopy />}
+      {CUSTOM_RIGHT_CLICK_CONTEXT_MENU && <CustomContextMenu {...props} />}
+      {!CAN_COPY && <DisableCopy />}
       {WEB_WHIZ_ENABLED && <WebWhiz />}
       {AD_WWADS_BLOCK_DETECT && <AdBlockDetect />}
       {TIANLI_KEY && <TianliGPT />}
       <VConsole />
       {ENABLE_NPROGRSS && <LoadingProgress />}
-      {pluginsIdle && <AosAnimation />}
+      <AosAnimation />
       {ANALYTICS_51LA_ID && ANALYTICS_51LA_CK && <LA51 />}
       {COZE_BOT_ID && <Coze />}
 

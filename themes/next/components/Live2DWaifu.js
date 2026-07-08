@@ -1,3 +1,4 @@
+import Head from 'next/head'
 import { useEffect } from 'react'
 import { loadExternalResource } from '@/lib/utils'
 
@@ -5,7 +6,9 @@ export default function Live2DWife() {
   useEffect(() => {
     initLive2DWife()
   }, [])
-  return null
+  return <>
+    <Head><SmartLink rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome/css/font-awesome.min.css" /></Head>
+  </>
 }
 
 function initLive2DWife() {

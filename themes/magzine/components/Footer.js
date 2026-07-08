@@ -31,7 +31,6 @@ const Footer = ({ title }) => {
               src={siteInfo?.icon}
               className='rounded-full'
               width={40}
-              height={40}
               alt={siteConfig('AUTHOR')}
             />
             <div>

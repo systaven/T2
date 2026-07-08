@@ -1,14 +1,9 @@
 /* eslint-disable react/no-unknown-property */
 
-import CONFIG from './config'
-import { normalizeHue } from './utils/themeColor'
-
 const Style = () => {
-  const defaultHue = normalizeHue(CONFIG.FUWARI_THEME_COLOR_HUE)
-
   return <style jsx global>{`
     #theme-fuwari {
-      --fuwari-hue: ${defaultHue};
+      --fuwari-hue: 350;
       --fuwari-bg: hsl(var(--fuwari-hue), 100%, 97%);
       --fuwari-bg-soft: hsl(var(--fuwari-hue), 100%, 94%);
       --fuwari-surface: #ffffff;

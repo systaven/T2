@@ -1,6 +1,5 @@
 import SmartLink from '@/components/SmartLink'
 import { siteConfig } from '@/lib/config'
-import { useGlobal } from '@/lib/global'
 import { useRouter } from 'next/router'
 
 const HIDDEN = -1
@@ -28,8 +27,7 @@ function buildPages(currentPage, totalPage) {
 
 const Pagination = ({ page = 1, postCount = 0 }) => {
   const router = useRouter()
-  const { NOTION_CONFIG } = useGlobal()
-  const POSTS_PER_PAGE = parseInt(siteConfig('POSTS_PER_PAGE', 12, NOTION_CONFIG), 10)
+  const POSTS_PER_PAGE = parseInt(siteConfig('POSTS_PER_PAGE', 12), 10)
   const totalPage = Math.ceil((postCount || 0) / POSTS_PER_PAGE)
   const currentPage = parseInt(page, 10) || 1
 

@@ -27,8 +27,7 @@ const ButtonJumpToComment = () => {
   return (
     <div
       className='flex space-x-1 items-center justify-center transform hover:scale-105 duration-200 w-7 h-7 text-center'
-      onClick={navToComment}
-      title='Jump to Comment'>
+      onClick={navToComment}>
       <i className='fas fa-comment text-xs' />
     </div>
   )

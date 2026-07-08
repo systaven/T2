@@ -114,12 +114,6 @@ export const initGoogleAdsense = ADSENSE_GOOGLE_ID => {
 const AdSlot = ({ type = 'show' }) => {
   const ADSENSE_GOOGLE_ID = siteConfig('ADSENSE_GOOGLE_ID')
   const ADSENSE_GOOGLE_TEST = siteConfig('ADSENSE_GOOGLE_TEST')
-  // ponytail: coarse ad slots; tune per slot if fill sizes differ.
-  const reservedAdStyle = {
-    display: 'block',
-    textAlign: 'center',
-    minHeight: type === 'flow' || type === 'native' ? '180px' : '90px'
-  }
   if (!ADSENSE_GOOGLE_ID) {
     return null
   }
@@ -128,7 +122,7 @@ const AdSlot = ({ type = 'show' }) => {
     return (
       <ins
         className='adsbygoogle'
-        style={reservedAdStyle}
+        style={{ display: 'block', textAlign: 'center' }}
         data-ad-layout='in-article'
         data-ad-format='fluid'
         data-adtest={ADSENSE_GOOGLE_TEST ? 'on' : 'off'}
@@ -144,7 +138,7 @@ const AdSlot = ({ type = 'show' }) => {
         className='adsbygoogle'
         data-ad-format='fluid'
         data-ad-layout-key='-5j+cz+30-f7+bf'
-        style={reservedAdStyle}
+        style={{ display: 'block' }}
         data-adtest={ADSENSE_GOOGLE_TEST ? 'on' : 'off'}
         data-ad-client={ADSENSE_GOOGLE_ID}
         data-ad-slot={siteConfig('ADSENSE_GOOGLE_SLOT_FLOW')}></ins>
@@ -156,7 +150,7 @@ const AdSlot = ({ type = 'show' }) => {
     return (
       <ins
         className='adsbygoogle'
-        style={reservedAdStyle}
+        style={{ display: 'block', textAlign: 'center' }}
         data-ad-format='autorelaxed'
         data-adtest={ADSENSE_GOOGLE_TEST ? 'on' : 'off'}
         data-ad-client={ADSENSE_GOOGLE_ID}
@@ -168,7 +162,7 @@ const AdSlot = ({ type = 'show' }) => {
   return (
     <ins
       className='adsbygoogle'
-      style={reservedAdStyle}
+      style={{ display: 'block' }}
       data-ad-client={ADSENSE_GOOGLE_ID}
       data-adtest={ADSENSE_GOOGLE_TEST ? 'on' : 'off'}
       data-ad-slot={siteConfig('ADSENSE_GOOGLE_SLOT_AUTO')}

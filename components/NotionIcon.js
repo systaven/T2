@@ -13,7 +13,7 @@ const NotionIcon = ({ icon, className }) => {
   const normalizedIcon = icon.trim()
 
   if (normalizedIcon.startsWith('http') || normalizedIcon.startsWith('data:')) {
-    return <LazyImage src={normalizedIcon} width={32} height={32} className={className || 'w-8 h-8 my-auto inline mr-1'} />
+    return <LazyImage src={normalizedIcon} className={className || 'w-8 h-8 my-auto inline mr-1'} />
   }
 
   const isFontAwesomeIcon =
