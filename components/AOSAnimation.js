@@ -9,12 +9,24 @@ import { useEffect } from 'react'
  */
 export default function AOSAnimation() {
   const initAOS = () => {
+    if (
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      return
+    }
+
     Promise.all([
       loadExternalResource('/js/aos.js', 'js'),
       loadExternalResource('/css/aos.css', 'css')
     ]).then(() => {
       if (window.AOS) {
-        window.AOS.init()
+        window.AOS.init({
+          disableMutationObserver: true,
+          debounceDelay: 100,
+          throttleDelay: 120,
+          once: true
+        })
       }
     })
   }
@@ -38,4 +50,6 @@ export default function AOSAnimation() {
       }
     }
   }, [])
+
+  return null
 }

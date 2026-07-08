@@ -111,13 +111,7 @@ const Header = ({ locale, customNav, customMenu, searchModal, siteInfo }) => {
           <ClerkAuthControls />
           <MobileNav locale={locale} customNav={customNav} customMenu={customMenu} />
         </div>
-        {showPalette && !paletteFixed && (
-          <div
-            ref={panelRef}
-            className='fuwari-card absolute right-3 md:right-4 top-12 p-0 w-[min(20rem,calc(100vw-2rem))] md:w-80 z-50'>
-            <ThemeColorSwitch />
-          </div>
-        )}
+        <ThemeColorSwitch panelRef={panelRef} visible={showPalette && !paletteFixed} />
       </div>
     </header>
   )
