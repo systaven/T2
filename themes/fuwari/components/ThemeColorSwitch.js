@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { siteConfig } from '@/lib/config'
 import CONFIG from '../config'
+import { normalizeHue } from '../utils/themeColor'
 
 const STORAGE_HUE_KEY = 'fuwari-theme-hue'
 
@@ -18,7 +19,7 @@ function hslToHex(h, s, l) {
 
 const ThemeColorSwitch = ({ onColorChange }) => {
   const enabled = siteConfig('FUWARI_WIDGET_THEME_COLOR_SWITCHER', true, CONFIG)
-  const defaultHue = siteConfig('FUWARI_THEME_COLOR_HUE', 350, CONFIG)
+  const defaultHue = normalizeHue(siteConfig('FUWARI_THEME_COLOR_HUE', 350, CONFIG))
   const [hue, setHue] = useState(defaultHue)
   const color = useMemo(() => hslToHex(hue, 85, 62), [hue])
 
@@ -30,16 +31,17 @@ const ThemeColorSwitch = ({ onColorChange }) => {
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_HUE_KEY)
-    const initialHue = stored ? parseInt(stored, 10) : defaultHue
+    const initialHue = stored ? normalizeHue(stored, defaultHue) : defaultHue
     setHue(initialHue)
     applyColor(hslToHex(initialHue, 85, 62), initialHue)
-  }, [])
+  }, [defaultHue])
 
   const handleSelect = nextHue => {
-    setHue(nextHue)
-    localStorage.setItem(STORAGE_HUE_KEY, String(nextHue))
-    const nextColor = hslToHex(nextHue, 85, 62)
-    applyColor(nextColor, nextHue)
+    const normalizedHue = normalizeHue(nextHue, defaultHue)
+    setHue(normalizedHue)
+    localStorage.setItem(STORAGE_HUE_KEY, String(normalizedHue))
+    const nextColor = hslToHex(normalizedHue, 85, 62)
+    applyColor(nextColor, normalizedHue)
     onColorChange?.(nextColor)
   }
 
@@ -86,4 +88,3 @@ const ThemeColorSwitch = ({ onColorChange }) => {
 }
 
 export default ThemeColorSwitch
-
