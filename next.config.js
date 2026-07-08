@@ -5,6 +5,8 @@ const { extractLangPrefix } = require('./lib/utils/pageId')
 const { isExport } = require('./lib/utils/buildMode')
 const { getStaticPageGenerationTimeoutSec } = require('./lib/build/buildEnv')
 
+const nextBuildCpus = Number.parseInt(process.env.NEXT_BUILD_CPUS || '1', 10)
+
 // 打包时是否分析代码
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: BLOG.BUNDLE_ANALYZER
@@ -395,7 +397,7 @@ const nextConfig = {
   }
   ,
   experimental: {
-    // cpus: 1,
+    cpus: Number.isFinite(nextBuildCpus) && nextBuildCpus > 0 ? nextBuildCpus : 1,
     scrollRestoration: true,
     // 性能优化实验性功能
     optimizePackageImports: ['@heroicons/react', 'lodash']
