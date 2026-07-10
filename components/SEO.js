@@ -4,6 +4,7 @@ import { createSiteUrl, normalizeSiteUrl } from '@/lib/sitemap-utils'
 import { isHttpLink, loadExternalResource } from '@/lib/utils'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
+import { useEffect } from 'react'
 
 /**
  * 页面的Head头，有用于SEO
