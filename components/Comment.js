@@ -27,6 +27,9 @@ const Comment = ({ frontMatter, className }) => {
   const COMMENT_UTTERRANCES_REPO = siteConfig('COMMENT_UTTERRANCES_REPO')
   const COMMENT_GITALK_CLIENT_ID = siteConfig('COMMENT_GITALK_CLIENT_ID')
   const COMMENT_WEBMENTION_ENABLE = siteConfig('COMMENT_WEBMENTION_ENABLE')
+  const COMMENT_NOTION_ENABLE =
+    siteConfig('COMMENT_NOTION_ENABLE') === true ||
+    siteConfig('COMMENT_NOTION_ENABLE') === 'true'
 
   useEffect(() => {
     if (shouldLoad) {
@@ -95,7 +98,8 @@ const Comment = ({ frontMatter, className }) => {
       key={frontMatter?.id}
       id='comment'
       ref={commentRef}
-      className={`comment mt-5 text-gray-800 dark:text-gray-300 ${className || ''}`}>
+      className={`comment mt-5 text-gray-800 dark:text-gray-300 ${className || ''}`}
+    >
       {/* 延迟加载评论区 */}
       {!shouldLoad && (
         <div className='text-center'>
@@ -162,6 +166,12 @@ const Comment = ({ frontMatter, className }) => {
               <WebMentionComponent frontMatter={frontMatter} className='px-2' />
             </div>
           )}
+
+          {COMMENT_NOTION_ENABLE && (
+            <div key='Notion'>
+              <NotionCommentsComponent postId={frontMatter.id} />
+            </div>
+          )}
         </Tabs>
       )}
     </div>
@@ -217,5 +227,10 @@ const WebMentionComponent = dynamic(
 const ValineComponent = dynamic(() => import('@/components/ValineComponent'), {
   ssr: false
 })
+
+const NotionCommentsComponent = dynamic(
+  () => import('@/components/NotionComments'),
+  { ssr: false }
+)
 
 export default Comment
