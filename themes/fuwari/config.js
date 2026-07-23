@@ -111,13 +111,13 @@ const CONFIG = {
   FUWARI_ARTICLE_TOC: true,
 
   /** 音乐播放器 */
-  MUSIC_PLAYER: true,
+  MUSIC_PLAYER: false,
   /** 音乐播放器在左下角显示（三栏布局下建议关闭，使用侧栏嵌入版） */
   MUSIC_PLAYER_VISIBLE: false,
   /** 音乐播放器自动播放 */
   MUSIC_PLAYER_AUTO_PLAY: false,
   /** 音乐播放器 MetingJS 支持 */
-  MUSIC_PLAYER_METING: true,
+  MUSIC_PLAYER_METING: false,
 
   /** 侧边栏个人头像 URL；留空则用 siteInfo.icon */
   FUWARI_AVATAR: '',

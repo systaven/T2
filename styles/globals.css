@@ -1,11 +1,21 @@
-@import url("https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css");
+/*
+ * Keep the primary display font in the repository so visitors do not need to
+ * reach a third-party CDN before the page can render.
+ */
+@font-face {
+  font-family: 'LXGW WenKai';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/LXGWWenKai-Regular.ttf') format('truetype');
+}
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-  font-family: "LXGW WenKai", sans-serif !important;
+  font-family: 'LXGW WenKai', sans-serif !important;
 }
 
 html {
