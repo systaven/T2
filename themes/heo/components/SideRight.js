@@ -39,7 +39,7 @@ export default function SideRight(props) {
       <div className='sticky top-20 space-y-4'>
         {/* 文章页显示目录（上锁文章不显示） */}
         {!lock && post && post.toc && post.toc.length > 0 && (
-          <Card className='bg-white dark:bg-[#701E49] wow fadeInUp'>
+          <Card className='bg-[var(--heo-color-card)] dark:bg-[var(--heo-color-card-dark)] wow fadeInUp'>
             <Catalog toc={post.toc} />
           </Card>
         )}
@@ -52,7 +52,7 @@ export default function SideRight(props) {
         {/* 最新文章列表 */}
         <div
           className={
-            'border wow fadeInUp  hover:border-[#df364e]  dark:hover:border-[#ffd9ef] duration-200 dark:border-gray-700 dark:bg-[#701E49] dark:text-white rounded-xl lg:p-6 p-4 hidden lg:block bg-white'
+            'border wow fadeInUp  hover:border-[var(--heo-color-border)] dark:hover:border-[var(--heo-color-border-dark)] duration-200 dark:border-gray-700 dark:bg-[var(--heo-color-card-dark)] dark:text-white rounded-xl lg:p-6 p-4 hidden lg:block bg-[var(--heo-color-card)]'
           }>
           <LatestPostsGroupMini {...props} />
         </div>
@@ -66,7 +66,7 @@ export default function SideRight(props) {
         {/* 标签和成绩 */}
         <Card
           className={
-            'bg-white dark:bg-[#701E49] dark:text-white hover:border-[#df364e]  dark:hover:border-[#ffd9ef] duration-200'
+            'bg-[var(--heo-color-card)] dark:bg-[var(--heo-color-card-dark)] dark:text-white hover:border-[var(--heo-color-border)] dark:hover:border-[var(--heo-color-border-dark)] duration-200'
           }>
           <TagGroups tags={sortedTags} currentTag={currentTag} />
           <hr className='mx-1 flex border-dashed relative my-4' />

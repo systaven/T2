@@ -22,9 +22,15 @@ const ExternalPlugin = props => {
   // 读取自Notion的配置
   const { NOTION_CONFIG } = props
   const { lang } = useGlobal()
+  const innerLinkPages = props?.allLinkPages || props?.allNavPages
   const DISABLE_PLUGIN = siteConfig('DISABLE_PLUGIN', null, NOTION_CONFIG)
   const THEME_SWITCH = siteConfig('THEME_SWITCH', null, NOTION_CONFIG)
   const DEBUG = siteConfig('DEBUG', null, NOTION_CONFIG)
+  const INNER_PAGE_URL_PARENT_PATH = siteConfig(
+    'INNER_PAGE_URL_PARENT_PATH',
+    null,
+    NOTION_CONFIG
+  )
   const ANALYTICS_ACKEE_TRACKER = siteConfig(
     'ANALYTICS_ACKEE_TRACKER',
     null,
@@ -121,6 +127,8 @@ const ExternalPlugin = props => {
   // 默认关闭NProgress
   const ENABLE_NPROGRSS = siteConfig('ENABLE_NPROGRSS', false)
   const COZE_BOT_ID = siteConfig('COZE_BOT_ID')
+  const AI_CHAT_API = siteConfig('AI_CHAT_API')
+  const DOCS_CHAT_API = siteConfig('DOCS_CHAT_API')
   const HILLTOP_ADS_META_ID = siteConfig(
     'HILLTOP_ADS_META_ID',
     null,
@@ -199,11 +207,18 @@ const ExternalPlugin = props => {
     setTimeout(() => {
       // 映射url
       convertInnerUrl({
-        allPages: props?.allLinkPages || props?.allNavPages,
-        lang: lang
+        allPages: innerLinkPages,
+        lang: lang,
+        innerPageUrlParentPath: INNER_PAGE_URL_PARENT_PATH
       })
     }, 500)
-  }, [router])
+  }, [
+    router,
+    ADSENSE_GOOGLE_ID,
+    INNER_PAGE_URL_PARENT_PATH,
+    innerLinkPages,
+    lang
+  ])
 
   useEffect(() => {
     if (!isBrowser || !GLOBAL_JS || GLOBAL_JS.trim() === '') {
@@ -253,7 +268,7 @@ const ExternalPlugin = props => {
       {ENABLE_NPROGRSS && <LoadingProgress />}
       <AosAnimation />
       {ANALYTICS_51LA_ID && ANALYTICS_51LA_CK && <LA51 />}
-      {COZE_BOT_ID && <Coze />}
+      {AI_CHAT_API || DOCS_CHAT_API ? <DocsChat /> : COZE_BOT_ID && <Coze />}
 
       {ANALYTICS_51LA_ID && ANALYTICS_51LA_CK && (
         <>
@@ -550,6 +565,9 @@ const Live2D = dynamic(() => import('@/components/Live2D'), {
 })
 
 const Coze = dynamic(() => import('@/components/Coze'), {
+  ssr: false
+})
+const DocsChat = dynamic(() => import('@/components/DocsChat'), {
   ssr: false
 })
 const LA51 = dynamic(() => import('@/components/LA51'), {

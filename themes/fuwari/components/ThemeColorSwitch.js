@@ -26,6 +26,9 @@ const ThemeColorSwitch = ({ onColorChange }) => {
     const root = document.getElementById('theme-fuwari')
     if (!root) return
     root.style.setProperty('--fuwari-hue', nextHue)
+    root.style.setProperty('--fuwari-primary', nextColor)
+    root.style.setProperty('--fuwari-primary-soft', `hsla(${nextHue}, 85%, 62%, 0.14)`)
+    root.style.setProperty('--fuwari-gradient', 'linear-gradient(135deg, var(--fuwari-primary) 0%, color-mix(in oklab, var(--fuwari-primary) 70%, #ffffff) 100%)')
   }
 
   useEffect(() => {

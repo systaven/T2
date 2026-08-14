@@ -1,5 +1,7 @@
 import { siteConfig } from '@/lib/config'
 import { compressImage, mapImgUrl } from '@/lib/db/notion/mapImage'
+import NotionEmbed from '@/components/NotionEmbed'
+import NotionLink from '@/components/NotionLink'
 import {
   checkStrIsNotionId,
   checkStrIsUuid,
@@ -15,6 +17,7 @@ import { useEffect, useRef } from 'react'
 import { NotionRenderer } from 'react-notion-x'
 import ArticleLink from '@/components/ArticleLink'
 import { getTextContent } from 'notion-utils'
+import OriginalityProof from './OriginalityProof'
 
 /**
  * 整个站点的核心组件
@@ -154,6 +157,7 @@ const NotionPage = ({ post, className }) => {
       />
 
       <AdEmbed />
+      <OriginalityProof proof={post?.originalityProof} />
       {hasCodeBlock(post?.blockMap) && <PrismMac />}
     </div>
   )
@@ -192,7 +196,6 @@ const FORCE_DOWNLOAD_FILE_PATTERN =
 const FORCE_DOWNLOAD_EXT_PATTERN =
   /\.(zip|rar|7z|pdf|docx?|xlsx?|pptx?|txt|csv|json|xml|mp3|mp4|mov|avi|apk|dmg|exe|iso)(?:[?#]|$)/i
 const FORCE_NEW_TAB_SHORTLINK_PATTERN = /^\/(?:r\/|go(?:\?|$))/i
-
 /**
  * 将数据库卡片或列表项的默认内部页面链接改写为 URL 属性里的外链
  */
@@ -701,10 +704,7 @@ const AdEmbed = dynamic(
 )
 
 const Collection = dynamic(
-  () =>
-    import('react-notion-x/build/third-party/collection').then(
-      m => m.Collection
-    ),
+  () => import('@/components/NotionCollection'),
   {
     ssr: true
   }

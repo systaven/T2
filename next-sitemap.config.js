@@ -7,7 +7,7 @@ module.exports = {
   siteUrl: 'https://blog.vachiika.me',
   changefreq: 'daily',
   priority: 0.7,
-  generateRobotsTxt: true,
+  generateRobotsTxt: false,
   sitemapSize: 7000
   // ...other options
   // https://github.com/iamvishnusankar/next-sitemap#configuration-options

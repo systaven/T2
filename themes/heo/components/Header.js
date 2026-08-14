@@ -75,7 +75,7 @@ const Header = props => {
     window.addEventListener('scroll', scrollTrigger, { passive: true })
     return () => {
       window.removeEventListener('scroll', scrollTrigger)
-      scrollTrigger.cancel()
+      scrollTrigger.cancel?.()
     }
   }, [scrollTrigger])
 
@@ -154,9 +154,9 @@ const Header = props => {
       <nav
         id='nav'
         className={`z-20 h-16 top-0 w-full duration-300 transition-all
-            ${fixedNav ? 'fixed shadow' : 'relative bg-transparent'} 
-            ${textWhite && isBrowser && document?.querySelector('#post-bg') && (window.localStorage.getItem('theme') === 'dark' || document.documentElement.classList.contains('dark')) ? 'text-white' : 'text-[#333] dark:text-white'}  
-            ${navBgWhite ? 'bg-white dark:bg-[#2E031B]' : 'bg-transparent'}`}>
+            ${fixedNav ? 'fixed' : 'relative bg-transparent'} 
+            ${textWhite ? 'text-white ' : 'text-black dark:text-white'}  
+            ${navBgWhite ? 'bg-[var(--heo-color-card)] dark:bg-[var(--heo-color-bg-dark)] shadow' : 'bg-transparent'}`}>
         <div className='flex h-full mx-auto justify-between items-center max-w-[86rem] px-6'>
           {/* 左侧logo */}
           <Logo {...props} />

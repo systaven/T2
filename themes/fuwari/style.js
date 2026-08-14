@@ -1,4 +1,6 @@
 /* eslint-disable react/no-unknown-property */
+import CONFIG from './config'
+import { themeConsoleStyle } from '@/lib/themeConsoleStyle'
 
 const Style = () => {
   return <style jsx global>{`
@@ -697,6 +699,8 @@ const Style = () => {
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: none; }
     }
+
+      ${themeConsoleStyle('fuwari', CONFIG)}
   `}</style>
 }
 

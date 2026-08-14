@@ -1,4 +1,4 @@
-﻿# NotionNext 开发者文档
+# NotionNext 开发者文档
 
 > 本目录 **不** 进入 [notionnext.tangly1024.com](https://notionnext.tangly1024.com)。  
 > 站长向教程见 [`../user-guide/`](../user-guide/) · 在线站说明见 [`../README.md`](../README.md)。
@@ -10,6 +10,11 @@
 | 主题 | 中文 | English |
 | --- | --- | --- |
 | 快速上手 | [GETTING_STARTED.md](./GETTING_STARTED.md) | [GETTING_STARTED.en.md](./GETTING_STARTED.en.md) |
+| 愿景与路线图 | [VISION_ROADMAP.md](./VISION_ROADMAP.md) | — |
+| 可持续增长路线图 | [GROWTH_ROADMAP.zh-CN.md](./GROWTH_ROADMAP.zh-CN.md) | — |
+| 开放生态长期计划 | [LONG_TERM_PLAN.md](./LONG_TERM_PLAN.md) | — |
+| 主题色变量计划 | [THEME_COLOR_TOKEN_ROADMAP.zh-CN.md](./THEME_COLOR_TOKEN_ROADMAP.zh-CN.md) | — |
+| 主题控制台设计 | [THEME_CONSOLE_DESIGN.zh-CN.md](./THEME_CONSOLE_DESIGN.zh-CN.md) | — |
 | 架构总览 | [ARCHITECTURE.md](./ARCHITECTURE.md) | [ARCHITECTURE.en.md](./ARCHITECTURE.en.md) |
 | 目录与模块 | [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) | [PROJECT_STRUCTURE.en.md](./PROJECT_STRUCTURE.en.md) |
 | 配置体系 | [CONFIGURATION.md](./CONFIGURATION.md) | [CONFIGURATION.en.md](./CONFIGURATION.en.md) |
@@ -26,7 +31,7 @@
 
 ## 主题开发者文档
 
-站长向 25 篇说明在 [`../user-guide/themes/`](../user-guide/themes/README.md)。
+站长向 26 篇说明在 [`../user-guide/themes/`](../user-guide/themes/README.md)。
 
 | 目录 | 说明 |
 | --- | --- |
