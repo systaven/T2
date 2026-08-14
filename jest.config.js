@@ -39,7 +39,11 @@ const customJestConfig = {
     '<rootDir>/.next/',
     '<rootDir>/node_modules/',
     '<rootDir>/out/',
-    '<rootDir>/.vercel/'
+    '<rootDir>/.vercel/',
+    '<rootDir>/.tmp/',
+    '<rootDir>/waline-reference/',
+    '<rootDir>/.AStrotheme/',
+    '<rootDir>/twikooa/'
   ],
   
   // Transform files

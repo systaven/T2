@@ -157,7 +157,6 @@ function getPageElement(page, currentPage, pagePrefix) {
           : 'dark:bg-[var(--heo-color-card-dark)] bg-[var(--heo-color-card)]') +
         ' hover:border-[var(--heo-color-border)] dark:hover:bg-[var(--heo-color-accent)] dark:border-gray-600 px-4 border py-2 rounded-lg drop-shadow-sm duration-200 transition-colors'
       }>
-      }>
       {page}
     </SmartLink>
   )

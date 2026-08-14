@@ -13,6 +13,7 @@ jest.mock('@/lib/config', () => ({
 
 describe('generateSitemapXml', () => {
   beforeEach(() => {
+    process.env.EXPORT = 'true'
     siteConfig.mockClear()
   })
 

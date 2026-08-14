@@ -9,6 +9,36 @@ import Announcement from './Announcement'
 import Card from './Card'
 import DailyQuote from './DailyQuote'
 
+export function normalizeInfoCardGreetings(value) {
+  if (Array.isArray(value)) {
+    return value.map(item => String(item).trim()).filter(Boolean)
+  }
+
+  if (typeof value !== 'string') {
+    return []
+  }
+
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return []
+  }
+
+  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+    try {
+      const parsed = JSON.parse(trimmed.replace(/'/g, '"'))
+      return normalizeInfoCardGreetings(parsed)
+    } catch {
+      return trimmed
+        .slice(1, -1)
+        .split(',')
+        .map(item => item.trim().replace(/^['"]|['"]$/g, ''))
+        .filter(Boolean)
+    }
+  }
+
+  return [trimmed]
+}
+
 export function shouldUseInfoCardBlurAvatar(isSlugPage, avatarBlurEnabled) {
   return Boolean(isSlugPage && avatarBlurEnabled)
 }
@@ -131,8 +161,13 @@ function MoreButton() {
  * 欢迎语
  */
 function GreetingsWords() {
-  const greetings = siteConfig('HEO_INFOCARD_GREETINGS', null, CONFIG)
+  const greetings = normalizeInfoCardGreetings(
+    siteConfig('HEO_INFOCARD_GREETINGS', null, CONFIG)
+  )
   const [greeting, setGreeting] = useState(greetings[0])
+  if (greetings.length === 0) {
+    return null
+  }
   // 每次点击，随机获取greetings中的一个
   const handleChangeGreeting = () => {
     const randomIndex = Math.floor(Math.random() * greetings.length)
@@ -143,10 +178,6 @@ function GreetingsWords() {
     <div
       onClick={handleChangeGreeting}
       className=' select-none cursor-pointer py-1 px-2 bg-[var(--heo-color-primary-hover)] hover:bg-[var(--heo-color-card-muted)]  hover:text-[var(--heo-color-text)] dark:bg-[var(--heo-color-accent)] dark:hover:text-white dark:hover:bg-black text-sm rounded-lg  duration-200 transition-colors'>
-      {greeting}
-    </div>
-  )
-}
       {greeting}
     </div>
   )

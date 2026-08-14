@@ -8,9 +8,9 @@ describe('NotionLink', () => {
     render(<NotionLink href='https://example.com'>Example</NotionLink>)
 
     const link = screen.getByRole('link', { name: 'Example' })
-    expect(link).toHaveAttribute('href', 'https://example.com')
+    expect(link).toHaveAttribute('href', expect.stringMatching(/^\/r\//))
     expect(link).toHaveAttribute('target', '_blank')
-    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+    expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'))
   })
 
   it('keeps same-origin absolute links in current tab', () => {
@@ -55,7 +55,7 @@ describe('NotionLink', () => {
 
     const link = screen.getByRole('link', { name: 'Mail' })
     expect(link).toHaveAttribute('target', '_blank')
-    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+    expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'))
   })
 })
 

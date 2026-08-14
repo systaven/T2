@@ -121,7 +121,7 @@ const Style = () => {
         background-color: #FFF0F8;
       }
 
-      // 公告栏中的字体固定白色
+      /* 公告栏中的字体固定白色 */
       #theme-heo #announcement-content .notion {
         color: #df364e;
       }
@@ -158,7 +158,7 @@ const Style = () => {
         box-sizing: border-box;
       }
 
-      // 标签滚动动画
+      /* 标签滚动动画 */
       .tags-group-wrapper {
         animation: rowup 60s linear infinite;
       }
@@ -189,6 +189,7 @@ const Style = () => {
       }
 
       ${themeConsoleStyle('heo', CONFIG)}
+    `}</style>
   )
 }
 

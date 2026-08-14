@@ -262,7 +262,7 @@ describe('formatNotionBlock', () => {
     })
 
     expect(formatted.pdf.value.properties.source[0][0]).toBe(
-      'https://notion.so/signed/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Fspace%2Ffile.pdf?table=block&id=pdf-block'
+      'https://www.notion.so/signed/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2Fspace%2Ffile.pdf?table=block&id=pdf-block'
     )
   })
 

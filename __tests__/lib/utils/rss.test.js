@@ -44,6 +44,7 @@ jest.mock('@/lib/utils/notion.util', () => ({
 
 describe('generateRss', () => {
   beforeEach(() => {
+    process.env.EXPORT = 'true'
     jest.clearAllMocks()
     jest.spyOn(fs, 'statSync').mockImplementation(() => {
       throw new Error('ENOENT')
