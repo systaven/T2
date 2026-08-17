@@ -23,6 +23,12 @@ describe('heo InfoCard greetings', () => {
   it('treats a plain string as a single greeting', () => {
     expect(normalizeInfoCardGreetings('Hello')).toEqual(['Hello'])
   })
+
+  it('does not corrupt an already-valid JSON array containing an apostrophe', () => {
+    expect(
+      normalizeInfoCardGreetings('["Hi, it\'s a great day!", "Welcome"]')
+    ).toEqual(["Hi, it's a great day!", 'Welcome'])
+  })
 })
 
 describe('heo InfoCard avatar blur', () => {
