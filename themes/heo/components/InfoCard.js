@@ -25,6 +25,11 @@ export function normalizeInfoCardGreetings(value) {
 
   if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
     try {
+      return normalizeInfoCardGreetings(JSON.parse(trimmed))
+    } catch {
+      // not valid JSON as-is (e.g. Notion's single-quoted array style); fall through
+    }
+    try {
       const parsed = JSON.parse(trimmed.replace(/'/g, '"'))
       return normalizeInfoCardGreetings(parsed)
     } catch {
