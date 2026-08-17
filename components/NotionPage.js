@@ -149,6 +149,7 @@ const NotionPage = ({ post, className }) => {
           ),
           Code,
           Collection,
+          Embed: NotionEmbed,
           Equation,
           Modal,
           Pdf,
