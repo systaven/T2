@@ -51,6 +51,7 @@ notionnext-*-comment.txt
 output/
 .idea
 .vscode
+tsconfig.tsbuildinfo
 
 
 # sitemap
