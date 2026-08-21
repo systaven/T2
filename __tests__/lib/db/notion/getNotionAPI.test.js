@@ -31,4 +31,16 @@ describe('getNotionAPI', () => {
       })
     )
   })
+
+  it('exposes getSignedFileUrls, delegating to the underlying notion-client instance', async () => {
+    const getSignedFileUrls = jest.fn().mockResolvedValue({ signedUrls: ['https://example.com/f'] })
+    const NotionAPI = jest.fn().mockImplementation(() => ({ getSignedFileUrls }))
+    jest.doMock('notion-client', () => ({ NotionAPI }))
+
+    const notionAPI = require('@/lib/db/notion/getNotionAPI').default
+    const result = await notionAPI.getSignedFileUrls([{ url: 'attachment:a:b.html' }])
+
+    expect(getSignedFileUrls).toHaveBeenCalledWith([{ url: 'attachment:a:b.html' }])
+    expect(result).toEqual({ signedUrls: ['https://example.com/f'] })
+  })
 })

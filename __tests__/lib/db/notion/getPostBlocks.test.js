@@ -2,10 +2,12 @@ jest.mock('@/lib/db/notion/getNotionAPI', () => ({}))
 jest.mock('p-limit', () => () => fn => fn())
 
 import {
+  addHtmlArtifactSignedUrls,
   formatNotionBlock,
   hasExpiredSignedUrls,
   preferStablePdfSignedUrls
 } from '@/lib/db/notion/getPostBlocks'
+import notionAPI from '@/lib/db/notion/getNotionAPI'
 import {
   isExternalVideoEmbedUrl,
   isAppleMusicEmbedUrl,
@@ -354,4 +356,99 @@ describe('formatNotionBlock', () => {
       expect(formatted['tab-a'].value.type).toBe('text')
     }
   )
+})
+
+describe('Notion HTML Block (html_artifact)', () => {
+  afterEach(() => {
+    delete notionAPI.getSignedFileUrls
+  })
+
+  it('preserves the attachment: source instead of replacing it with a placeholder', () => {
+    const formatted = formatNotionBlock({
+      artifact: {
+        value: {
+          id: 'artifact',
+          type: 'embed',
+          format: { embed_variant: 'html_artifact' },
+          properties: {
+            source: [['attachment:abc123:widget.html']]
+          }
+        }
+      }
+    })
+
+    expect(formatted.artifact.value.properties.source[0][0]).toBe(
+      'attachment:abc123:widget.html'
+    )
+  })
+
+  it('resolves the signed URL and fetches the HTML content into format.html_artifact_content', async () => {
+    notionAPI.getSignedFileUrls = jest
+      .fn()
+      .mockResolvedValue({ signedUrls: ['https://file.notion.so/f/widget.html?exp=1'] })
+    global.fetch.mockResolvedValue({
+      ok: true,
+      headers: { get: () => '20' },
+      text: () => Promise.resolve('<html>widget</html>')
+    })
+
+    const recordMap = {
+      block: {
+        artifact: {
+          value: {
+            id: 'artifact',
+            type: 'embed',
+            format: { embed_variant: 'html_artifact' },
+            properties: {
+              source: [['attachment:abc123:widget.html']]
+            }
+          }
+        }
+      }
+    }
+
+    await addHtmlArtifactSignedUrls(recordMap)
+
+    expect(notionAPI.getSignedFileUrls).toHaveBeenCalledWith([
+      {
+        permissionRecord: { table: 'block', id: 'artifact' },
+        url: 'attachment:abc123:widget.html'
+      }
+    ])
+    expect(recordMap.signed_urls.artifact).toBe(
+      'https://file.notion.so/f/widget.html?exp=1'
+    )
+    expect(recordMap.block.artifact.value.format.html_artifact_content).toBe(
+      '<html>widget</html>'
+    )
+  })
+
+  it('skips blocks that already have a signed URL or are not html_artifact embeds', async () => {
+    notionAPI.getSignedFileUrls = jest.fn()
+
+    const recordMap = {
+      signed_urls: { alreadySigned: 'https://file.notion.so/f/a.html' },
+      block: {
+        alreadySigned: {
+          value: {
+            id: 'alreadySigned',
+            type: 'embed',
+            format: { embed_variant: 'html_artifact' },
+            properties: { source: [['attachment:already:widget.html']] }
+          }
+        },
+        regularEmbed: {
+          value: {
+            id: 'regularEmbed',
+            type: 'embed',
+            properties: { source: [['https://example.com/page']] }
+          }
+        }
+      }
+    }
+
+    await addHtmlArtifactSignedUrls(recordMap)
+
+    expect(notionAPI.getSignedFileUrls).not.toHaveBeenCalled()
+  })
 })
