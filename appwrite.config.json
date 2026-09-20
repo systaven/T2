@@ -128,8 +128,7 @@
         {
           "key": "published",
           "type": "boolean",
-          "required": true,
-          "default": true
+          "required": true
         },
         { "key": "authorId", "type": "varchar", "size": 128, "required": true }
       ],
