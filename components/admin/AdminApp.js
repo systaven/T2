@@ -1,26 +1,6 @@
-import {
-  Admin,
-  BooleanField,
-  BooleanInput,
-  Create,
-  Datagrid,
-  Edit,
-  EditButton,
-  List,
-  Layout,
-  Menu,
-  DashboardMenuItem,
-  MenuItemLink,
-  Resource,
-  SimpleForm,
-  TextField,
-  TextInput,
-  useGetIdentity,
-  useGetList,
-  usePermissions
-} from 'react-admin'
-import { SignInButton, UserProfile } from '@clerk/nextjs'
-import { useMemo } from 'react'
+import { Tab } from '@headlessui/react'
+import { SignInButton, UserButton, UserProfile } from '@clerk/nextjs'
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
 const api = async (url, options = {}) => {
   const response = await fetch(url, {
@@ -29,312 +9,379 @@ const api = async (url, options = {}) => {
     ...options
   })
   const body = await response.json().catch(() => ({}))
-  if (!response.ok) {
-    const error = new Error(body.error || 'Request failed')
-    error.status = response.status
-    throw error
-  }
+  if (!response.ok) throw new Error(body.error || '请求失败')
   return body
 }
 
-const dataProvider = {
-  getList: async (resource, params) => {
-    const query = new URLSearchParams()
-    if (resource === 'users') {
-      query.set('limit', params.pagination?.perPage || 25)
-      query.set(
-        'offset',
-        ((params.pagination?.page || 1) - 1) *
-          (params.pagination?.perPage || 25)
-      )
-    }
-    const search = query.toString()
-    const body = await api(
-      `/api/admin/${resource}${search ? `?${search}` : ''}`
-    )
-    return { data: body.data, total: body.total }
-  },
-  getOne: async (resource, params) => {
-    const body = await api(`/api/admin/${resource}/${params.id}`)
-    return { data: body.data }
-  },
-  create: async (resource, params) => {
-    const body = await api(`/api/admin/${resource}`, {
-      method: 'POST',
-      body: JSON.stringify(params.data)
-    })
-    return { data: body.data }
-  },
-  update: async (resource, params) => {
-    const body = await api(`/api/admin/${resource}/${params.id}`, {
-      method: 'PUT',
-      body: JSON.stringify(params.data)
-    })
-    return { data: body.data }
-  },
-  delete: async (resource, params) => {
-    const body = await api(`/api/admin/${resource}/${params.id}`, {
-      method: 'DELETE'
-    })
-    return { data: body.data }
+const panelClass =
+  'rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900'
+const buttonClass =
+  'rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50'
+const inputClass =
+  'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none focus:border-blue-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100'
+
+const StatCard = ({ label, value, tone = 'blue' }) => {
+  const tones = {
+    blue: 'bg-blue-50 text-blue-900 dark:bg-blue-950/60 dark:text-blue-100',
+    green:
+      'bg-emerald-50 text-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-100',
+    amber: 'bg-amber-50 text-amber-900 dark:bg-amber-950/60 dark:text-amber-100'
   }
-}
-
-const authProvider = {
-  login: () => Promise.resolve(),
-  logout: () => Promise.resolve(),
-  checkError: error =>
-    error.status === 401 ? Promise.reject() : Promise.resolve(),
-  checkAuth: async () => {
-    await api('/api/admin/session')
-  },
-  getIdentity: async () => api('/api/admin/session'),
-  getPermissions: async () => (await api('/api/admin/session')).role
-}
-
-const AnnouncementList = () => (
-  <List sort={{ field: '$createdAt', order: 'DESC' }} perPage={25}>
-    <Datagrid bulkActionButtons={false} rowClick='edit'>
-      <TextField source='title' label='标题' />
-      <TextField source='content' label='内容' />
-      <BooleanField source='published' label='发布中' />
-      <TextField source='$createdAt' label='创建时间' />
-      <EditButton />
-    </Datagrid>
-  </List>
-)
-
-const AnnouncementForm = () => (
-  <SimpleForm>
-    <TextInput source='title' label='标题' fullWidth required />
-    <TextInput source='content' label='内容' multiline minRows={6} fullWidth />
-    <BooleanInput source='published' label='立即发布' defaultValue />
-  </SimpleForm>
-)
-
-const AnnouncementCreate = () => (
-  <Create>
-    <AnnouncementForm />
-  </Create>
-)
-const AnnouncementEdit = () => (
-  <Edit>
-    <AnnouncementForm />
-  </Edit>
-)
-
-const UserList = () => (
-  <List perPage={25} sort={{ field: 'createdAt', order: 'DESC' }}>
-    <Datagrid bulkActionButtons={false} rowClick='edit'>
-      <TextField source='name' label='用户' />
-      <TextField source='email' label='邮箱' />
-      <TextField source='role' label='权限' />
-      <TextField source='createdAt' label='注册时间' />
-      <EditButton />
-    </Datagrid>
-  </List>
-)
-
-const UserEdit = () => (
-  <Edit mutationMode='pessimistic'>
-    <SimpleForm>
-      <TextInput source='name' label='用户' disabled fullWidth />
-      <TextInput source='email' label='邮箱' disabled fullWidth />
-      <TextInput
-        source='role'
-        label='权限（admin 或 user）'
-        required
-        fullWidth
-      />
-    </SimpleForm>
-  </Edit>
-)
-
-const Dashboard = () => {
-  const { identity } = useGetIdentity()
-  const { total: announcementCount } = useGetList('announcements', {
-    pagination: { page: 1, perPage: 1 },
-    sort: { field: '$createdAt', order: 'DESC' },
-    filter: {}
-  })
-  const { total: userCount } = useGetList(
-    'users',
-    {
-      pagination: { page: 1, perPage: 1 },
-      sort: { field: 'createdAt', order: 'DESC' },
-      filter: {}
-    },
-    { enabled: identity?.role === 'admin' }
-  )
-  const isAdmin = identity?.role === 'admin'
   return (
-    <section style={{ padding: '12px 4px' }}>
-      <h1 style={{ marginTop: 0 }}>你好，{identity?.fullName || '用户'}</h1>
-      <p>这里是独立于博客与 Notion 内容的站点管理区。</p>
-      <div
-        style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 28 }}
-      >
-        <article
-          style={{
-            minWidth: 200,
-            padding: 20,
-            borderRadius: 12,
-            background: '#eef4ff'
-          }}
+    <article className={`rounded-2xl p-5 ${tones[tone]}`}>
+      <p className='text-sm opacity-70'>{label}</p>
+      <p className='mt-2 text-2xl font-semibold'>{value}</p>
+    </article>
+  )
+}
+
+const AnnouncementPanel = ({ isAdmin, announcements, reload }) => {
+  const [form, setForm] = useState({ title: '', content: '', published: true })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  const createAnnouncement = async event => {
+    event.preventDefault()
+    setSaving(true)
+    setError('')
+    try {
+      await api('/api/admin/announcements', {
+        method: 'POST',
+        body: JSON.stringify(form)
+      })
+      setForm({ title: '', content: '', published: true })
+      await reload()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const updateAnnouncement = async (item, changes) => {
+    setError('')
+    try {
+      await api(`/api/admin/announcements/${item.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ ...item, ...changes })
+      })
+      await reload()
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  const deleteAnnouncement = async item => {
+    if (!window.confirm(`确定删除公告“${item.title}”吗？`)) return
+    try {
+      await api(`/api/admin/announcements/${item.id}`, { method: 'DELETE' })
+      await reload()
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  return (
+    <div className='space-y-5'>
+      {isAdmin && (
+        <form
+          className={panelClass}
+          onSubmit={event => void createAnnouncement(event)}
         >
-          <strong>你的身份</strong>
-          <p style={{ fontSize: 24, marginBottom: 0 }}>
-            {isAdmin ? '管理员' : '普通用户'}
-          </p>
-        </article>
-        <article
-          style={{
-            minWidth: 200,
-            padding: 20,
-            borderRadius: 12,
-            background: '#f2f8f3'
-          }}
-        >
-          <strong>公告</strong>
-          <p style={{ fontSize: 24, marginBottom: 0 }}>
-            {announcementCount || 0} 条
-          </p>
-        </article>
-        {isAdmin && (
-          <article
-            style={{
-              minWidth: 200,
-              padding: 20,
-              borderRadius: 12,
-              background: '#fff7e8'
-            }}
-          >
-            <strong>已注册用户</strong>
-            <p style={{ fontSize: 24, marginBottom: 0 }}>{userCount || 0} 位</p>
-          </article>
-        )}
-      </div>
-      {isAdmin ? (
-        <p style={{ marginTop: 28 }}>
-          可从左侧管理公告和用户权限。统计会先使用这些真实业务数据，暂不额外追踪访客，避免无意义的数据写入。
-        </p>
+          <h2 className='text-lg font-semibold'>发布公告</h2>
+          <div className='mt-4 space-y-3'>
+            <input
+              className={inputClass}
+              required
+              maxLength={255}
+              placeholder='公告标题'
+              value={form.title}
+              onChange={event =>
+                setForm(current => ({ ...current, title: event.target.value }))
+              }
+            />
+            <textarea
+              className={inputClass}
+              rows={5}
+              placeholder='公告内容'
+              value={form.content}
+              onChange={event =>
+                setForm(current => ({
+                  ...current,
+                  content: event.target.value
+                }))
+              }
+            />
+            <label className='flex items-center gap-2 text-sm'>
+              <input
+                type='checkbox'
+                checked={form.published}
+                onChange={event =>
+                  setForm(current => ({
+                    ...current,
+                    published: event.target.checked
+                  }))
+                }
+              />
+              立即发布
+            </label>
+            <button className={buttonClass} disabled={saving}>
+              {saving ? '保存中…' : '发布公告'}
+            </button>
+          </div>
+        </form>
+      )}
+      {error && (
+        <p className='rounded-lg bg-red-50 p-3 text-sm text-red-700'>{error}</p>
+      )}
+      {announcements.length === 0 ? (
+        <div className={panelClass}>暂无公告。</div>
       ) : (
-        <p style={{ marginTop: 28 }}>
-          管理员发布的公告会显示在这里；你也可以通过 Clerk
-          管理自己的账号与安全设置。
+        announcements.map(item => (
+          <article className={panelClass} key={item.id}>
+            <div className='flex flex-wrap items-start justify-between gap-3'>
+              <div>
+                <h3 className='text-lg font-semibold'>{item.title}</h3>
+                <p className='mt-1 text-xs text-slate-500'>
+                  {new Date(item.$createdAt).toLocaleString()}
+                </p>
+              </div>
+              {isAdmin && (
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs ${item.published ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}
+                >
+                  {item.published ? '已发布' : '草稿'}
+                </span>
+              )}
+            </div>
+            <p className='mt-4 whitespace-pre-wrap text-slate-600 dark:text-slate-300'>
+              {item.content || '（无正文）'}
+            </p>
+            {isAdmin && (
+              <div className='mt-4 flex gap-3 text-sm'>
+                <button
+                  className='text-blue-600 hover:underline'
+                  onClick={() =>
+                    void updateAnnouncement(item, {
+                      published: !item.published
+                    })
+                  }
+                >
+                  {item.published ? '转为草稿' : '发布'}
+                </button>
+                <button
+                  className='text-red-600 hover:underline'
+                  onClick={() => void deleteAnnouncement(item)}
+                >
+                  删除
+                </button>
+              </div>
+            )}
+          </article>
+        ))
+      )}
+    </div>
+  )
+}
+
+const UserPanel = ({ users, reload }) => {
+  const [error, setError] = useState('')
+  const changeRole = async (user, role) => {
+    setError('')
+    try {
+      await api(`/api/admin/users/${user.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ role })
+      })
+      await reload()
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+  return (
+    <div className={panelClass}>
+      <h2 className='text-lg font-semibold'>用户与权限</h2>
+      {error && (
+        <p className='mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700'>
+          {error}
         </p>
       )}
-      <div style={{ marginTop: 36 }}>
-        <Account />
+      <div className='mt-4 overflow-x-auto'>
+        <table className='w-full min-w-[640px] text-left text-sm'>
+          <thead className='border-b text-slate-500'>
+            <tr>
+              <th className='p-3'>用户</th>
+              <th className='p-3'>邮箱</th>
+              <th className='p-3'>注册时间</th>
+              <th className='p-3'>权限</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map(user => (
+              <tr
+                className='border-b border-slate-100 dark:border-slate-800'
+                key={user.id}
+              >
+                <td className='p-3 font-medium'>{user.name}</td>
+                <td className='p-3'>{user.email}</td>
+                <td className='p-3'>
+                  {new Date(user.createdAt).toLocaleDateString()}
+                </td>
+                <td className='p-3'>
+                  <select
+                    className={inputClass}
+                    value={user.role}
+                    onChange={event =>
+                      void changeRole(user, event.target.value)
+                    }
+                  >
+                    <option value='user'>普通用户</option>
+                    <option value='admin'>管理员</option>
+                  </select>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-    </section>
-  )
-}
-
-const Account = () => (
-  <div style={{ paddingTop: 12 }}>
-    <UserProfile routing='hash' />
-  </div>
-)
-
-const AdminMenu = () => {
-  const { permissions } = usePermissions()
-  const isAdmin = permissions === 'admin'
-  return (
-    <Menu>
-      <DashboardMenuItem />
-      {isAdmin && <MenuItemLink to='/announcements' primaryText='公告管理' />}
-      {isAdmin && <MenuItemLink to='/users' primaryText='用户管理' />}
-      <MenuItemLink to='/' primaryText='账号与安全' />
-    </Menu>
-  )
-}
-
-const AdminLayout = props => <Layout {...props} menu={AdminMenu} />
-
-const AdminShell = () => {
-  const theme = useMemo(
-    () => ({
-      palette: {
-        primary: { main: '#2563eb' },
-        secondary: { main: '#0f766e' },
-        background: { default: '#f7f8fc' }
-      },
-      shape: { borderRadius: 10 }
-    }),
-    []
-  )
-  return (
-    <Admin
-      basename='/admin'
-      title='站点管理'
-      dataProvider={dataProvider}
-      authProvider={authProvider}
-      dashboard={Dashboard}
-      layout={AdminLayout}
-      theme={theme}
-      requireAuth
-    >
-      <Resource
-        name='announcements'
-        options={{ label: '公告管理' }}
-        list={AnnouncementList}
-        create={AnnouncementCreate}
-        edit={AnnouncementEdit}
-      />
-      <Resource
-        name='users'
-        options={{ label: '用户管理' }}
-        list={UserList}
-        edit={UserEdit}
-      />
-    </Admin>
+    </div>
   )
 }
 
 export default function AdminApp() {
-  return <AdminShell />
+  const [session, setSession] = useState(null)
+  const [announcements, setAnnouncements] = useState([])
+  const [users, setUsers] = useState([])
+  const [error, setError] = useState('')
+
+  const loadAnnouncements = useCallback(async () => {
+    const result = await api('/api/admin/announcements')
+    setAnnouncements(result.data || [])
+  }, [])
+  const loadUsers = useCallback(async () => {
+    const result = await api('/api/admin/users?limit=100&offset=0')
+    setUsers(result.data || [])
+  }, [])
+
+  useEffect(() => {
+    api('/api/admin/session')
+      .then(async current => {
+        setSession(current)
+        await loadAnnouncements()
+        if (current.role === 'admin') await loadUsers()
+      })
+      .catch(err => setError(err.message))
+  }, [loadAnnouncements, loadUsers])
+
+  const isAdmin = session?.role === 'admin'
+  const tabs = useMemo(
+    () => ['概览', '公告', ...(isAdmin ? ['用户管理'] : []), '账号与安全'],
+    [isAdmin]
+  )
+  if (error)
+    return (
+      <main className='grid min-h-screen place-items-center bg-slate-50 p-6'>
+        <div className={`${panelClass} max-w-lg`}>
+          <h1 className='text-xl font-semibold'>后台暂时无法载入</h1>
+          <p className='mt-3 text-red-600'>{error}</p>
+        </div>
+      </main>
+    )
+  if (!session)
+    return (
+      <main className='grid min-h-screen place-items-center bg-slate-50'>
+        正在载入管理后台…
+      </main>
+    )
+
+  return (
+    <main className='min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100'>
+      <header className='border-b bg-white dark:border-slate-800 dark:bg-slate-900'>
+        <div className='mx-auto flex max-w-7xl items-center justify-between px-5 py-4'>
+          <div>
+            <p className='font-semibold'>站点管理</p>
+            <p className='text-xs text-slate-500'>{session.email}</p>
+          </div>
+          <UserButton afterSignOutUrl='/' />
+        </div>
+      </header>
+      <Tab.Group>
+        <div className='mx-auto grid max-w-7xl gap-6 px-5 py-6 lg:grid-cols-[220px_1fr]'>
+          <Tab.List className='flex gap-2 overflow-x-auto lg:flex-col'>
+            {tabs.map(tab => (
+              <Tab as={Fragment} key={tab}>
+                {({ selected }) => (
+                  <button
+                    className={`whitespace-nowrap rounded-xl px-4 py-3 text-left text-sm font-medium ${selected ? 'bg-blue-600 text-white' : 'bg-white hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800'}`}
+                  >
+                    {tab}
+                  </button>
+                )}
+              </Tab>
+            ))}
+          </Tab.List>
+          <Tab.Panels>
+            <Tab.Panel className='space-y-5'>
+              <div>
+                <h1 className='text-2xl font-semibold'>
+                  你好，{session.fullName}
+                </h1>
+                <p className='mt-1 text-slate-500'>
+                  这里与博客主题和 Notion 内容完全独立。
+                </p>
+              </div>
+              <div className='grid gap-4 sm:grid-cols-3'>
+                <StatCard
+                  label='你的身份'
+                  value={isAdmin ? '管理员' : '普通用户'}
+                />
+                <StatCard
+                  label='公告'
+                  value={`${announcements.length} 条`}
+                  tone='green'
+                />
+                {isAdmin && (
+                  <StatCard
+                    label='注册用户'
+                    value={`${users.length} 位`}
+                    tone='amber'
+                  />
+                )}
+              </div>
+            </Tab.Panel>
+            <Tab.Panel>
+              <AnnouncementPanel
+                isAdmin={isAdmin}
+                announcements={announcements}
+                reload={loadAnnouncements}
+              />
+            </Tab.Panel>
+            {isAdmin && (
+              <Tab.Panel>
+                <UserPanel users={users} reload={loadUsers} />
+              </Tab.Panel>
+            )}
+            <Tab.Panel>
+              <UserProfile routing='hash' />
+            </Tab.Panel>
+          </Tab.Panels>
+        </div>
+      </Tab.Group>
+    </main>
+  )
 }
 
 export function AdminSignedOut() {
   return (
-    <main
-      style={{
-        minHeight: '100vh',
-        display: 'grid',
-        placeItems: 'center',
-        background: '#f7f8fc',
-        padding: 24
-      }}
-    >
-      <section
-        style={{
-          width: '100%',
-          maxWidth: 440,
-          borderRadius: 16,
-          background: '#fff',
-          padding: 36,
-          boxShadow: '0 16px 45px rgba(15,23,42,.12)'
-        }}
-      >
-        <p style={{ color: '#2563eb', fontWeight: 700 }}>站点管理</p>
-        <h1>请先登录</h1>
-        <p>登录后可查看公告、账户信息及相应权限的管理功能。</p>
+    <main className='grid min-h-screen place-items-center bg-slate-50 p-6'>
+      <section className={`${panelClass} w-full max-w-md`}>
+        <p className='font-semibold text-blue-600'>站点管理</p>
+        <h1 className='mt-2 text-2xl font-semibold'>请先登录</h1>
+        <p className='mt-3 text-slate-500'>
+          登录后可查看公告、账户信息及相应权限的管理功能。
+        </p>
         <SignInButton mode='modal'>
-          <button
-            type='button'
-            style={{
-              marginTop: 18,
-              border: 0,
-              borderRadius: 8,
-              padding: '10px 18px',
-              background: '#2563eb',
-              color: '#fff',
-              cursor: 'pointer'
-            }}
-          >
-            使用 Clerk 登录
-          </button>
+          <button className={`${buttonClass} mt-6`}>使用 Clerk 登录</button>
         </SignInButton>
       </section>
     </main>
