@@ -1,16 +1,28 @@
 import { Tab } from '@headlessui/react'
-import { SignInButton, UserButton, UserProfile } from '@clerk/nextjs'
+import { SignInButton, UserButton, UserProfile, useAuth } from '@clerk/nextjs'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 
-const api = async (url, options = {}) => {
-  const response = await fetch(url, {
-    credentials: 'same-origin',
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-    ...options
-  })
-  const body = await response.json().catch(() => ({}))
-  if (!response.ok) throw new Error(body.error || '请求失败')
-  return body
+const useAdminApi = () => {
+  const { getToken } = useAuth()
+
+  return useCallback(
+    async (url, options = {}) => {
+      const token = await getToken()
+      const response = await fetch(url, {
+        credentials: 'same-origin',
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(options.headers || {})
+        }
+      })
+      const body = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(body.error || '请求失败')
+      return body
+    },
+    [getToken]
+  )
 }
 
 const panelClass =
@@ -36,6 +48,7 @@ const StatCard = ({ label, value, tone = 'blue' }) => {
 }
 
 const AnnouncementPanel = ({ isAdmin, announcements, reload }) => {
+  const api = useAdminApi()
   const [form, setForm] = useState({ title: '', content: '', published: true })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -185,6 +198,7 @@ const AnnouncementPanel = ({ isAdmin, announcements, reload }) => {
 }
 
 const UserPanel = ({ users, reload }) => {
+  const api = useAdminApi()
   const [error, setError] = useState('')
   const changeRole = async (user, role) => {
     setError('')
@@ -249,6 +263,7 @@ const UserPanel = ({ users, reload }) => {
 }
 
 export default function AdminApp() {
+  const api = useAdminApi()
   const [session, setSession] = useState(null)
   const [announcements, setAnnouncements] = useState([])
   const [users, setUsers] = useState([])
@@ -257,11 +272,11 @@ export default function AdminApp() {
   const loadAnnouncements = useCallback(async () => {
     const result = await api('/api/admin/announcements')
     setAnnouncements(result.data || [])
-  }, [])
+  }, [api])
   const loadUsers = useCallback(async () => {
     const result = await api('/api/admin/users?limit=100&offset=0')
     setUsers(result.data || [])
-  }, [])
+  }, [api])
 
   useEffect(() => {
     api('/api/admin/session')
@@ -271,7 +286,7 @@ export default function AdminApp() {
         if (current.role === 'admin') await loadUsers()
       })
       .catch(err => setError(err.message))
-  }, [loadAnnouncements, loadUsers])
+  }, [api, loadAnnouncements, loadUsers])
 
   const isAdmin = session?.role === 'admin'
   const tabs = useMemo(
