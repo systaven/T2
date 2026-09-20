@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { clerkMiddleware } from '@clerk/nextjs/server'
 import { checkStrIsNotionId, getLastPartOfUrl } from '@/lib/utils'
 import { idToUuid } from 'notion-utils'
 import BLOG from './blog.config'
@@ -46,4 +47,13 @@ const noAuthMiddleware = async (req: NextRequest, ev: any) => {
   return NextResponse.next()
 }
 
-export default noAuthMiddleware
+// Clerk must wrap the existing middleware so it can attach authentication
+// state to page and API requests. Routes remain public here; authorization is
+// enforced by the admin page/API handlers themselves. Keep Clerk optional for
+// installations of NotionNext that do not configure it.
+const middleware =
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY
+    ? clerkMiddleware((_auth, req, ev) => noAuthMiddleware(req, ev))
+    : noAuthMiddleware
+
+export default middleware
