@@ -6,6 +6,10 @@ import {
   isExternalHttpLink,
   mergeRelValues
 } from '@/lib/utils/externalLink'
+import {
+  getCachedLinkMetadataPreview,
+  preloadLinkMetadataPreview
+} from '@/lib/utils/linkMetadataPreview'
 import { siteConfig } from '@/lib/config'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -22,7 +26,6 @@ const NON_TEXTUAL_LINK_CLASS_PATTERNS = [
   'notion-collection-card',
   'notion-property-title'
 ]
-const previewCache = new Map()
 
 const getUrlString = href => {
   if (typeof href === 'string') return href
@@ -38,24 +41,6 @@ const getFaviconProxyUrl = href => {
     return `https://a.favicon.im/${encodeURIComponent(url.hostname)}`
   } catch {
     return null
-  }
-}
-
-const getLinkMetadataPreview = async href => {
-  const response = await fetch(
-    `https://api.linkmetadata.com/v1/metadata?url=${encodeURIComponent(href)}`
-  )
-  if (!response.ok) throw new Error('link metadata request failed')
-
-  const metadata = await response.json()
-  const hostname = new URL(metadata.url || href).hostname
-  return {
-    title: metadata.title || null,
-    description: metadata.description || null,
-    image: metadata.image?.url || null,
-    favicon: metadata.favicon?.url || null,
-    siteName: hostname,
-    url: metadata.url || href
   }
 }
 
@@ -185,10 +170,14 @@ const ExternalArticleLink = ({
   useEffect(() => {
     if (!shouldShowPreview) return
 
-    const cachedPreview = previewCache.get(targetUrl)
+    const cachedPreview = getCachedLinkMetadataPreview(targetUrl)
     if (cachedPreview && !preview) {
       setPreview(cachedPreview)
+      return
     }
+    preloadLinkMetadataPreview(targetUrl)
+      .then(data => setPreview(current => current || data))
+      .catch(() => {})
   }, [preview, shouldShowPreview, targetUrl])
 
   useEffect(() => {
@@ -197,10 +186,9 @@ const ExternalArticleLink = ({
     let cancelled = false
     setLoading(true)
 
-    getLinkMetadataPreview(targetUrl)
+    preloadLinkMetadataPreview(targetUrl)
       .then(data => {
         if (!cancelled) {
-          previewCache.set(targetUrl, data)
           setPreview(data)
         }
       })

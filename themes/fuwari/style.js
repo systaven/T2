@@ -181,7 +181,8 @@ const Style = () => {
       background: rgba(255, 255, 255, .98);
       box-shadow: 0 20px 60px rgba(15, 23, 42, .22);
       backdrop-filter: blur(16px);
-      animation: article-link-preview-in .18s ease-out both;
+      transform-origin: var(--link-preview-origin, 50% 0);
+      animation: article-link-preview-in .26s cubic-bezier(.16, 1, .3, 1) both;
     }
     .dark .article-link-preview {
       border-color: rgba(148, 163, 184, .3);
@@ -189,8 +190,12 @@ const Style = () => {
       box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
     }
     @keyframes article-link-preview-in {
-      from { opacity: 0; transform: translateY(4px) scale(.98); }
+      from { opacity: 0; transform: translateY(8px) scale(.965); filter: blur(3px); }
+      65% { opacity: 1; transform: translateY(-1px) scale(1.006); filter: blur(0); }
       to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .article-link-preview { animation-duration: .01ms; }
     }
     #theme-fuwari .fuwari-footer {
       border-top: 1px dashed color-mix(in oklab, var(--fuwari-border) 85%, transparent);

@@ -2,6 +2,10 @@
 
 import { siteConfig } from '@/lib/config'
 import { decodeExternalUrl, isExternalHttpLink } from '@/lib/utils/externalLink'
+import {
+  getCachedLinkMetadataPreview,
+  preloadLinkMetadataPreview
+} from '@/lib/utils/linkMetadataPreview'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -10,7 +14,6 @@ const PREVIEW_OFFSET = 14
 const PREVIEW_HOVER_DELAY_MS = 320
 const FILE_LIKE_URL_PATTERN =
   /\.(pdf|zip|rar|7z|docx?|xlsx?|pptx?|txt|mp3|mp4|mov|avi|apk|dmg|exe)(?:[?#]|$)/i
-const previewCache = new Map()
 
 const getFaviconProxyUrl = href => {
   try {
@@ -42,21 +45,6 @@ const getActualUrl = link => {
   const href = link.getAttribute('href') || ''
   const shortLink = href.match(/^\/r\/([^?#/]+)/)
   return shortLink ? decodeExternalUrl(shortLink[1]) || href : href
-}
-
-const fetchPreview = async url => {
-  const response = await fetch(
-    `https://api.linkmetadata.com/v1/metadata?url=${encodeURIComponent(url)}`
-  )
-  if (!response.ok) throw new Error('link metadata request failed')
-
-  const metadata = await response.json()
-  return {
-    title: metadata.title || null,
-    description: metadata.description || null,
-    image: metadata.image?.url || null,
-    siteName: new URL(metadata.url || url).hostname
-  }
 }
 
 /** Adds previews to external Notion collection cards, which are not React Link components. */
@@ -105,8 +93,9 @@ const ArticleLinkPreview = () => {
       timerRef.current = setTimeout(() => {
         const url = getActualUrl(link)
         setActiveLink({ link, url })
-        setPreview(previewCache.get(url) || null)
-        setLoading(!previewCache.has(url))
+        const cachedPreview = getCachedLinkMetadataPreview(url)
+        setPreview(cachedPreview)
+        setLoading(!cachedPreview)
         setPosition(getPreviewPosition(link.getBoundingClientRect()))
         timerRef.current = null
       }, PREVIEW_HOVER_DELAY_MS)
@@ -125,6 +114,10 @@ const ArticleLinkPreview = () => {
 
     rootRef.current.addEventListener('mouseover', onMouseOver)
     rootRef.current.addEventListener('mouseout', onMouseOut)
+    const links = rootRef.current.querySelectorAll('a[href]')
+    links.forEach(link => {
+      if (isEligible(link)) preloadLinkMetadataPreview(getActualUrl(link)).catch(() => {})
+    })
     return () => {
       rootRef.current?.removeEventListener('mouseover', onMouseOver)
       rootRef.current?.removeEventListener('mouseout', onMouseOut)
@@ -135,9 +128,8 @@ const ArticleLinkPreview = () => {
   useEffect(() => {
     if (!activeLink || preview) return
     let cancelled = false
-    fetchPreview(activeLink.url)
+    preloadLinkMetadataPreview(activeLink.url)
       .then(data => {
-        previewCache.set(activeLink.url, data)
         if (!cancelled) setPreview(data)
       })
       .catch(() => {
