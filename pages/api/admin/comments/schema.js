@@ -26,8 +26,8 @@ const definitions = [
       { key: 'ipHash', type: 'varchar', size: 64, required: false },
       { key: 'content', type: 'mediumtext', required: true },
       { key: 'status', type: 'varchar', size: 16, required: true },
-      { key: 'likes', type: 'integer', required: true, default: 0 },
-      { key: 'edited', type: 'boolean', required: true, default: false }
+      { key: 'likes', type: 'integer', required: true },
+      { key: 'edited', type: 'boolean', required: true }
     ],
     indexes: [
       {
