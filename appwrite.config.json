@@ -150,6 +150,151 @@
         }
       ],
       "indexes": []
+    },
+    {
+      "$id": "native_comments",
+      "name": "Native comments",
+      "databaseId": "t2_data",
+      "enabled": true,
+      "rowSecurity": false,
+      "$permissions": [],
+      "columns": [
+        { "key": "postId", "type": "varchar", "size": 128, "required": true },
+        {
+          "key": "postTitle",
+          "type": "varchar",
+          "size": 255,
+          "required": false
+        },
+        { "key": "href", "type": "text", "required": false },
+        { "key": "parentId", "type": "varchar", "size": 36, "required": false },
+        { "key": "rootId", "type": "varchar", "size": 36, "required": false },
+        {
+          "key": "authorType",
+          "type": "varchar",
+          "size": 16,
+          "required": true
+        },
+        {
+          "key": "authorId",
+          "type": "varchar",
+          "size": 128,
+          "required": false
+        },
+        {
+          "key": "authorName",
+          "type": "varchar",
+          "size": 100,
+          "required": true
+        },
+        {
+          "key": "authorEmail",
+          "type": "varchar",
+          "size": 320,
+          "required": false
+        },
+        { "key": "authorAvatar", "type": "text", "required": false },
+        { "key": "actorHash", "type": "varchar", "size": 64, "required": true },
+        {
+          "key": "guestTokenHash",
+          "type": "varchar",
+          "size": 64,
+          "required": false
+        },
+        { "key": "ipHash", "type": "varchar", "size": 64, "required": false },
+        { "key": "content", "type": "mediumtext", "required": true },
+        { "key": "status", "type": "varchar", "size": 16, "required": true },
+        { "key": "likes", "type": "integer", "required": true, "default": 0 },
+        {
+          "key": "edited",
+          "type": "boolean",
+          "required": true,
+          "default": false
+        }
+      ],
+      "indexes": [
+        {
+          "key": "native_comments_post_status",
+          "type": "key",
+          "attributes": ["postId", "status"]
+        },
+        {
+          "key": "native_comments_post_hot",
+          "type": "key",
+          "attributes": ["postId", "status", "likes"]
+        },
+        {
+          "key": "native_comments_actor",
+          "type": "key",
+          "attributes": ["actorHash"]
+        },
+        {
+          "key": "native_comments_parent",
+          "type": "key",
+          "attributes": ["parentId"]
+        }
+      ]
+    },
+    {
+      "$id": "native_comment_likes",
+      "name": "Native comment likes",
+      "databaseId": "t2_data",
+      "enabled": true,
+      "rowSecurity": false,
+      "$permissions": [],
+      "columns": [
+        { "key": "commentId", "type": "varchar", "size": 36, "required": true },
+        { "key": "actorHash", "type": "varchar", "size": 64, "required": true }
+      ],
+      "indexes": [
+        {
+          "key": "native_comment_like_unique",
+          "type": "unique",
+          "attributes": ["commentId", "actorHash"]
+        }
+      ]
+    },
+    {
+      "$id": "native_article_reactions",
+      "name": "Native article reactions",
+      "databaseId": "t2_data",
+      "enabled": true,
+      "rowSecurity": false,
+      "$permissions": [],
+      "columns": [
+        { "key": "postId", "type": "varchar", "size": 128, "required": true },
+        { "key": "votes", "type": "mediumtext", "required": true }
+      ],
+      "indexes": [
+        {
+          "key": "native_article_reaction_post",
+          "type": "unique",
+          "attributes": ["postId"]
+        }
+      ]
+    },
+    {
+      "$id": "native_comment_settings",
+      "name": "Native comment settings",
+      "databaseId": "t2_data",
+      "enabled": true,
+      "rowSecurity": false,
+      "$permissions": [],
+      "columns": [
+        {
+          "key": "payload",
+          "type": "mediumtext",
+          "required": true,
+          "encrypt": true
+        },
+        {
+          "key": "updatedBy",
+          "type": "varchar",
+          "size": 128,
+          "required": false
+        }
+      ],
+      "indexes": []
     }
   ]
 }

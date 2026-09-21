@@ -3,6 +3,10 @@ import { SignInButton, UserProfile, useAuth, useClerk } from '@clerk/nextjs'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  CommentManagementPanel,
+  CommentSettingsPanel
+} from './CommentAdminPanels'
 
 const useAdminApi = () => {
   const { getToken } = useAuth()
@@ -391,7 +395,12 @@ export default function AdminApp({ siteName = '我的博客' }) {
 
   const isAdmin = session?.role === 'admin'
   const tabs = useMemo(
-    () => ['概览', '公告', ...(isAdmin ? ['用户管理'] : []), '账号与安全'],
+    () => [
+      '概览',
+      '公告',
+      ...(isAdmin ? ['评论管理', '评论设置', '用户管理'] : []),
+      '账号与安全'
+    ],
     [isAdmin]
   )
   const handleSignOut = async () => {
@@ -557,6 +566,16 @@ export default function AdminApp({ siteName = '我的博客' }) {
                 notify={notify}
               />
             </Tab.Panel>
+            {isAdmin && (
+              <Tab.Panel>
+                <CommentManagementPanel api={api} notify={notify} />
+              </Tab.Panel>
+            )}
+            {isAdmin && (
+              <Tab.Panel>
+                <CommentSettingsPanel api={api} notify={notify} />
+              </Tab.Panel>
+            )}
             {isAdmin && (
               <Tab.Panel>
                 <UserPanel

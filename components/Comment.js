@@ -15,7 +15,9 @@ import Artalk from './Artalk'
  */
 const Comment = ({ frontMatter, className }) => {
   const router = useRouter()
-  const [shouldLoad, setShouldLoad] = useState(!siteConfig('COMMENT_REVEAL_ON_SCROLL', true))
+  const [shouldLoad, setShouldLoad] = useState(
+    !siteConfig('COMMENT_REVEAL_ON_SCROLL', true)
+  )
   const commentRef = useRef(null)
 
   const COMMENT_ARTALK_SERVER = siteConfig('COMMENT_ARTALK_SERVER')
@@ -89,7 +91,7 @@ const Comment = ({ frontMatter, className }) => {
   }
 
   // 特定文章关闭评论区
-  if (frontMatter?.comment === 'Hide') {
+  if (String(frontMatter?.comment || '').toLowerCase() === 'hide') {
     return null
   }
 
@@ -110,6 +112,10 @@ const Comment = ({ frontMatter, className }) => {
 
       {shouldLoad && (
         <Tabs>
+          <div key='本站评论'>
+            <NativeCommentsComponent frontMatter={frontMatter} />
+          </div>
+
           {COMMENT_ARTALK_SERVER && (
             <div key='Artalk'>
               <Artalk />
@@ -230,6 +236,11 @@ const ValineComponent = dynamic(() => import('@/components/ValineComponent'), {
 
 const NotionCommentsComponent = dynamic(
   () => import('@/components/NotionComments'),
+  { ssr: false }
+)
+
+const NativeCommentsComponent = dynamic(
+  () => import('@/components/NativeComments'),
   { ssr: false }
 )
 
