@@ -34,8 +34,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Role must be admin or user' })
     if (actor.id === userId && role !== 'admin')
       return res
-        .status(400)
-        .json({ error: 'You cannot remove your own administrator access.' })
+        .status(409)
+        .json({ error: '不能降低当前登录账号自己的管理员权限。' })
     const db = getAdminDb()
     const service = getAdminConfig()
     const { Query } = require('node-appwrite')
