@@ -17,6 +17,14 @@ const LayoutLoading = () => (
 const EmptyBaseLayout = ({ children }) => <>{children}</>
 const EmptyPageLayout = () => null
 
+// A literal import at module scope lets Next preload the same layout before
+// hydration. The generic runtime loader has no webpack module IDs, so a warm
+// SSR response can contain a layout the initial client render does not know.
+const FuwariBaseLayout = dynamic(
+  () => import('@/themes/fuwari').then(mod => mod.LayoutBase),
+  { ssr: true, loading: LayoutLoading }
+)
+
 const IndexLayoutLoading = () => (
   <div className='pt-10 md:pt-18 w-full bg-[#f6f6f1] dark:bg-black'>
     <div className='mx-auto w-full max-w-screen-3xl px-4 py-10 lg:px-0'>
@@ -191,6 +199,7 @@ const getCurrentTheme = (router, fallbackTheme) => {
  */
 export const getBaseLayoutByTheme = theme => {
   const normalizedTheme = normalizeThemeName(theme)
+  if (normalizedTheme === 'fuwari') return FuwariBaseLayout
   if (baseLayoutCache.has(normalizedTheme)) {
     return baseLayoutCache.get(normalizedTheme)
   }
