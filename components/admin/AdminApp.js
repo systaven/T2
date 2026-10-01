@@ -3,6 +3,7 @@ import { SignInButton, UserProfile, useAuth, useClerk } from '@clerk/nextjs'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
+import WallpaperSettingsPanel from './WallpaperSettingsPanel'
 import {
   CommentManagementPanel,
   CommentSettingsPanel
@@ -398,7 +399,7 @@ export default function AdminApp({ siteName = '我的博客' }) {
     () => [
       '概览',
       '公告',
-      ...(isAdmin ? ['评论管理', '评论设置', '用户管理'] : []),
+      ...(isAdmin ? ['评论管理', '评论设置', '壁纸墙', '用户管理'] : []),
       '账号与安全'
     ],
     [isAdmin]
@@ -574,6 +575,11 @@ export default function AdminApp({ siteName = '我的博客' }) {
             {isAdmin && (
               <Tab.Panel>
                 <CommentSettingsPanel api={api} notify={notify} />
+              </Tab.Panel>
+            )}
+            {isAdmin && (
+              <Tab.Panel>
+                <WallpaperSettingsPanel api={api} notify={notify} />
               </Tab.Panel>
             )}
             {isAdmin && (

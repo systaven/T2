@@ -72,6 +72,8 @@ export function getFuwariMenuLinks({ locale, customNav, customMenu }) {
     links = customMenu
   }
 
+  if (!links.some(link => (link.href || link.url) === '/image')) {
+    links = [...links, { id: 'wallpaper-wall', name: '壁纸墙', href: '/image' }]
+  }
   return normalizeMenu(links)
 }
-
