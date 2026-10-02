@@ -1,6 +1,5 @@
 // import '@/styles/animate.css' // @see https://animate.style/
 import '@/styles/globals.css'
-import 'react-photo-view/dist/react-photo-view.css'
 import '@/styles/utility-patterns.css'
 
 // core styles shared by all of react-notion-x (required)
