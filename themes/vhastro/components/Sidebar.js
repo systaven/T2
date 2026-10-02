@@ -1,7 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { siteConfig } from '@/lib/config'
 import dynamic from 'next/dynamic'
-import { useEffect, useRef, useState } from 'react'
 import { enabled } from '../utils'
 import CONFIG from '../config'
 import ThemeLink from './ThemeLink'
@@ -9,39 +8,13 @@ import Icon from './Icon'
 import styles from '../Theme.module.css'
 
 const Toc = dynamic(() => import('./Toc'), { ssr: false })
+const DailyQuote = dynamic(() => import('./DailyQuote'), { ssr: false })
 
 // Reuse the repaired audio engine, not Fuwari's layout or global stylesheet.
 const MusicPlayer = dynamic(
   () => import('@/themes/fuwari/components/MusicPlayer'),
   { ssr: false }
 )
-
-function LazyMusic() {
-  const ref = useRef(null)
-  const [visible, setVisible] = useState(false)
-  useEffect(() => {
-    if (!window.IntersectionObserver) {
-      setVisible(true)
-      return
-    }
-    const observer = new IntersectionObserver(
-      entries => {
-        if (entries.some(entry => entry.isIntersecting)) {
-          setVisible(true)
-          observer.disconnect()
-        }
-      },
-      { rootMargin: '100px' }
-    )
-    if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
-  }, [])
-  return (
-    <div ref={ref} className={styles.music}>
-      {visible ? <MusicPlayer /> : <p className={styles.muted}>音乐播放器</p>}
-    </div>
-  )
-}
 
 export default function Sidebar({
   categoryOptions = [],
@@ -55,7 +28,6 @@ export default function Sidebar({
   const author = siteConfig('AUTHOR') || siteInfo?.title || siteConfig('TITLE')
   return (
     <aside className={styles.sidebar} aria-label='站点侧栏'>
-      {post && !lock && <Toc postId={post.id} />}
       <section className={`${styles.card} ${styles.profile}`}>
         <img
           className={styles.profileAvatar}
@@ -82,6 +54,7 @@ export default function Sidebar({
           </ThemeLink>
         </div>
       </section>
+      {enabled(siteConfig('VHASTRO_HITOKOTO', true, CONFIG)) && <DailyQuote />}
       {categoryOptions.length > 0 && (
         <section className={styles.card}>
           <h2 className={styles.sectionHeading}>
@@ -120,7 +93,12 @@ export default function Sidebar({
         </section>
       )}
       {enabled(siteConfig('VHASTRO_MUSIC', true, CONFIG)) &&
-        enabled(siteConfig('MUSIC_PLAYER', false)) && <LazyMusic />}
+        enabled(siteConfig('MUSIC_PLAYER', CONFIG.MUSIC_PLAYER, CONFIG)) && (
+          <section className={styles.music} aria-label='音乐播放器'>
+            <MusicPlayer />
+          </section>
+        )}
+      {post && !lock && <Toc postId={post.id} />}
     </aside>
   )
 }

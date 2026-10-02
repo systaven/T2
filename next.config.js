@@ -157,6 +157,9 @@ function getOutput() {
 }
 
 const nextConfig = {
+  env: {
+    NOTIONNEXT_AVAILABLE_THEMES: JSON.stringify(themes)
+  },
   eslint: {
     ignoreDuringBuilds: true
   },
@@ -169,7 +172,6 @@ const nextConfig = {
   generateEtags: true,
 
   // 构建优化
-  swcMinify: true,
   modularizeImports: {
     '@heroicons/react/24/outline': {
       transform: '@heroicons/react/24/outline/{{member}}'
@@ -440,10 +442,6 @@ const nextConfig = {
     delete pages['/sitemap.xml']
     delete pages['/auth']
     return pages
-  },
-  publicRuntimeConfig: {
-    // 这里的配置既可以服务端获取到，也可以在浏览器端获取到
-    THEMES: themes
   }
 }
 

@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import dynamic from 'next/dynamic'
+import { useRef } from 'react'
 import { useRouter } from 'next/router'
 import { siteConfig } from '@/lib/config'
 import Header from './components/Header'
@@ -12,11 +13,15 @@ import CoverImage from './components/CoverImage'
 import CONFIG from './config'
 import styles from './Theme.module.css'
 import { themeColorStyle } from './color'
+import HeroParticles from './components/HeroParticles'
+import usePageMotion from './usePageMotion'
 
 const Article = dynamic(() => import('./components/Article'))
 
 function LayoutBase(props) {
   const router = useRouter()
+  const mainRef = useRef(null)
+  usePageMotion(mainRef, router)
   const home = router.pathname === '/' || router.pathname === '/page/[page]'
   const cover =
     siteConfig('VHASTRO_HOME_BANNER', '', CONFIG) ||
@@ -24,6 +29,8 @@ function LayoutBase(props) {
     siteConfig('HOME_BANNER_IMAGE') ||
     '/bg_image.jpg'
   const title = props.siteInfo?.title || siteConfig('TITLE')
+  const sidebarLeft =
+    siteConfig('VHASTRO_SIDEBAR_POSITION', 'right', CONFIG) === 'left'
   return (
     <div id='theme-vhastro' className={styles.root} style={themeColorStyle()}>
       <Header customNav={props.customNav} customMenu={props.customMenu} />
@@ -35,6 +42,7 @@ function LayoutBase(props) {
             alt=''
             fetchpriority='high'
           />
+          <HeroParticles />
           <div className={styles.heroContent}>
             <img
               className={styles.heroAvatar}
@@ -48,7 +56,11 @@ function LayoutBase(props) {
           </div>
         </section>
       )}
-      <main className={`${styles.main} ${home ? styles.homeMain : ''}`}>
+      <main
+        ref={mainRef}
+        data-sidebar-position={sidebarLeft ? 'left' : 'right'}
+        className={`${styles.main} ${sidebarLeft ? styles.sidebarLeft : ''} ${home ? styles.homeMain : ''}`}
+      >
         <div className={styles.content}>{props.children}</div>
         <Sidebar {...props} />
       </main>

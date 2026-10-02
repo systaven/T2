@@ -59,14 +59,14 @@ export function buildThemeColorStyle(value) {
   const isDefault = color === DEFAULT_COLOR
   const light = readableAccent(color, '#ffffff', '#000000')
   const dark = isDefault
-    ? '#5abff2' // Fuwari: hsl(200, 85%, 65%)
-    : readableAccent(color, '#222c36', '#ffffff')
+    ? '#82b6d0' // Muted blue: readable without Fuwari's vivid dark accent.
+    : readableAccent(color, '#252525', '#ffffff')
   return {
     '--vh-custom-bright': color,
     '--vh-custom-accent-light': light,
     '--vh-custom-accent-dark': dark,
     '--vh-custom-soft-light': `${color}1a`,
-    '--vh-custom-soft-dark': `${dark}24`,
+    '--vh-custom-soft-dark': `${dark}14`,
     '--vh-custom-on-accent-light': '#ffffff',
     '--vh-custom-on-accent-dark': '#172033'
   }

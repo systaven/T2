@@ -41,6 +41,7 @@ export default function Header({ customNav, customMenu }) {
   const router = useRouter()
   const { isDarkMode, toggleDarkMode } = useGlobal()
   const [searchOpen, setSearchOpen] = useState(false)
+  const [searchMounted, setSearchMounted] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const mobileToggle = useRef(null)
   const defaults = [
@@ -53,6 +54,9 @@ export default function Header({ customNav, customMenu }) {
       ? customMenu
       : [...defaults, ...(customNav || [])]
   )
+  useEffect(() => {
+    if (searchOpen) setSearchMounted(true)
+  }, [searchOpen])
   useEffect(() => {
     setMobileOpen(false)
     setSearchOpen(false)
@@ -114,7 +118,10 @@ export default function Header({ customNav, customMenu }) {
               className={styles.tool}
               type='button'
               aria-label='搜索文章'
-              onClick={() => setSearchOpen(true)}
+              onClick={() => {
+                setSearchMounted(true)
+                setSearchOpen(true)
+              }}
             >
               <Icon name='search' />
             </button>
@@ -153,7 +160,7 @@ export default function Header({ customNav, customMenu }) {
           )}
         </div>
       </header>
-      {searchOpen && (
+      {(searchMounted || searchOpen) && (
         <SearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} />
       )}
     </>

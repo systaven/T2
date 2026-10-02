@@ -533,7 +533,7 @@ export function CommentSettingsPanel({ api, notify }) {
 
       <SettingsSection
         title='访客人机验证'
-        description='登录用户自动跳过。开启后，访客发布评论和上传图片需要通过 Cloudflare Turnstile。'
+        description='登录用户自动跳过。开启后，访客发布评论和上传图片需要通过 Cloudflare Turnstile。仅用于评论验证时，请在 Cloudflare 控制台关闭 Pre-clearance（预通行），并确认已允许实际使用的域名；否则可能出现 clearance redemption 或 405 错误。'
       >
         <SettingToggle
           settings={settings}

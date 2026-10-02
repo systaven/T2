@@ -1,12 +1,13 @@
 import BLOG, { LAYOUT_MAPPINGS } from '@/blog.config'
-import getConfig from 'next/config'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { createContext, useContext } from 'react'
 import { getQueryParam, getQueryVariable, isBrowser } from '../lib/utils'
 
-// 在next.config.js中扫描所有主题
-export const { THEMES = [] } = getConfig()?.publicRuntimeConfig || {}
+// next.config.js scans the same directories and embeds this public list at build time.
+export const THEMES = JSON.parse(
+  process.env.NOTIONNEXT_AVAILABLE_THEMES || '[]'
+)
 export const ThemePreviewContext = createContext(undefined)
 const baseLayoutCache = new Map()
 const layoutByThemeCache = new Map()

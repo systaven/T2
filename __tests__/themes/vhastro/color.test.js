@@ -21,12 +21,12 @@ jest.mock('next/router', () => ({
 test('defaults to Fuwari blue with readable accents and safely falls back on invalid values', () => {
   const original = buildThemeColorStyle('#3aa8df')
   expect(original['--vh-custom-bright']).toBe('#3aa8df')
-  expect(original['--vh-custom-accent-dark']).toBe('#5abff2')
+  expect(original['--vh-custom-accent-dark']).toBe('#82b6d0')
   expect(
     contrastRatio(original['--vh-custom-accent-light'], '#ffffff')
   ).toBeGreaterThanOrEqual(4.5)
   expect(
-    contrastRatio(original['--vh-custom-accent-dark'], '#222c36')
+    contrastRatio(original['--vh-custom-accent-dark'], '#252525')
   ).toBeGreaterThanOrEqual(4.5)
   for (const value of [
     '',
@@ -48,7 +48,7 @@ test.each(['#a855f7', '#ffffff', '#000000', '#ffff00', '#ff0000'])(
       contrastRatio(palette['--vh-custom-accent-light'], '#ffffff')
     ).toBeGreaterThanOrEqual(4.5)
     expect(
-      contrastRatio(palette['--vh-custom-accent-dark'], '#222c36')
+      contrastRatio(palette['--vh-custom-accent-dark'], '#252525')
     ).toBeGreaterThanOrEqual(4.5)
     expect(
       contrastRatio(

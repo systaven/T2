@@ -2,12 +2,26 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import Header from '@/themes/vhastro/components/Header'
 import SearchForm from '@/themes/vhastro/components/SearchForm'
 import PostList from '@/themes/vhastro/components/PostList'
+import SearchDialog from '@/themes/vhastro/components/SearchDialog'
 
 const mockPush = jest.fn()
 const mockToggle = jest.fn()
 jest.mock('next/router', () => ({
   useRouter: () => ({ asPath: '/?theme=vhastro', push: mockPush })
 }))
+
+test('animated search keeps accessible focus and unmounts after closing', async () => {
+  const close = jest.fn()
+  const { rerender } = render(<SearchDialog open onClose={close} />)
+  expect(await screen.findByRole('dialog')).toHaveAccessibleName('搜索文章')
+  await waitFor(() => expect(screen.getByRole('searchbox')).toHaveFocus())
+  fireEvent.click(screen.getByRole('button', { name: '关闭搜索' }))
+  expect(close).toHaveBeenCalled()
+  rerender(<SearchDialog open={false} onClose={close} />)
+  await waitFor(() =>
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  )
+})
 jest.mock('@/lib/global', () => ({
   useGlobal: () => ({ isDarkMode: false, toggleDarkMode: mockToggle })
 }))

@@ -21,39 +21,18 @@ import {
   useState
 } from 'react'
 import styles from './NativeComments.module.css'
+import {
+  DEFAULT_EMOJI,
+  gravatarUrl,
+  guestAvatarUrl,
+  publicCommentError,
+  REACTION_FACES,
+  yellowFaceUrl
+} from '@/lib/comments/presentation'
 
 const PROFILE_KEY = 'native-comment-profile'
 const TOKEN_KEY = 'native-comment-guest-token'
-const builtinEmoji = {
-  颜文字: [
-    '|´・ω・)ノ',
-    'ヾ(≧∇≦*)ゝ',
-    '(☆ω☆)',
-    '（╯‵□′）╯︵┴─┴',
-    '(/ω＼)',
-    '∠( ᐛ 」∠)＿',
-    '→_→',
-    '٩(ˊᗜˋ*)و',
-    '(ฅ´ω`ฅ)',
-    'Σ(っ °Д °;)っ',
-    '╮(╯▽╰)╭',
-    '＞﹏＜'
-  ],
-  Emoji: [
-    '😀',
-    '😂',
-    '🥰',
-    '😮',
-    '🤔',
-    '😭',
-    '👍',
-    '🎉',
-    '❤️',
-    '✨',
-    '💡',
-    '👀'
-  ]
-}
+const builtinEmoji = DEFAULT_EMOJI
 
 const makeGuestToken = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID)
@@ -90,12 +69,22 @@ const loadTurnstile = () => {
   if (window.turnstile) return Promise.resolve(window.turnstile)
   if (turnstileLoader) return turnstileLoader
   turnstileLoader = new Promise((resolve, reject) => {
+    const timer = setTimeout(() => fail(), 20000)
+    const loaded = () => {
+      clearTimeout(timer)
+      if (window.turnstile) resolve(window.turnstile)
+      else reject(new Error('人机验证暂时无法加载'))
+    }
+    const fail = () => {
+      clearTimeout(timer)
+      reject(new Error('人机验证暂时无法加载'))
+    }
     const existing = document.querySelector('script[data-native-turnstile]')
     if (existing) {
-      existing.addEventListener('load', () => resolve(window.turnstile), {
+      existing.addEventListener('load', loaded, {
         once: true
       })
-      existing.addEventListener('error', reject, { once: true })
+      existing.addEventListener('error', fail, { once: true })
       return
     }
     const script = document.createElement('script')
@@ -104,9 +93,14 @@ const loadTurnstile = () => {
     script.async = true
     script.defer = true
     script.dataset.nativeTurnstile = 'true'
-    script.onload = () => resolve(window.turnstile)
-    script.onerror = reject
+    script.onload = loaded
+    script.onerror = fail
     document.head.appendChild(script)
+  })
+  turnstileLoader = turnstileLoader.catch(error => {
+    turnstileLoader = null
+    document.querySelector('script[data-native-turnstile]')?.remove()
+    throw error
   })
   return turnstileLoader
 }
@@ -117,6 +111,8 @@ const TurnstileWidget = forwardRef(function TurnstileWidget(
 ) {
   const container = useRef(null)
   const widgetId = useRef(null)
+  const [failure, setFailure] = useState('')
+  const [attempt, setAttempt] = useState(0)
   const callback = useRef(onToken)
   callback.current = onToken
 
@@ -142,20 +138,58 @@ const TurnstileWidget = forwardRef(function TurnstileWidget(
           action: 'comment',
           theme: 'auto',
           size: 'flexible',
-          callback: token => callback.current(token),
+          retry: 'never',
+          callback: token => {
+            setFailure('')
+            callback.current(token)
+          },
           'expired-callback': () => callback.current(''),
-          'error-callback': () => callback.current('')
+          'error-callback': () => {
+            callback.current('')
+            setFailure(
+              '人机验证没有完成，请重试；若仍失败，请检查网络或联系站点管理员。'
+            )
+            return true
+          },
+          'timeout-callback': () => {
+            callback.current('')
+            setFailure('人机验证超时，请重试。')
+          }
         })
       })
-      .catch(() => callback.current(''))
+      .catch(() => {
+        if (disposed) return
+        callback.current('')
+        setFailure('人机验证暂时无法加载，请检查网络后重试。')
+      })
     return () => {
       disposed = true
       if (widgetId.current && window.turnstile)
         window.turnstile.remove(widgetId.current)
       widgetId.current = null
     }
-  }, [siteKey])
-  return <div ref={container} className={styles.turnstile} />
+  }, [siteKey, attempt])
+  return (
+    <div className={styles.turnstile}>
+      <div ref={container} />
+      {failure && (
+        <div role='alert'>
+          <p>{failure}</p>
+          <button
+            className={styles.textButton}
+            type='button'
+            onClick={() => {
+              setFailure('')
+              callback.current('')
+              setAttempt(value => value + 1)
+            }}
+          >
+            重新验证
+          </button>
+        </div>
+      )}
+    </div>
+  )
 })
 
 const parseOwo = data => {
@@ -184,12 +218,23 @@ const parseOwo = data => {
 
 const emojiValue = value => {
   const image = String(value).match(/<img[^>]+src=["']([^"']+)["']/i)
-  if (image?.[1] && /^https?:\/\//.test(image[1])) return `![](${image[1]})`
+  if (image?.[1] && /^https?:\/\//.test(image[1])) {
+    const label = String(value).match(/alt=["']([^"']+)["']/i)?.[1] || '表情'
+    return `![${label.replace(/[\[\]\\]/g, '')}](${image[1]})`
+  }
   return String(value).replace(/<[^>]+>/g, '')
 }
 
-const EmojiPicker = ({ groups, onPick }) => (
+const EmojiPicker = ({ groups, onPick, onClose }) => (
   <div className={styles.emojiPanel} role='dialog' aria-label='选择表情'>
+    <button
+      type='button'
+      className={styles.emojiClose}
+      aria-label='关闭表情'
+      onClick={onClose}
+    >
+      <IconX size={16} />
+    </button>
     {Object.entries(groups).map(([name, items]) => (
       <div className={styles.emojiGroup} key={name}>
         <p className={styles.emojiGroupTitle}>{name}</p>
@@ -203,12 +248,22 @@ const EmojiPicker = ({ groups, onPick }) => (
                 className={styles.emojiItem}
                 key={`${name}-${index}`}
                 type='button'
+                aria-label={
+                  String(item).match(/alt=["']([^"']+)["']/i)?.[1] ||
+                  `表情 ${index + 1}`
+                }
                 onClick={() => onPick(emojiValue(item))}
               >
                 {image && /^https?:\/\//.test(image) ? (
                   // OwO packs can point at arbitrary administrator-approved hosts.
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={image} alt='' loading='lazy' />
+                  <img
+                    src={image}
+                    alt=''
+                    loading='lazy'
+                    width={28}
+                    height={28}
+                  />
                 ) : (
                   emojiValue(item)
                 )}
@@ -221,19 +276,30 @@ const EmojiPicker = ({ groups, onPick }) => (
   </div>
 )
 
-const Avatar = ({ src, name }) => (
-  <span className={styles.avatar} aria-hidden='true'>
-    {src ? (
-      // Clerk and guest avatar hosts are not known at build time.
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={src} alt='' loading='lazy' />
-    ) : (
-      String(name || '?')
-        .slice(0, 1)
-        .toUpperCase()
-    )}
-  </span>
-)
+const Avatar = ({ src, name }) => {
+  const [failedSrc, setFailedSrc] = useState(null)
+  return (
+    <span className={styles.avatar} aria-hidden='true'>
+      {src && src !== failedSrc ? (
+        // Clerk and guest avatar hosts are not known at build time.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt=''
+          loading='lazy'
+          width={40}
+          height={40}
+          referrerPolicy='no-referrer'
+          onError={() => setFailedSrc(src)}
+        />
+      ) : (
+        String(name || '?')
+          .slice(0, 1)
+          .toUpperCase()
+      )}
+    </span>
+  )
+}
 
 const relativeTime = value => {
   const date = new Date(value)
@@ -282,7 +348,12 @@ function NativeCommentsCore({
 
   const api = useCallback(
     async (url, options = {}) => {
-      const token = getToken ? await getToken().catch(() => null) : null
+      const isRead = !options.method || options.method === 'GET'
+      if (!isRead && getToken && !clerkLoaded) {
+        throw new Error('正在确认登录状态，请稍后再试。')
+      }
+      const token =
+        getToken && clerkLoaded ? await getToken().catch(() => null) : null
       const response = await fetch(url, {
         ...options,
         headers: {
@@ -291,12 +362,15 @@ function NativeCommentsCore({
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
           ...(options.headers || {})
         }
+      }).catch(() => {
+        throw new Error('网络连接不顺畅，请稍后重试。')
       })
       const body = await response.json().catch(() => ({}))
-      if (!response.ok) throw new Error(body.error || '请求失败')
+      if (!response.ok)
+        throw new Error(publicCommentError(body.error, response.status))
       return body
     },
-    [getToken, guestToken]
+    [getToken, clerkLoaded, guestToken]
   )
 
   useEffect(() => {
@@ -304,6 +378,42 @@ function NativeCommentsCore({
     setGuestToken(stored.guestToken)
     setProfile(stored.profile)
   }, [])
+
+  const [guestAvatar, setGuestAvatar] = useState(gravatarUrl(''))
+  useEffect(() => {
+    let cancelled = false
+    setGuestAvatar(gravatarUrl(''))
+    const timer = setTimeout(() => {
+      guestAvatarUrl(profile.email)
+        .then(value => {
+          if (!cancelled) setGuestAvatar(value)
+        })
+        .catch(() => {})
+    }, 300)
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+  }, [profile.email])
+
+  const emojiRoot = useRef(null)
+  useEffect(() => {
+    if (!emojiOpen) return
+    const close = event => {
+      if (
+        event.key === 'Escape' ||
+        (event.type === 'pointerdown' &&
+          !emojiRoot.current?.contains(event.target))
+      )
+        setEmojiOpen(false)
+    }
+    document.addEventListener('keydown', close)
+    document.addEventListener('pointerdown', close)
+    return () => {
+      document.removeEventListener('keydown', close)
+      document.removeEventListener('pointerdown', close)
+    }
+  }, [emojiOpen])
 
   useEffect(() => {
     if (!config?.emojiDataUrl) return
@@ -332,7 +442,7 @@ function NativeCommentsCore({
         )
         setTotal(result.total || 0)
         setNextCursor(result.nextCursor || null)
-        setMessage(null)
+        setMessage(current => (current?.type === 'error' ? null : current))
       } catch (error) {
         setMessage({ type: 'error', text: error.message })
       } finally {
@@ -660,7 +770,7 @@ function NativeCommentsCore({
   return (
     <section className={styles.root} aria-label='评论区'>
       <div className={styles.reactionPanel}>
-        <p className={styles.reactionTitle}>你对此文章感觉如何？</p>
+        <p className={styles.reactionTitle}>这篇文章，给你什么感觉？</p>
         <div className={styles.reactions}>
           {(config.reactions || []).map(item => (
             <button
@@ -670,7 +780,16 @@ function NativeCommentsCore({
               key={item.id}
               onClick={() => void toggleReaction(item.id)}
             >
-              <span className={styles.reactionEmoji}>{item.emoji}</span>
+              <span className={styles.reactionEmoji}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={yellowFaceUrl(REACTION_FACES[item.id] || 'silme')}
+                  alt=''
+                  width={32}
+                  height={32}
+                  loading='lazy'
+                />
+              </span>
               <span className={styles.reactionMeta}>
                 {item.label} {reactions.counts?.[item.id] || 0}
               </span>
@@ -704,7 +823,7 @@ function NativeCommentsCore({
       <form className={styles.composer} onSubmit={event => void submit(event)}>
         <div className={styles.identity}>
           <Avatar
-            src={clerkUser?.imageUrl}
+            src={clerkUser ? clerkUser.imageUrl : guestAvatar}
             name={clerkUser?.fullName || profile.name}
           />
           <div className={styles.identityText}>
@@ -716,33 +835,44 @@ function NativeCommentsCore({
             <p className={styles.identityHint}>
               {clerkUser
                 ? '使用登录身份发布，无需人机验证'
-                : '昵称和邮箱会保存在这台设备，邮箱不会公开'}
+                : '邮箱用于匹配头像和回复通知，不会直接公开'}
             </p>
           </div>
         </div>
         {!clerkUser && (
           <div className={styles.guestFields}>
-            <input
-              className={styles.input}
-              maxLength={100}
-              required
-              placeholder='昵称'
-              value={profile.name}
-              onChange={event =>
-                saveProfile({ ...profile, name: event.target.value })
-              }
-            />
-            <input
-              className={styles.input}
-              type='email'
-              maxLength={320}
-              required
-              placeholder='邮箱（不会公开）'
-              value={profile.email}
-              onChange={event =>
-                saveProfile({ ...profile, email: event.target.value })
-              }
-            />
+            <label className={styles.fieldLabel}>
+              昵称
+              <input
+                className={styles.input}
+                maxLength={100}
+                required
+                placeholder='昵称'
+                name='comment-name'
+                autoComplete='nickname'
+                value={profile.name}
+                onChange={event =>
+                  saveProfile({ ...profile, name: event.target.value })
+                }
+              />
+            </label>
+            <label className={styles.fieldLabel}>
+              邮箱
+              <input
+                className={styles.input}
+                type='email'
+                maxLength={320}
+                required
+                placeholder='邮箱（不会公开）'
+                name='comment-email'
+                autoComplete='email'
+                spellCheck={false}
+                value={profile.email}
+                onChange={event =>
+                  saveProfile({ ...profile, email: event.target.value })
+                }
+              />
+            </label>
           </div>
         )}
         {replyTo && (
@@ -764,6 +894,8 @@ function NativeCommentsCore({
           maxLength={config.maxCommentLength}
           required
           placeholder='友善交流，留下你的想法…'
+          aria-label='评论内容'
+          name='comment-content'
           value={content}
           onChange={event => setContent(event.target.value)}
         />
@@ -794,7 +926,7 @@ function NativeCommentsCore({
           </p>
         )}
         <div className={styles.toolbar}>
-          <div className={styles.tools}>
+          <div className={styles.tools} ref={emojiRoot}>
             <button
               className={styles.iconButton}
               type='button'
@@ -805,7 +937,11 @@ function NativeCommentsCore({
               <IconMoodSmile size={19} />
             </button>
             {emojiOpen && (
-              <EmojiPicker groups={emojiGroups} onPick={insertAtCursor} />
+              <EmojiPicker
+                groups={emojiGroups}
+                onPick={insertAtCursor}
+                onClose={() => setEmojiOpen(false)}
+              />
             )}
             <input
               ref={fileRef}

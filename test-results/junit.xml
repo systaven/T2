@@ -1,23 +1,125 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="8" failures="0" errors="0" time="1.678">
-  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T02:09:14" time="0.86" tests="3">
-    <testcase classname=" API failure shows a persistent error and retry loads the configured song" name=" API failure shows a persistent error and retry loads the configured song" time="0.224">
+<testsuites name="jest tests" tests="49" failures="0" errors="0" time="6.556">
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T05:32:57" time="2.366" tests="5">
+    <testcase classname=" public discussion loads while identity is pending without requesting a token" name=" public discussion loads while identity is pending without requesting a token" time="0.358">
     </testcase>
-    <testcase classname=" string false selects local audio without calling Meting or inserting unrelated demo songs" name=" string false selects local audio without calling Meting or inserting unrelated demo songs" time="0.012">
+    <testcase classname=" verification failures give an actionable retry without automatic challenge loops" name=" verification failures give an actionable retry without automatic challenge loops" time="0.156">
     </testcase>
-    <testcase classname=" initial local audio has metadata listeners and all failed tracks stop rather than loop forever" name=" initial local audio has metadata listeners and all failed tracks stop rather than loop forever" time="0.026">
+    <testcase classname=" guest form has labelled fields, default avatar and image-based yellow faces" name=" guest form has labelled fields, default avatar and image-based yellow faces" time="0.308">
+    </testcase>
+    <testcase classname=" public errors do not expose service names or schema details" name=" public errors do not expose service names or schema details" time="0.026">
+    </testcase>
+    <testcase classname=" successful publication retains its feedback after refreshing comments" name=" successful publication retains its feedback after refreshing comments" time="0.149">
     </testcase>
   </testsuite>
-  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T02:09:14" time="0.112" tests="5">
-    <testcase classname=" normalizes string switches and filters missing audio URLs" name=" normalizes string switches and filters missing audio URLs" time="0.004">
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T05:32:59" time="0.469" tests="6">
+    <testcase classname=" animated search keeps accessible focus and unmounts after closing" name=" animated search keeps accessible focus and unmounts after closing" time="0.143">
     </testcase>
-    <testcase classname=" default 403 falls back using the same server and playlist ID" name=" default 403 falls back using the same server and playlist ID" time="0.004">
+    <testcase classname=" keeps a single header and renders Notion navigation with working dark switch" name=" keeps a single header and renders Notion navigation with working dark switch" time="0.056">
     </testcase>
-    <testcase classname=" custom APIs are not silently replaced and malformed/empty lists report errors" name=" custom APIs are not silently replaced and malformed/empty lists report errors" time="0.008">
+    <testcase classname=" mobile navigation closes on outside click or keyboard focus leaving it" name=" mobile navigation closes on outside click or keyboard focus leaving it" time="0.036">
     </testcase>
-    <testcase classname=" request timeout aborts loading instead of leaving it pending" name=" request timeout aborts loading instead of leaving it pending" time="0.018">
+    <testcase classname=" search navigates to existing search route and preserves theme" name=" search navigates to existing search route and preserves theme" time="0.023">
     </testcase>
-    <testcase classname=" unmount cancellation does not start a backup request" name=" unmount cancellation does not start a backup request" time="0.007">
+    <testcase classname=" search reports route failures and enables retry" name=" search reports route failures and enables retry" time="0.015">
+    </testcase>
+    <testcase classname=" article cards support absent covers and array categories" name=" article cards support absent covers and array categories" time="0.025">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T05:33:00" time="0.232" tests="5">
+    <testcase classname=" daily cache prevents extra requests on article navigation and preserves attribution" name=" daily cache prevents extra requests on article navigation and preserves attribution" time="0.018">
+    </testcase>
+    <testcase classname=" concurrent mounts share one request" name=" concurrent mounts share one request" time="0.001">
+    </testcase>
+    <testcase classname=" old or malformed cache is refreshed" name=" old or malformed cache is refreshed" time="0">
+    </testcase>
+    <testcase classname=" failure remains visible and retry can recover" name=" failure remains visible and retry can recover" time="0.064">
+    </testcase>
+    <testcase classname=" request timeout rejects and releases the request for retry" name=" request timeout rejects and releases the request for retry" time="0.021">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T05:33:00" time="0.097" tests="1">
+    <testcase classname=" build-time theme registry preserves every existing theme without runtime config" name=" build-time theme registry preserves every existing theme without runtime config" time="0.036">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T05:33:00" time="0.198" tests="4">
+    <testcase classname=" article table of contents follows every sidebar widget and is absent for locked articles" name=" article table of contents follows every sidebar widget and is absent for locked articles" time="0.023">
+    </testcase>
+    <testcase classname=" music stays mounted when Fuwari configuration is replaced by vhastro during navigation" name=" music stays mounted when Fuwari configuration is replaced by vhastro during navigation" time="0.012">
+    </testcase>
+    <testcase classname=" explicit music and quote switches remain respected" name=" explicit music and quote switches remain respected" time="0.007">
+    </testcase>
+    <testcase classname=" sidebar position is configurable and invalid values keep the right layout" name=" sidebar position is configurable and invalid values keep the right layout" time="0.029">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T05:33:00" time="0.178" tests="2">
+    <testcase classname=" replaces a broken cover and accepts a subsequent URL" name=" replaces a broken cover and accepts a subsequent URL" time="0.06">
+    </testcase>
+    <testcase classname=" does not render a broken image when the cover is absent" name=" does not render a broken image when the cover is absent" time="0.005">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T05:33:01" time="0.251" tests="8">
+    <testcase classname=" defaults to Fuwari blue with readable accents and safely falls back on invalid values" name=" defaults to Fuwari blue with readable accents and safely falls back on invalid values" time="0.003">
+    </testcase>
+    <testcase classname=" derives readable light and dark accents from #a855f7" name=" derives readable light and dark accents from #a855f7" time="0.002">
+    </testcase>
+    <testcase classname=" derives readable light and dark accents from #ffffff" name=" derives readable light and dark accents from #ffffff" time="0.001">
+    </testcase>
+    <testcase classname=" derives readable light and dark accents from #000000" name=" derives readable light and dark accents from #000000" time="0.001">
+    </testcase>
+    <testcase classname=" derives readable light and dark accents from #ffff00" name=" derives readable light and dark accents from #ffff00" time="0.001">
+    </testcase>
+    <testcase classname=" derives readable light and dark accents from #ff0000" name=" derives readable light and dark accents from #ff0000" time="0.001">
+    </testcase>
+    <testcase classname=" applies the same configured palette to theme root and portalled search dialog" name=" applies the same configured palette to theme root and portalled search dialog" time="0.121">
+    </testcase>
+    <testcase classname=" reads the public environment variable from theme configuration" name=" reads the public environment variable from theme configuration" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T05:33:01" time="0.256" tests="1">
+    <testcase classname=" login-locked articles report Clerk loading failure instead of spinning forever" name=" login-locked articles report Clerk loading failure instead of spinning forever" time="0.023">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T05:33:01" time="0.173" tests="5">
+    <testcase classname=" locked articles expose neither content nor comments" name=" locked articles expose neither content nor comments" time="0.033">
+    </testcase>
+    <testcase classname=" Notion Hide prevents mounting the entire comment component" name=" Notion Hide prevents mounting the entire comment component" time="0.005">
+    </testcase>
+    <testcase classname=" login-protected pages do not ask for an unrelated password" name=" login-protected pages do not ask for an unrelated password" time="0.006">
+    </testcase>
+    <testcase classname=" normal articles mount native comment entry point" name=" normal articles mount native comment entry point" time="0.003">
+    </testcase>
+    <testcase classname=" sidebar never repeats the page children slot" name=" sidebar never repeats the page children slot" time="0.005">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T05:33:01" time="0.289" tests="4">
+    <testcase classname=" guest avatar hashes trimmed lowercase email with SHA-256 without publishing the email" name=" guest avatar hashes trimmed lowercase email with SHA-256 without publishing the email" time="0.079">
+    </testcase>
+    <testcase classname=" old guest comments get avatars on read without exposing private data" name=" old guest comments get avatars on read without exposing private data" time="0.008">
+    </testcase>
+    <testcase classname=" only user-actionable errors pass through to the public response" name=" only user-actionable errors pass through to the public response" time="0.009">
+    </testcase>
+    <testcase classname=" default picker uses curated community images instead of system emojis" name=" default picker uses curated community images instead of system emojis" time="0.009">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T05:33:02" time="0.364" tests="3">
+    <testcase classname=" route motion keeps the page node alive and restores it after failed navigation" name=" route motion keeps the page node alive and restores it after failed navigation" time="0.033">
+    </testcase>
+    <testcase classname=" reduced motion skips page animations" name=" reduced motion skips page animations" time="0.003">
+    </testcase>
+    <testcase classname=" decorative particles pause outside the viewport and disconnect on unmount" name=" decorative particles pause outside the viewport and disconnect on unmount" time="0.021">
+    </testcase>
+  </testsuite>
+  <testsuite name="vhastro integrations" errors="0" failures="0" skipped="0" timestamp="2026-10-02T05:33:02" time="0.085" tests="5">
+    <testcase classname="vhastro integrations maps existing Notion menus without requiring icon properties" name="vhastro integrations maps existing Notion menus without requiring icon properties" time="0.001">
+    </testcase>
+    <testcase classname="vhastro integrations accepts both menu formats, preserves submenus and removes hidden entries" name="vhastro integrations accepts both menu formats, preserves submenus and removes hidden entries" time="0.001">
+    </testcase>
+    <testcase classname="vhastro integrations preview links remain identical between server and browser and preserve anchors" name="vhastro integrations preview links remain identical between server and browser and preserve anchors" time="0.003">
+    </testcase>
+    <testcase classname="vhastro integrations never mounts comments on locked or Notion-hidden pages" name="vhastro integrations never mounts comments on locked or Notion-hidden pages" time="0.001">
+    </testcase>
+    <testcase classname="vhastro integrations large pagination is compact and includes current and endpoint pages" name="vhastro integrations large pagination is compact and includes current and endpoint pages" time="0.001">
     </testcase>
   </testsuite>
 </testsuites>

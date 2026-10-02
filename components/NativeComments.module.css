@@ -11,36 +11,37 @@
 }
 
 .reactionPanel {
-  padding: 1.25rem 0;
-  border-block: 1px solid var(--nc-border);
+  padding: 1rem 0 1.5rem;
   text-align: center;
 }
 
 .reactionTitle {
   margin: 0 0 0.85rem;
-  font-size: 0.95rem;
-  font-weight: 650;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--nc-muted);
 }
 
 .reactions {
   display: flex;
   justify-content: center;
   gap: 0.55rem;
+  flex-wrap: wrap;
   overflow-x: auto;
   padding: 0.15rem;
 }
 
 .reaction {
   display: inline-flex;
-  min-width: 4.2rem;
+  min-width: 4rem;
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
   padding: 0.65rem 0.75rem 0.55rem;
   color: var(--nc-muted);
-  background: var(--nc-surface);
-  border: 1px solid var(--nc-border);
-  border-radius: 0.9rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
   cursor: pointer;
 }
 
@@ -55,6 +56,12 @@
   font-size: 1.45rem;
   line-height: 1;
 }
+.reactionEmoji img {
+  display: block;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
 .reactionMeta {
   font-size: 0.72rem;
   white-space: nowrap;
@@ -65,17 +72,21 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin: 1.5rem 0 0.8rem;
+  margin: 0.5rem 0 1rem;
+  flex-wrap: wrap;
 }
 
 .heading h3 {
   margin: 0;
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
 }
 .sort {
   display: flex;
   gap: 0.25rem;
+  padding: 3px;
+  border-radius: 6px;
+  background: var(--nc-soft);
 }
 .sort button,
 .textButton {
@@ -91,15 +102,19 @@
 .sortActive,
 .textButton:hover {
   color: var(--nc-primary) !important;
-  background: var(--nc-primary-soft) !important;
+  background: var(--nc-surface) !important;
 }
 
 .composer {
   position: relative;
-  padding: 1rem;
+  padding: 1.2rem;
   background: var(--nc-surface);
   border: 1px solid var(--nc-border);
-  border-radius: 1rem;
+  border-radius: 0.65rem;
+  transition: border-color 0.15s;
+}
+.composer:focus-within {
+  border-color: var(--nc-primary);
 }
 
 .identity {
@@ -128,8 +143,8 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-  color: #fff;
-  background: var(--nc-primary);
+  color: var(--nc-muted);
+  background: var(--nc-soft);
   border-radius: 50%;
   font-size: 0.78rem;
   font-weight: 700;
@@ -146,21 +161,27 @@
   gap: 0.7rem;
   margin-bottom: 0.7rem;
 }
+.fieldLabel {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  font-size: 0.75rem;
+  color: var(--nc-muted);
+}
 .input,
 .textarea {
   width: 100%;
   color: var(--nc-text);
-  background: var(--nc-soft);
-  border: 1px solid transparent;
-  border-radius: 0.7rem;
-  outline: none;
+  background: var(--nc-surface);
+  border: 1px solid var(--nc-border);
+  border-radius: 0.4rem;
 }
 .input {
   padding: 0.65rem 0.75rem;
   font-size: 0.84rem;
 }
 .textarea {
-  min-height: 7rem;
+  min-height: 8rem;
   resize: vertical;
   padding: 0.8rem;
   line-height: 1.7;
@@ -189,6 +210,7 @@
   justify-content: space-between;
   gap: 0.8rem;
   margin-top: 0.7rem;
+  flex-wrap: wrap;
 }
 .tools {
   position: relative;
@@ -216,10 +238,10 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.62rem 1rem;
-  color: #fff;
+  color: var(--vh-on-accent, #fff);
   background: var(--nc-primary);
   border: 0;
-  border-radius: 0.65rem;
+  border-radius: 0.4rem;
   cursor: pointer;
   font-size: 0.84rem;
   font-weight: 650;
@@ -233,11 +255,12 @@
 .emojiPanel {
   position: absolute;
   left: 0;
-  top: calc(100% + 0.4rem);
+  bottom: calc(100% + 0.5rem);
   z-index: 20;
   width: min(22rem, calc(100vw - 3rem));
   max-height: 16rem;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 0.75rem;
   background: var(--nc-surface);
   border: 1px solid var(--nc-border);
@@ -251,6 +274,21 @@
   margin: 0 0 0.4rem;
   color: var(--nc-muted);
   font-size: 0.72rem;
+  padding-right: 28px;
+}
+.emojiClose {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--nc-muted);
+  cursor: pointer;
 }
 .emojiGrid {
   display: flex;
@@ -259,7 +297,7 @@
 }
 .emojiItem {
   padding: 0.35rem 0.45rem;
-  background: var(--nc-soft);
+  background: transparent;
   border: 0;
   border-radius: 0.45rem;
   cursor: pointer;
@@ -341,6 +379,25 @@
   max-height: 28rem;
   border-radius: 0.7rem;
 }
+.content img[src*='/bmoji/'] {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  vertical-align: text-bottom;
+  object-fit: contain;
+  border-radius: 0;
+}
+.root button,
+.root a {
+  touch-action: manipulation;
+}
+.root button:focus-visible,
+.root a:focus-visible,
+.root input:focus-visible,
+.root textarea:focus-visible {
+  outline: 2px solid var(--nc-primary);
+  outline-offset: 3px;
+}
 .content blockquote {
   margin: 0.5rem 0;
   padding-left: 0.8rem;
@@ -399,9 +456,13 @@
   .guestFields {
     grid-template-columns: 1fr;
   }
+  .reactions {
+    gap: 0.35rem;
+  }
   .reaction {
-    min-width: 3.75rem;
-    padding-inline: 0.55rem;
+    min-width: 0;
+    flex: 1 1 0;
+    padding-inline: 0.25rem;
   }
   .children {
     margin-left: 1.25rem;
