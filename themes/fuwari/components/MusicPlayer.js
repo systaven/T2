@@ -3,32 +3,27 @@
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { useEffect, useRef, useState } from 'react'
+import CONFIG from '../config'
+import { DEFAULT_METING_API, fetchMusicPlaylist, musicEnabled, normalizeMusicPlaylist } from '../utils/musicPlaylist'
 
 /**
  * Mizuki-style Sidebar Card Music Player for Fuwari Theme
  */
 const MusicPlayer = () => {
   const { locale } = useGlobal()
-  const musicPlayerEnable = siteConfig('MUSIC_PLAYER')
-  const metingApi = siteConfig('MUSIC_PLAYER_METING_API', 'https://api.i-meto.com/meting/api?server=:server&type=:type&id=:id&r=:r')
+  const musicPlayerEnable = musicEnabled(siteConfig('MUSIC_PLAYER', true, CONFIG))
+  const metingApi = siteConfig('MUSIC_PLAYER_METING_API', DEFAULT_METING_API)
   const metingId = siteConfig('MUSIC_PLAYER_METING_ID', '6686195786')
   const metingServer = siteConfig('MUSIC_PLAYER_METING_SERVER', 'netease')
-  const metingType = 'playlist'
-  const autoPlay = JSON.parse(siteConfig('MUSIC_PLAYER_AUTO_PLAY', 'false'))
-  const musicMetingEnable = siteConfig('MUSIC_PLAYER_METING', true)
-  const fallbackPlaylist = [{
-    name: 'SoundHelix Song 1',
-    artist: 'SoundHelix',
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-    cover: '/favicon.png'
-  }]
+  const autoPlay = musicEnabled(siteConfig('MUSIC_PLAYER_AUTO_PLAY', false, CONFIG))
+  const musicMetingEnable = musicEnabled(siteConfig('MUSIC_PLAYER_METING', false, CONFIG))
 
   const [playlist, setPlaylist] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [currentSong, setCurrentSong] = useState({
     title: 'Loading...',
     artist: 'Loading...',
-    cover: '/favicon/favicon.ico',
+    cover: '/favicon.ico',
     url: '',
     duration: 0
   })
@@ -46,8 +41,15 @@ const MusicPlayer = () => {
   const [showError, setShowError] = useState(false)
   const [autoplayFailed, setAutoplayFailed] = useState(false)
   const [isVolumeDragging, setIsVolumeDragging] = useState(false)
+  const [playlistError, setPlaylistError] = useState('')
+  const [sourceNotice, setSourceNotice] = useState('')
 
   const audioRef = useRef(null)
+  const requestRef = useRef(null)
+  const loadTimerRef = useRef(null)
+  const errorTimerRef = useRef(null)
+  const failedSongsRef = useRef(new Set())
+  const selectionRef = useRef(0)
   const progressBarRef = useRef(null)
   const volumeBarRef = useRef(null)
   const isMouseDownRef = useRef(false)
@@ -76,9 +78,10 @@ const MusicPlayer = () => {
   }, [isPlaying, isRepeating, isShuffled, playlist, currentIndex, volume, isMuted])
 
   const showErrorMessage = (message) => {
+    clearTimeout(errorTimerRef.current)
     setErrorMessage(message)
     setShowError(true)
-    setTimeout(() => {
+    errorTimerRef.current = setTimeout(() => {
       setShowError(false)
     }, 3000)
   }
@@ -102,6 +105,8 @@ const MusicPlayer = () => {
   }
 
   const handleLoadSuccess = () => {
+    clearTimeout(loadTimerRef.current)
+    failedSongsRef.current.clear()
     setIsLoading(false)
     const audio = audioRef.current
     if (audio && audio.duration && audio.duration > 1) {
@@ -122,22 +127,28 @@ const MusicPlayer = () => {
     if (stateRef.current.isPlaying) {
       audio.play().catch((err) => {
         console.warn('Playback blocked by browser policy:', err)
+        setIsPlaying(false)
         setAutoplayFailed(true)
       })
     }
   }
 
   const handleLoadError = () => {
+    clearTimeout(loadTimerRef.current)
     setIsLoading(false)
+    setIsPlaying(false)
     const { playlist, currentIndex, isShuffled } = stateRef.current
     if (playlist[currentIndex]) {
       showErrorMessage(`无法播放 "${playlist[currentIndex].title}"，正在尝试下一首...`)
     }
-    if (playlist.length > 1) {
-      setTimeout(() => {
-        playNextSong(playlist, currentIndex, isShuffled)
-      }, 1500)
+    failedSongsRef.current.add(currentIndex)
+    if (playlist.length > 1 && failedSongsRef.current.size < Math.min(playlist.length, 3)) {
+      const candidates = playlist.map((_, index) => index).filter(index => !failedSongsRef.current.has(index))
+      const nextIndex = candidates[isShuffled ? Math.floor(Math.random() * candidates.length) : 0]
+      playSongByIndex(nextIndex)
     } else {
+      audioRef.current?.pause()
+      setPlaylistError('音频源无法播放或响应超时，请重试或检查歌曲链接。')
       showErrorMessage('播放列表中没有可用的歌曲')
     }
   }
@@ -145,19 +156,17 @@ const MusicPlayer = () => {
   const loadSong = (song) => {
     const audio = audioRef.current
     if (!song || !audio) return
+    selectionRef.current += 1
     setCurrentSong(song)
     if (song.url) {
       setIsLoading(true)
+      setPlaylistError('')
       audio.currentTime = 0
       setCurrentTime(0)
       setDuration(song.duration ?? 0)
 
-      audio.removeEventListener('loadeddata', handleLoadSuccess)
-      audio.removeEventListener('error', handleLoadError)
-
-      audio.addEventListener('loadeddata', handleLoadSuccess, { once: true })
-      audio.addEventListener('error', handleLoadError, { once: true })
-
+      clearTimeout(loadTimerRef.current)
+      loadTimerRef.current = setTimeout(handleLoadError, 20000)
       audio.src = getAssetPath(song.url)
       audio.load()
     } else {
@@ -171,28 +180,16 @@ const MusicPlayer = () => {
     setCurrentIndex(index)
     const song = list[index]
     loadSong(song)
-    setTimeout(() => {
-      const audio = audioRef.current
-      if (!audio) return
-      if (audio.readyState >= 2) {
-        audio.play().then(() => {
-          setIsPlaying(true)
-        }).catch((err) => {
-          console.warn('Playback blocked:', err)
-          setAutoplayFailed(true)
-        })
-      } else {
-        const playOnCanPlay = () => {
-          audio.play().then(() => {
-            setIsPlaying(true)
-          }).catch((err) => {
-            console.warn('Playback blocked on canplay:', err)
-            setAutoplayFailed(true)
-          })
-        }
-        audio.addEventListener('canplay', playOnCanPlay, { once: true })
-      }
-    }, 100)
+    const audio = audioRef.current
+    const selection = selectionRef.current
+    audio.play().then(() => {
+      if (audioRef.current === audio && selectionRef.current === selection) setIsPlaying(true)
+    }).catch((err) => {
+      if (audioRef.current !== audio || selectionRef.current !== selection) return
+      console.warn('Playback blocked:', err)
+      setIsPlaying(false)
+      setAutoplayFailed(true)
+    })
   }
 
   const playNextSong = (list, index, shuffle) => {
@@ -216,59 +213,48 @@ const MusicPlayer = () => {
   }
 
   const fetchMetingPlaylist = async () => {
-    if (!metingApi || !metingId) return
+    requestRef.current?.abort()
+    clearTimeout(loadTimerRef.current)
+    audioRef.current?.pause()
+    const request = new AbortController()
+    requestRef.current = request
+    setPlaylistError('')
+    setSourceNotice('')
     setIsLoading(true)
-    const apiUrl = metingApi
-      .replace(':server', metingServer)
-      .replace(':type', metingType)
-      .replace(':id', metingId)
-      .replace(':auth', '')
-      .replace(':r', Date.now().toString())
     try {
-      const res = await fetch(apiUrl)
-      if (!res.ok) throw new Error('meting api error')
-      const list = await res.json()
-      const formatted = list.map((song) => {
-        let title = song.name ?? song.title ?? '未知歌曲'
-        let artist = song.artist ?? song.author ?? '未知艺术家'
-        let dur = song.duration ?? 0
-        if (dur > 10000) dur = Math.floor(dur / 1000)
-        if (!Number.isFinite(dur) || dur <= 0) dur = 0
-        return {
-          id: song.id ?? Math.random(),
-          title,
-          artist,
-          cover: song.pic ?? song.cover ?? '',
-          url: song.url ?? '',
-          duration: dur
-        }
+      if (!metingApi || !metingId) throw new Error('请配置音乐接口地址和歌单 ID')
+      const { songs: formatted, backup } = await fetchMusicPlaylist({
+        api: metingApi, server: metingServer, id: metingId, signal: request.signal
       })
+      if (request.signal.aborted) return
+      if (backup) setSourceNotice('默认音乐接口不可用，已通过备用接口加载同一歌单。')
       if (formatted.length > 0) {
         setPlaylist(formatted)
-        setCurrentSong(formatted[0])
         setCurrentIndex(0)
-        
+        failedSongsRef.current.clear()
+        loadSong(formatted[0])
         const audio = audioRef.current
         if (audio) {
-          audio.currentTime = 0
-          audio.src = getAssetPath(formatted[0].url)
-          audio.load()
-          setDuration(formatted[0].duration)
           if (autoPlay) {
             audio.play().then(() => {
               setIsPlaying(true)
             }).catch(err => {
               console.warn('Autoplay failed:', err)
+              setIsPlaying(false)
               setAutoplayFailed(true)
             })
           }
         }
       }
     } catch (e) {
+      if (request.signal.aborted) return
       console.error(e)
-      showErrorMessage('Meting 歌单获取失败')
+      setPlaylist([])
+      setIsPlaying(false)
+      setCurrentSong({ title: '歌单加载失败', artist: '请检查音乐接口或重试', url: '', cover: '/favicon.ico' })
+      setPlaylistError(e.message || 'Meting 歌单获取失败')
     } finally {
-      setIsLoading(false)
+      if (!request.signal.aborted) setIsLoading(false)
     }
   }
 
@@ -284,57 +270,31 @@ const MusicPlayer = () => {
     } catch (e) {
       console.error('Failed to parse MUSIC_PLAYER_AUDIO_LIST', e)
     }
-    const formatted = localList.map((song, index) => {
-      let title = song.name ?? song.title ?? '未知歌曲'
-      let artist = song.artist ?? '未知艺术家'
-      let cover = song.cover ?? '/favicon/favicon.ico'
-      let url = song.url ?? ''
-      return {
-        id: index,
-        title,
-        artist,
-        cover,
-        url,
-        duration: 0
-      }
-    })
+    const formatted = normalizeMusicPlaylist(Array.isArray(localList) ? localList : [])
     if (formatted.length > 0) {
       setPlaylist(formatted)
-      setCurrentSong(formatted[0])
       setCurrentIndex(0)
+      failedSongsRef.current.clear()
+      loadSong(formatted[0])
       
       const audio = audioRef.current
       if (audio) {
-        audio.currentTime = 0
-        audio.src = getAssetPath(formatted[0].url)
-        audio.load()
         if (autoPlay) {
           audio.play().then(() => {
             setIsPlaying(true)
           }).catch(err => {
             console.warn('Autoplay failed:', err)
+            setIsPlaying(false)
             setAutoplayFailed(true)
           })
         }
       }
     } else {
-      // Notion 配置为空时仍给播放器一首可播放的兜底曲目，避免永久 Loading。
-      const fallback = fallbackPlaylist.map((song, index) => ({
-        id: `fallback-${index}`,
-        title: song.name,
-        artist: song.artist,
-        cover: song.cover,
-        url: song.url,
-        duration: 0
-      }))
-      setPlaylist(fallback)
-      setCurrentSong(fallback[0])
+      setPlaylist([])
+      setCurrentSong({ title: '未配置歌曲', artist: '请配置音乐列表', url: '', cover: '/favicon.ico' })
       setCurrentIndex(0)
-      const audio = audioRef.current
-      if (audio) {
-        audio.src = fallback[0].url
-        audio.load()
-      }
+      setIsLoading(false)
+      setPlaylistError('音乐列表为空，请配置 MUSIC_PLAYER_AUDIO_LIST 或启用 Meting 歌单。')
     }
   }
 
@@ -342,13 +302,14 @@ const MusicPlayer = () => {
     if (!musicPlayerEnable) return
 
     const audio = new Audio()
+    setPlaylistError('')
+    setSourceNotice('')
     audio.volume = volume
     audioRef.current = audio
 
     const onPlay = () => setIsPlaying(true)
     const onPause = () => setIsPlaying(false)
     const onTimeUpdate = () => setCurrentTime(audio.currentTime)
-    const onError = () => setIsLoading(false)
     const onEnded = () => {
       const { isRepeating, isShuffled, playlist, currentIndex } = stateRef.current
       if (isRepeating === 1) {
@@ -364,7 +325,8 @@ const MusicPlayer = () => {
     audio.addEventListener('play', onPlay)
     audio.addEventListener('pause', onPause)
     audio.addEventListener('timeupdate', onTimeUpdate)
-    audio.addEventListener('error', onError)
+    audio.addEventListener('loadeddata', handleLoadSuccess)
+    audio.addEventListener('error', handleLoadError)
     audio.addEventListener('ended', onEnded)
 
     if (musicMetingEnable) {
@@ -374,16 +336,21 @@ const MusicPlayer = () => {
     }
 
     return () => {
+      selectionRef.current += 1
+      requestRef.current?.abort()
+      clearTimeout(loadTimerRef.current)
+      clearTimeout(errorTimerRef.current)
       audio.removeEventListener('play', onPlay)
       audio.removeEventListener('pause', onPause)
       audio.removeEventListener('timeupdate', onTimeUpdate)
-      audio.removeEventListener('error', onError)
+      audio.removeEventListener('loadeddata', handleLoadSuccess)
+      audio.removeEventListener('error', handleLoadError)
       audio.removeEventListener('ended', onEnded)
       audio.pause()
       audio.src = ''
       audioRef.current = null
     }
-  }, [])
+  }, [musicPlayerEnable, musicMetingEnable, metingApi, metingId, metingServer, autoPlay])
 
   const handleUserInteraction = () => {
     if (autoplayFailed && audioRef.current && stateRef.current.isPlaying) {
@@ -417,8 +384,9 @@ const MusicPlayer = () => {
         setIsPlaying(true)
       }).catch((err) => {
         console.warn('Playback blocked:', err)
-        setIsPlaying(true)
+        setIsPlaying(false)
         setAutoplayFailed(true)
+        showErrorMessage('播放失败，请检查音频链接后重试。')
       })
     }
   }
@@ -526,6 +494,17 @@ const MusicPlayer = () => {
       )}
 
       <section className="fuwari-card p-4 flex flex-col gap-3 min-w-0 w-full select-none">
+        {sourceNotice && <p role='status' className='text-xs text-[var(--fuwari-muted)]'>{sourceNotice}</p>}
+        {playlistError && (
+          <div role='alert' className='text-xs text-red-600 dark:text-red-400'>
+            <p>{playlistError}</p>
+            <button type='button' className='mt-1 underline' onClick={() => {
+              failedSongsRef.current.clear()
+              if (musicMetingEnable) void fetchMetingPlaylist()
+              else loadLocalPlaylist()
+            }}>重试加载音乐</button>
+          </div>
+        )}
         {/* Upper part: Cover & Meta Info */}
         <div className="flex items-center gap-3">
           {/* Cover Art (rotates when playing) */}
@@ -606,7 +585,7 @@ const MusicPlayer = () => {
 
           <button
             onClick={togglePlay}
-            disabled={isLoading}
+            disabled={isLoading || !currentSong.url}
             className="w-10 h-10 rounded-full flex items-center justify-center bg-[var(--fuwari-primary)] text-white hover:scale-105 active:scale-95 transition-all shadow-md shadow-[var(--fuwari-primary-soft)]"
             title={isPlaying ? '暂停' : '播放'}
           >

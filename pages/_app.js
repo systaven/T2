@@ -8,9 +8,9 @@ import '@/styles/notion.css' //  重写部分notion样式
 
 import useAdjustStyle from '@/hooks/useAdjustStyle'
 import { GlobalContextProvider } from '@/lib/global'
-import { getBaseLayoutByTheme } from '@/themes/theme'
+import { getBaseLayoutByTheme, ThemePreviewContext } from '@/themes/theme'
 import { useRouter } from 'next/router'
-import { useCallback, useMemo, useEffect } from 'react'
+import { useCallback, useMemo, useEffect, useState } from 'react'
 import { getQueryParam } from '../lib/utils'
 import ErrorHandler from '@/lib/utils/errorHandler'
 
@@ -41,7 +41,12 @@ const MyApp = ({ Component, pageProps }) => {
   useAdjustStyle()
 
   const route = useRouter()
-  const queryTheme = getQueryParam(route.asPath, 'theme')
+  // SSG HTML cannot know request query strings. Keep the first client render
+  // identical to it, then switch preview themes when the router is ready.
+  const [queryTheme, setQueryTheme] = useState(null)
+  useEffect(() => {
+    if (route.isReady) setQueryTheme(getQueryParam(route.asPath, 'theme'))
+  }, [route.isReady, route.asPath])
   const notionTheme = pageProps?.NOTION_CONFIG?.THEME
   const configTheme = BLOG.THEME
 
@@ -114,7 +119,7 @@ const MyApp = ({ Component, pageProps }) => {
       )
 
   return (
-    <>
+    <ThemePreviewContext.Provider value={queryTheme}>
       {enableClerk
         ? (
         <ClerkProvider localization={zhCN}>{content}</ClerkProvider>
@@ -122,7 +127,7 @@ const MyApp = ({ Component, pageProps }) => {
         : (
             content
           )}
-    </>
+    </ThemePreviewContext.Provider>
   )
 }
 

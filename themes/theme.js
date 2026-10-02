@@ -2,10 +2,12 @@ import BLOG, { LAYOUT_MAPPINGS } from '@/blog.config'
 import getConfig from 'next/config'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
+import { createContext, useContext } from 'react'
 import { getQueryParam, getQueryVariable, isBrowser } from '../lib/utils'
 
 // 在next.config.js中扫描所有主题
 export const { THEMES = [] } = getConfig()?.publicRuntimeConfig || {}
+export const ThemePreviewContext = createContext(undefined)
 const baseLayoutCache = new Map()
 const layoutByThemeCache = new Map()
 let domFixTimer = null
@@ -25,6 +27,40 @@ const FuwariBaseLayout = dynamic(
   { ssr: true, loading: LayoutLoading }
 )
 
+const VhastroBaseLayout = dynamic(
+  () => import('@/themes/vhastro').then(mod => mod.LayoutBase),
+  { ssr: true, loading: LayoutLoading }
+)
+
+// Keep page layout module IDs discoverable too: runtime-only import functions
+// can otherwise hydrate a warm SSR response with a loading placeholder.
+const VhastroPageLayouts = {
+  LayoutIndex: dynamic(() =>
+    import('@/themes/vhastro').then(mod => mod.LayoutIndex)
+  ),
+  LayoutPostList: dynamic(() =>
+    import('@/themes/vhastro').then(mod => mod.LayoutPostList)
+  ),
+  LayoutSlug: dynamic(() =>
+    import('@/themes/vhastro').then(mod => mod.LayoutSlug)
+  ),
+  LayoutSearch: dynamic(() =>
+    import('@/themes/vhastro').then(mod => mod.LayoutSearch)
+  ),
+  LayoutArchive: dynamic(() =>
+    import('@/themes/vhastro').then(mod => mod.LayoutArchive)
+  ),
+  LayoutCategoryIndex: dynamic(() =>
+    import('@/themes/vhastro').then(mod => mod.LayoutCategoryIndex)
+  ),
+  LayoutTagIndex: dynamic(() =>
+    import('@/themes/vhastro').then(mod => mod.LayoutTagIndex)
+  ),
+  Layout404: dynamic(() =>
+    import('@/themes/vhastro').then(mod => mod.Layout404)
+  )
+}
+
 const IndexLayoutLoading = () => (
   <div className='pt-10 md:pt-18 w-full bg-[#f6f6f1] dark:bg-black'>
     <div className='mx-auto w-full max-w-screen-3xl px-4 py-10 lg:px-0'>
@@ -40,7 +76,8 @@ const IndexLayoutLoading = () => (
           {[0, 1].map(item => (
             <div
               key={item}
-              className='flex gap-6 border-t border-gray-300 pt-6 dark:border-gray-800'>
+              className='flex gap-6 border-t border-gray-300 pt-6 dark:border-gray-800'
+            >
               <div className='min-w-0 flex-1 space-y-3'>
                 <div className='h-6 w-4/5 animate-pulse bg-gray-200 dark:bg-gray-800' />
                 <div className='h-4 w-2/3 animate-pulse bg-gray-200 dark:bg-gray-800' />
@@ -61,7 +98,8 @@ const IndexLayoutLoading = () => (
           {[0, 1, 2, 3].map(item => (
             <div
               key={item}
-              className='space-y-4 border-t border-gray-300 pt-5 dark:border-gray-800'>
+              className='space-y-4 border-t border-gray-300 pt-5 dark:border-gray-800'
+            >
               <div className='h-5 w-3/4 animate-pulse bg-gray-200 dark:bg-gray-800' />
               <div className='h-4 w-24 animate-pulse bg-gray-200 dark:bg-gray-800' />
             </div>
@@ -115,7 +153,7 @@ const scheduleFixThemeDOM = (delay = 120) => {
 
 async function importThemeConfig(themeFolderName) {
   try {
-    const mod = await import(`@/themes/${themeFolderName}`)
+    const mod = await import(`@/themes/${themeFolderName}/index`)
     return getThemeExport(mod, 'THEME_CONFIG')
   } catch (err) {
     console.error(`Failed to load theme config "${themeFolderName}":`, err)
@@ -125,7 +163,7 @@ async function importThemeConfig(themeFolderName) {
 
 async function importThemeLayout(themeFolderName, layoutName) {
   try {
-    const mod = await import(`@/themes/${themeFolderName}`)
+    const mod = await import(`@/themes/${themeFolderName}/index`)
     return (
       getThemeExport(mod, layoutName) ||
       getThemeExport(mod, 'LayoutSlug') ||
@@ -152,7 +190,9 @@ async function resolveThemeLayout(themeName, layoutName, emptyLayout) {
     }
   }
 
-  console.warn(`[theme] "${themeName}" missing "${layoutName}", using empty layout.`)
+  console.warn(
+    `[theme] "${themeName}" missing "${layoutName}", using empty layout.`
+  )
   return emptyLayout
 }
 
@@ -177,15 +217,20 @@ export const getThemeConfig = async themeQuery => {
       return cfg
     }
   }
-  console.warn('[theme] No theme configuration could be loaded, using empty config.')
+  console.warn(
+    '[theme] No theme configuration could be loaded, using empty config.'
+  )
   return {}
 }
 
 /**
  * 获取当前主题（query 主题优先，且做合法性校验）
  */
-const getCurrentTheme = (router, fallbackTheme) => {
-  const queryTheme = getQueryParam(router?.asPath, 'theme')
+const getCurrentTheme = (router, fallbackTheme, previewTheme) => {
+  const queryTheme =
+    previewTheme === undefined
+      ? getQueryParam(router?.asPath, 'theme')
+      : previewTheme
   if (queryTheme) {
     return normalizeThemeName(queryTheme)
   }
@@ -200,12 +245,12 @@ const getCurrentTheme = (router, fallbackTheme) => {
 export const getBaseLayoutByTheme = theme => {
   const normalizedTheme = normalizeThemeName(theme)
   if (normalizedTheme === 'fuwari') return FuwariBaseLayout
+  if (normalizedTheme === 'vhastro') return VhastroBaseLayout
   if (baseLayoutCache.has(normalizedTheme)) {
     return baseLayoutCache.get(normalizedTheme)
   }
   const DynamicBaseLayout = dynamic(
-    () =>
-      resolveThemeLayout(normalizedTheme, 'LayoutBase', EmptyBaseLayout),
+    () => resolveThemeLayout(normalizedTheme, 'LayoutBase', EmptyBaseLayout),
     { ssr: true }
   )
   baseLayoutCache.set(normalizedTheme, DynamicBaseLayout)
@@ -230,7 +275,10 @@ export const DynamicLayout = props => {
  */
 export const useLayoutByTheme = ({ layoutName, theme }) => {
   const router = useRouter()
-  const themeQuery = getCurrentTheme(router, theme)
+  const previewTheme = useContext(ThemePreviewContext)
+  const themeQuery = getCurrentTheme(router, theme, previewTheme)
+  if (themeQuery === 'vhastro' && VhastroPageLayouts[layoutName])
+    return VhastroPageLayouts[layoutName]
   const cacheKey = `${themeQuery}:${layoutName}`
 
   if (layoutByThemeCache.has(cacheKey)) {

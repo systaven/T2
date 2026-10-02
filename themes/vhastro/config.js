@@ -1,0 +1,11 @@
+export const DEFAULT_THEME_COLOR = '#3aa8df' // Fuwari: hsl(200, 72%, 55%)
+
+const CONFIG = {
+  VHASTRO_THEME_COLOR:
+    process.env.NEXT_PUBLIC_VHASTRO_THEME_COLOR || DEFAULT_THEME_COLOR,
+  VHASTRO_HOME_BANNER: '',
+  VHASTRO_ARTICLE_COMMENT: true,
+  VHASTRO_MUSIC: true
+}
+
+export default CONFIG

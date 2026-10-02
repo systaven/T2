@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { siteConfig } from '@/lib/config'
 import { mergeRelValues } from '@/lib/utils/externalLink'
 
@@ -33,6 +34,7 @@ const filterLinkProps = props => {
 }
 
 const SmartLink = ({ href, children, ...rest }) => {
+  const router = useRouter()
   const LINK = siteConfig('LINK')
 
   // 获取 URL 字符串用于判断是否是外链
@@ -51,8 +53,8 @@ const SmartLink = ({ href, children, ...rest }) => {
   const isExternal = urlString.startsWith('http') && !urlString.startsWith(LINK)
 
   const getPersistedQuery = () => {
-    if (typeof window === 'undefined') return {}
-    const queryString = window.location.search?.slice(1) || ''
+    if (!router.isReady) return {}
+    const queryString = router.asPath.split('?')[1]?.split('#')[0] || ''
     const params = new URLSearchParams(queryString)
     const preserved = {}
     for (const [key, value] of params.entries()) {

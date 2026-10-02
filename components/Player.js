@@ -1,6 +1,7 @@
 import { siteConfig } from '@/lib/config'
 import { loadExternalResource } from '@/lib/utils'
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/router'
 
 /**
  * 音乐播放器
@@ -9,8 +10,9 @@ import { useEffect, useRef, useState } from 'react'
 const Player = () => {
   const [player, setPlayer] = useState()
   const ref = useRef(null)
-  const theme = siteConfig('THEME')
-  const isFuwari = theme === 'fuwari'
+  const router = useRouter()
+  const theme = router.query.theme || siteConfig('THEME')
+  const hasThemePlayer = theme === 'fuwari' || theme === 'vhastro'
   const lrcType = JSON.parse(siteConfig('MUSIC_PLAYER_LRC_TYPE'))
   const playerVisible = JSON.parse(siteConfig('MUSIC_PLAYER_VISIBLE'))
   const autoPlay = JSON.parse(siteConfig('MUSIC_PLAYER_AUTO_PLAY'))
@@ -55,14 +57,14 @@ const Player = () => {
   }
 
   useEffect(() => {
-    if (isFuwari) return
+    if (hasThemePlayer) return
     initMusicPlayer()
     return () => {
       setPlayer(undefined)
     }
-  }, [])
+  }, [hasThemePlayer])
 
-  if (isFuwari) return null
+  if (hasThemePlayer) return null
 
   return (
     <div className={playerVisible ? 'visible' : 'invisible'}>

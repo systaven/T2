@@ -74,4 +74,3 @@ export function getFuwariMenuLinks({ locale, customNav, customMenu }) {
 
   return normalizeMenu(links)
 }
-

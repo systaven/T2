@@ -1,11 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="3" failures="0" errors="0" time="0.725">
-  <testsuite name="post short-link preparation" errors="0" failures="0" skipped="0" timestamp="2026-09-07T17:07:38" time="0.397" tests="3">
-    <testcase classname="post short-link preparation collects ordinary Notion hyperlinks and Bookmark URLs once" name="post short-link preparation collects ordinary Notion hyperlinks and Bookmark URLs once" time="0.008">
+<testsuites name="jest tests" tests="8" failures="0" errors="0" time="1.678">
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T02:09:14" time="0.86" tests="3">
+    <testcase classname=" API failure shows a persistent error and retry loads the configured song" name=" API failure shows a persistent error and retry loads the configured song" time="0.224">
     </testcase>
-    <testcase classname="post short-link preparation rewrites ordinary links while preserving a Bookmark URL for display" name="post short-link preparation rewrites ordinary links while preserving a Bookmark URL for display" time="0.002">
+    <testcase classname=" string false selects local audio without calling Meting or inserting unrelated demo songs" name=" string false selects local audio without calling Meting or inserting unrelated demo songs" time="0.012">
     </testcase>
-    <testcase classname="post short-link preparation excludes Notion attachments from short-link creation" name="post short-link preparation excludes Notion attachments from short-link creation" time="0.002">
+    <testcase classname=" initial local audio has metadata listeners and all failed tracks stop rather than loop forever" name=" initial local audio has metadata listeners and all failed tracks stop rather than loop forever" time="0.026">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T02:09:14" time="0.112" tests="5">
+    <testcase classname=" normalizes string switches and filters missing audio URLs" name=" normalizes string switches and filters missing audio URLs" time="0.004">
+    </testcase>
+    <testcase classname=" default 403 falls back using the same server and playlist ID" name=" default 403 falls back using the same server and playlist ID" time="0.004">
+    </testcase>
+    <testcase classname=" custom APIs are not silently replaced and malformed/empty lists report errors" name=" custom APIs are not silently replaced and malformed/empty lists report errors" time="0.008">
+    </testcase>
+    <testcase classname=" request timeout aborts loading instead of leaving it pending" name=" request timeout aborts loading instead of leaving it pending" time="0.018">
+    </testcase>
+    <testcase classname=" unmount cancellation does not start a backup request" name=" unmount cancellation does not start a backup request" time="0.007">
     </testcase>
   </testsuite>
 </testsuites>
