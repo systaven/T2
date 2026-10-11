@@ -1,3 +1,4 @@
+import { Query } from '@/lib/server/businessDatabase.cjs'
 import {
   getAdminConfig,
   getAdminDb,
@@ -16,7 +17,6 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       const user = await getRequestUser(req)
       const role = await getUserRole(user)
-      const { Query } = require('node-appwrite')
       const queries = [Query.orderDesc('$createdAt'), Query.limit(100)]
       if (role !== 'admin') queries.unshift(Query.equal('published', true))
       const rows = await db.listRows({

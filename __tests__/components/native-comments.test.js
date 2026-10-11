@@ -20,11 +20,11 @@ beforeEach(() => {
   verificationEnabled = false
   window.turnstile = originalTurnstile
   localStorage.clear()
-  global.fetch = jest.fn(async (url, options = {}) => {
+  global.fetch = jest.fn((url, options = {}) => {
     if (String(url).includes('/config'))
-      return {
+      return Promise.resolve({
         ok: true,
-        json: async () => ({
+        json: () => Promise.resolve({
           data: {
             enabled: true,
             maxCommentLength: 5000,
@@ -32,17 +32,18 @@ beforeEach(() => {
             turnstile: { enabled: verificationEnabled, siteKey: 'test-site' }
           }
         })
-      }
+      })
     if (String(url).includes('/reactions'))
-      return { ok: true, json: async () => ({ counts: {}, selected: null }) }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ counts: {}, selected: null }) })
     if (options.method === 'POST')
-      return { ok: true, json: async () => ({ pending: false }) }
-    return {
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ pending: false }) })
+    return Promise.resolve({
       ok: !commentError,
       status: commentError ? 503 : 200,
-      json: async () =>
+      json: () => Promise.resolve(
         commentError ? { error: commentError } : { data: [], total: 0 }
-    }
+      )
+    })
   })
 })
 
@@ -140,4 +141,20 @@ test('successful publication retains its feedback after refreshing comments', as
     expect(screen.getByRole('status')).toHaveTextContent('评论已发布')
   )
   expect(screen.getByRole('textbox', { name: '评论内容' })).toHaveValue('')
+})
+
+test('database write failure retains the entire comment form for an explicit retry', async () => {
+  const fetchBefore = global.fetch
+  global.fetch = jest.fn((url, options = {}) => options.method === 'POST'
+    ? Promise.resolve({ ok: false, status: 503, json: () => Promise.resolve({ error: '数据库暂时不可用，请重试。' }) })
+    : fetchBefore(url, options))
+  render(<NativeComments frontMatter={{ id: 'post' }} />)
+  fireEvent.change(await screen.findByRole('textbox', { name: '昵称' }), { target: { value: '访客' } })
+  fireEvent.change(screen.getByRole('textbox', { name: '邮箱' }), { target: { value: 'visitor@example.com' } })
+  fireEvent.change(screen.getByRole('textbox', { name: '评论内容' }), { target: { value: '失败后保留的内容' } })
+  fireEvent.click(screen.getByRole('button', { name: '发布评论' }))
+  expect(await screen.findByRole('alert')).toHaveTextContent('重试')
+  expect(screen.getByRole('textbox', { name: '昵称' })).toHaveValue('访客')
+  expect(screen.getByRole('textbox', { name: '邮箱' })).toHaveValue('visitor@example.com')
+  expect(screen.getByRole('textbox', { name: '评论内容' })).toHaveValue('失败后保留的内容')
 })

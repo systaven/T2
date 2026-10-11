@@ -22,10 +22,11 @@ const getHostname = target => {
   }
 }
 
-export default function RedirectPage({ target }) {
+export default function RedirectPage({ target, lookupFailed = false }) {
   const [secondsLeft, setSecondsLeft] = useState(REDIRECT_DELAY_SECONDS)
 
   useEffect(() => {
+    if (lookupFailed) return
     const startedAt = Date.now()
     const timer = window.setInterval(() => {
       const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000)
@@ -39,7 +40,19 @@ export default function RedirectPage({ target }) {
     }, 200)
 
     return () => window.clearInterval(timer)
-  }, [target])
+  }, [target, lookupFailed])
+
+  if (lookupFailed) {
+    return (
+      <main className='flex min-h-screen items-center justify-center px-5'>
+        <section role='alert' className='text-center'>
+          <h1 className='text-xl font-semibold'>链接暂时无法加载</h1>
+          <p className='mt-3'>请稍后重试。</p>
+          <button type='button' className='mt-5 rounded-lg border px-4 py-2' onClick={() => window.location.reload()}>重试</button>
+        </section>
+      </main>
+    )
+  }
 
   const hostname = getHostname(target)
 
@@ -87,18 +100,25 @@ export async function getServerSideProps(context) {
   const siteOrigin = siteConfig('LINK') || undefined
   const token = typeof params?.token === 'string' ? params.token : ''
   let target = null
+  let lookupFailed = false
 
   try {
     target = await findShortLinkTarget(token)
   } catch (error) {
-    // A temporary Appwrite issue must not break links published before this
+    // A temporary database issue must not break links published before this
     // feature. Those tokens can still be decoded below.
-    console.warn('[short-link] Appwrite lookup failed:', error?.message)
+    console.warn('[short-link] Database lookup failed:', error?.message)
+    lookupFailed = true
   }
 
   if (!target) {
     const legacyTarget = decodeExternalUrl(token)
     target = validateExternalRedirectTarget(legacyTarget, siteOrigin)
+  }
+
+  if (!target && lookupFailed) {
+    res.statusCode = 503
+    return { props: { target: null, lookupFailed: true } }
   }
 
   if (!target) {

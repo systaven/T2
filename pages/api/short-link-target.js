@@ -7,7 +7,14 @@ export default async function handler(req, res) {
   }
 
   const token = typeof req.query?.token === 'string' ? req.query.token : ''
-  const target = await findShortLinkTarget(token)
+  let target
+  try {
+    target = await findShortLinkTarget(token)
+  } catch (error) {
+    console.error('[short-link]', error)
+    res.setHeader('Cache-Control', 'no-store')
+    return res.status(503).json({ error: '链接暂时无法加载，请重试。' })
+  }
   if (!target) return res.status(404).json({ error: 'Not found' })
 
   res.setHeader('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800')

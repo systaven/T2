@@ -366,7 +366,7 @@ export function CommentSettingsPanel({ api, notify }) {
     try {
       await api('/api/admin/comments/schema', { method: 'POST' })
       await load()
-      notify('评论数据表已初始化。')
+      notify('评论数据表检查通过。')
     } catch (initializeError) {
       notify(initializeError.message, 'error')
     } finally {
@@ -422,12 +422,12 @@ export function CommentSettingsPanel({ api, notify }) {
       <div className='space-y-5'>
         {title(
           '评论设置',
-          '启用原生评论前，需要先在现有 Appwrite 数据库中建立专用数据表。'
+          '启用原生评论前，需要先准备评论数据表。'
         )}
         <section className={`${panelClass} border-l-4 border-l-blue-600`}>
           <h2 className='text-lg font-semibold'>初始化评论系统</h2>
           <p className='mt-2 max-w-2xl text-sm leading-6 text-slate-500'>
-            这个操作只会补齐缺少的评论数据表，不会修改文章、页面、友链或已有后台数据。
+            点击下方按钮准备或检查数据表。如果仍有缺失，请联系站点维护者。
           </p>
           {missing.length > 0 && (
             <p className='mt-2 break-all text-xs text-slate-400'>
@@ -441,7 +441,7 @@ export function CommentSettingsPanel({ api, notify }) {
             disabled={initializing}
             onClick={() => void initialize()}
           >
-            {initializing ? '正在初始化…' : '一键初始化'}
+            {initializing ? '正在检查…' : '准备并检查'}
           </button>
         </section>
       </div>

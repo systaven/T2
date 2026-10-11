@@ -1,3 +1,4 @@
+import { Query } from '@/lib/server/businessDatabase.cjs'
 import { waitUntil } from '@vercel/functions'
 import { COMMENT_TABLES } from '@/lib/comments/constants'
 import {
@@ -29,7 +30,6 @@ export default async function handler(req, res) {
       if (!postId) return res.status(400).json({ error: '缺少文章标识。' })
       const guestToken = req.headers['x-guest-token'] || ''
       const actor = await getActor(req, guestToken)
-      const { Query } = require('node-appwrite')
       const limit = Math.min(
         Math.max(Number(req.query.limit) || settings.pageSize, 1),
         100
@@ -117,7 +117,6 @@ export default async function handler(req, res) {
             .json({ error: '人机验证失败或已过期，请重试。' })
       }
 
-      const { Query } = require('node-appwrite')
       if (settings.rateLimitSeconds > 0) {
         const recent = await db.listRows({
           databaseId: service.databaseId,

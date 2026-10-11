@@ -1,3 +1,4 @@
+import { Query } from '@/lib/server/businessDatabase.cjs'
 import { COMMENT_TABLES } from '@/lib/comments/constants'
 import { safePublicUrl } from '@/lib/comments/server'
 import {
@@ -33,7 +34,6 @@ export default async function handler(req, res) {
     const db = getAdminDb()
     const service = getAdminConfig()
     if (req.method === 'GET') {
-      const { Query } = require('node-appwrite')
       const limit = Math.min(Math.max(Number(req.query.limit) || 30, 1), 100)
       const offset = Math.max(Number(req.query.offset) || 0, 0)
       const queries = [

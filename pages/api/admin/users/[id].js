@@ -1,3 +1,4 @@
+import { Query } from '@/lib/server/businessDatabase.cjs'
 import { clerkClient } from '@clerk/nextjs/server'
 import {
   clearRoleCache,
@@ -38,7 +39,6 @@ export default async function handler(req, res) {
         .json({ error: '不能降低当前登录账号自己的管理员权限。' })
     const db = getAdminDb()
     const service = getAdminConfig()
-    const { Query } = require('node-appwrite')
     const existing = await db.listRows({
       databaseId: service.databaseId,
       tableId: service.rolesTableId,
