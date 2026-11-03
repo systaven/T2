@@ -35,6 +35,33 @@ const VhastroBaseLayout = dynamic(
 
 // Keep page layout module IDs discoverable too: runtime-only import functions
 // can otherwise hydrate a warm SSR response with a loading placeholder.
+const FuwariPageLayouts = {
+  LayoutIndex: dynamic(() =>
+    import('@/themes/fuwari').then(mod => mod.LayoutIndex)
+  ),
+  LayoutPostList: dynamic(() =>
+    import('@/themes/fuwari').then(mod => mod.LayoutPostList)
+  ),
+  LayoutSlug: dynamic(() =>
+    import('@/themes/fuwari').then(mod => mod.LayoutSlug)
+  ),
+  LayoutSearch: dynamic(() =>
+    import('@/themes/fuwari').then(mod => mod.LayoutSearch)
+  ),
+  LayoutArchive: dynamic(() =>
+    import('@/themes/fuwari').then(mod => mod.LayoutArchive)
+  ),
+  LayoutCategoryIndex: dynamic(() =>
+    import('@/themes/fuwari').then(mod => mod.LayoutCategoryIndex)
+  ),
+  LayoutTagIndex: dynamic(() =>
+    import('@/themes/fuwari').then(mod => mod.LayoutTagIndex)
+  ),
+  Layout404: dynamic(() =>
+    import('@/themes/fuwari').then(mod => mod.Layout404)
+  )
+}
+
 const VhastroPageLayouts = {
   LayoutIndex: dynamic(() =>
     import('@/themes/vhastro').then(mod => mod.LayoutIndex)
@@ -278,6 +305,8 @@ export const useLayoutByTheme = ({ layoutName, theme }) => {
   const router = useRouter()
   const previewTheme = useContext(ThemePreviewContext)
   const themeQuery = getCurrentTheme(router, theme, previewTheme)
+  if (themeQuery === 'fuwari' && FuwariPageLayouts[layoutName])
+    return FuwariPageLayouts[layoutName]
   if (themeQuery === 'vhastro' && VhastroPageLayouts[layoutName])
     return VhastroPageLayouts[layoutName]
   const cacheKey = `${themeQuery}:${layoutName}`
