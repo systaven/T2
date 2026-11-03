@@ -77,6 +77,14 @@ origin sends a Cloudflare-specific 24-hour TTL; the browser must
 revalidate. Verify repeated requests return `CF-Cache-Status: HIT` and an increasing
 `Age`; private requests must bypass. Purge the exact homepage URL after a release
 or whenever homepage content needs to refresh before TTL expiry.
+The generated rules include Cloudflare's internal `PURGE` method so single-file
+purges evaluate the same cache policy as GET/HEAD. The application still only
+marks anonymous GET/HEAD responses public. After purging, verify a MISS followed
+by HIT and confirm the HTML contains the new Next.js build ID; an API success
+alone does not prove that an old cache entry was removed.
+Allow rule changes to propagate before purging. If a single-file purge still
+returns the old build, purge by hostname using `{"hosts":["blog.vachiika.me"]}`
+and check the resulting MISS/HIT sequence again.
 
 Uptime must request `https://blog.vachiika.me/` without cookies/query strings,
 without browser subresource fetching, and without following article/API links.

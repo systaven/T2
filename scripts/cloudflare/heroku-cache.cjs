@@ -7,7 +7,8 @@ const rulesForHost = hostname => {
       ref: 't2_public_root',
       description: 'T2: cache anonymous homepage for uptime',
       enabled: true,
-      expression: `${host} and (http.request.uri.path eq "/") and (http.request.uri.query eq "") and (http.request.method in {"GET" "HEAD"}) and (http.cookie eq "") and not any(http.request.headers["authorization"][*] ne "")`,
+      // Cloudflare evaluates single-file invalidations as internal PURGE requests.
+      expression: `${host} and (http.request.uri.path eq "/") and (http.request.uri.query eq "") and (http.request.method in {"GET" "HEAD" "PURGE"}) and (http.cookie eq "") and not any(http.request.headers["authorization"][*] ne "")`,
       action: 'set_cache_settings',
       action_parameters: {
         cache: true,
@@ -23,7 +24,7 @@ const rulesForHost = hostname => {
       ref: 't2_private_bypass',
       description: 'T2: bypass authenticated and dynamic content',
       enabled: true,
-      expression: `${host} and (not (http.request.method in {"GET" "HEAD"}) or any(http.request.headers["authorization"][*] ne "") or ((http.cookie ne "") and not starts_with(http.request.uri.path, "/_next/static/")) or starts_with(http.request.uri.path, "/api/") or (http.request.uri.path eq "/api") or starts_with(http.request.uri.path, "/admin") or starts_with(http.request.uri.path, "/sign-in") or starts_with(http.request.uri.path, "/auth") or starts_with(http.request.uri.path, "/_next/data/"))`,
+      expression: `${host} and (not (http.request.method in {"GET" "HEAD" "PURGE"}) or any(http.request.headers["authorization"][*] ne "") or ((http.cookie ne "") and not starts_with(http.request.uri.path, "/_next/static/")) or starts_with(http.request.uri.path, "/api/") or (http.request.uri.path eq "/api") or starts_with(http.request.uri.path, "/admin") or starts_with(http.request.uri.path, "/sign-in") or starts_with(http.request.uri.path, "/auth") or starts_with(http.request.uri.path, "/_next/data/"))`,
       action: 'set_cache_settings',
       action_parameters: { cache: false }
     }
