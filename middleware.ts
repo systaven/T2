@@ -1,8 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextFetchEvent, NextRequest, NextResponse } from 'next/server'
 import { clerkMiddleware } from '@clerk/nextjs/server'
 import { checkStrIsNotionId, getLastPartOfUrl } from '@/lib/utils'
 import { idToUuid } from 'notion-utils'
 import BLOG from './blog.config'
+import {
+  isAnonymousRootRequest,
+  rootCacheHeaders
+} from './lib/server/edgeCachePolicy.cjs'
 
 /**
  * 中间件配置
@@ -18,8 +22,8 @@ export const config = {
  * @param ev
  * @returns
  */
-// eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-const noAuthMiddleware = async (req: NextRequest, ev: any) => {
+// eslint-disable-next-line @typescript-eslint/require-await
+const noAuthMiddleware = async (req: NextRequest, _ev: NextFetchEvent) => {
   // 处理 UUID 重定向
   if (BLOG['UUID_REDIRECT']) {
     let redirectJson: Record<string, string> = {}
@@ -51,9 +55,37 @@ const noAuthMiddleware = async (req: NextRequest, ev: any) => {
 // state to page and API requests. Routes remain public here; authorization is
 // enforced by the admin page/API handlers themselves. Keep Clerk optional for
 // installations of NotionNext that do not configure it.
-const middleware =
+const authenticatedMiddleware =
   process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY
     ? clerkMiddleware((_auth, req, ev) => noAuthMiddleware(req, ev))
     : noAuthMiddleware
 
-export default middleware
+// Uptime requests are anonymous HTTP reads. Avoid issuing authentication cookies
+// on this public cache entry; session-bearing requests still run Clerk normally.
+export default async function middleware(req: NextRequest, ev: NextFetchEvent) {
+  const publicRoot =
+    process.env.CLOUDFLARE_ROOT_CACHE === 'true' &&
+    isAnonymousRootRequest({
+      method: req.method,
+      pathname: req.nextUrl.pathname,
+      search: req.nextUrl.search,
+      cookie: req.headers.get('cookie') || '',
+      authorization: req.headers.get('authorization') || ''
+    })
+  const response = await (publicRoot
+    ? noAuthMiddleware(req, ev)
+    : authenticatedMiddleware(req, ev))
+  if (
+    publicRoot &&
+    response &&
+    response.status === 200 &&
+    !response.headers.has('set-cookie')
+  ) {
+    for (const [name, value] of Object.entries(
+      rootCacheHeaders(process.env.CLOUDFLARE_ROOT_CACHE_TTL)
+    )) {
+      response.headers.set(name, String(value))
+    }
+  }
+  return response
+}

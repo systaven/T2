@@ -1,0 +1,14 @@
+/.git
+/.github
+/.agents
+/.claude
+/.codex
+/.tmp
+/.AStrotheme
+/waline-reference
+/twikooa
+/docs
+/test-results
+/__tests__
+/.env*
+/work
